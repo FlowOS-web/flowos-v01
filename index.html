@@ -461,7 +461,9 @@
     */
 
     const SUPABASE_URL =
-      "https://mxyikhxpzijrdrgowmxr.supabase.co/rest/v1/";
+      "https://mxyikhxpzijrdrgowmxr.supabase.co"
+    .replace(/\/+$/, "")
+    .replace(/\/rest\/v1\/?$/, "");
 
     const SUPABASE_KEY =
       "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
