@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Shine OnSite Appointment Demo</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f1115;
+      color: white;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: auto;
+      padding: 32px 18px 60px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 7px 12px;
+      border: 1px solid #333845;
+      border-radius: 999px;
+      color: #aab0bb;
+      font-size: 12px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 8px;
+    }
+
+    .sub {
+      color: #aab0bb;
+      line-height: 1.5;
+    }
+
+    .card {
+      margin-top: 24px;
+      padding: 22px;
+      background: #171a21;
+      border: 1px solid #2a2f3a;
+      border-radius: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      color: #d8dde5;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #303643;
+      background: #101318;
+      color: white;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 100px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+    }
+
+    .success {
+      background: #12251b;
+      border: 1px solid #28563b;
+    }
+
+    .error {
+      background: #2c1616;
+      border: 1px solid #653232;
+    }
+
+    @media (max-width: 620px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="badge">
+    PROTOTYPE — NOT CURRENTLY AFFILIATED WITH SHINE ONSITE
+  </div>
+
+  <h1>Request a Detail Appointment</h1>
+
+  <p class="sub">
+    Tell us about your vehicle and the service you're interested in.
+  </p>
+
+  <div class="card">
+
+    <form id="leadForm">
+
+      <div class="grid">
+
+        <div>
+          <label>Name *</label>
+          <input id="customer_name" required>
+        </div>
+
+        <div>
+          <label>Phone</label>
+          <input id="phone" type="tel">
+        </div>
+
+        <div>
+          <label>Email</label>
+          <input id="email" type="email">
+        </div>
+
+        <div>
+          <label>Vehicle *</label>
+          <input
+            id="vehicle"
+            required
+            placeholder="2021 Ford F-150"
+          >
+        </div>
+
+        <div>
+          <label>Vehicle Type</label>
+
+          <select id="vehicle_type">
+            <option value="">Select</option>
+            <option>Car</option>
+            <option>SUV</option>
+            <option>Truck</option>
+            <option>Van</option>
+            <option>RV / Trailer</option>
+            <option>ATV / Golf Cart</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Service *</label>
+
+          <select id="service" required>
+            <option value="">Select</option>
+            <option>Interior Detail</option>
+            <option>Exterior Detail</option>
+            <option>Interior + Exterior Detail</option>
+            <option>Engine Bay Detail</option>
+            <option>Maintenance Detail</option>
+            <option>RV / Trailer Detail</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Service Location</label>
+
+          <select id="service_location">
+            <option value="">Select</option>
+            <option>Shine OnSite</option>
+            <option>Mobile Service</option>
+            <option>Not Sure</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Preferred Date</label>
+          <input id="preferred_date" type="date">
+        </div>
+
+        <div class="full">
+          <label>Additional Notes</label>
+
+          <textarea
+            id="notes"
+            placeholder="Pet hair, stains, vehicle condition, special requests, etc."
+          ></textarea>
+        </div>
+
+      </div>
+
+      <button id="submitButton" type="submit">
+        Request Appointment
+      </button>
+
+    </form>
+
+    <div id="successMessage" class="message success">
+      Your appointment request has been received.
+    </div>
+
+    <div id="errorMessage" class="message error">
+      Something went wrong. Please try again.
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  // Replace these TWO values with your Supabase public values.
+
+  const SUPABASE_URL =
+    "https://mxyikhxpzijrdrgowmxr.supabase.co/rest/v1/";
+
+  const SUPABASE_ANON_KEY =
+    "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
+
+
+  const form =
+    document.getElementById("leadForm");
+
+  const submitButton =
+    document.getElementById("submitButton");
+
+  const successMessage =
+    document.getElementById("successMessage");
+
+  const errorMessage =
+    document.getElementById("errorMessage");
+
+
+  form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    successMessage.style.display = "none";
+    errorMessage.style.display = "none";
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
+
+
+    const preferredDate =
+      document.getElementById("preferred_date").value;
+
+
+    const lead = {
+
+      customer_name:
+        document.getElementById("customer_name").value.trim(),
+
+      phone:
+        document.getElementById("phone").value.trim() || null,
+
+      email:
+        document.getElementById("email").value.trim() || null,
+
+      vehicle:
+        document.getElementById("vehicle").value.trim(),
+
+      vehicle_type:
+        document.getElementById("vehicle_type").value || null,
+
+      service:
+        document.getElementById("service").value,
+
+      service_location:
+        document.getElementById("service_location").value || null,
+
+      preferred_date:
+        preferredDate || null,
+
+      notes:
+        document.getElementById("notes").value.trim() || null,
+
+      source:
+        "website"
+    };
+
+
+    try {
+
+      const response = await fetch(
+        `${SUPABASE_URL}/rest/v1/leads`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Prefer": "return=minimal"
+          },
+
+          body: JSON.stringify(lead)
+        }
+      );
+
+
+      if (!response.ok) {
+
+        const errorText =
+          await response.text();
+
+        console.error(
+          "Supabase error:",
+          errorText
+        );
+
+        throw new Error(
+          "Database submission failed"
+        );
+      }
+
+
+      form.reset();
+
+      successMessage.style.display = "block";
+
+    }
+
+    catch (error) {
+
+      console.error(error);
+
+      errorMessage.style.display = "block";
+
+    }
+
+    finally {
+
+      submitButton.disabled = false;
+
+      submitButton.textContent =
+        "Request Appointment";
+    }
+
+  });
+
+</script>
+
+</body>
+</html>
