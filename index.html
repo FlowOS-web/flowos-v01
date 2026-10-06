@@ -1,27 +1,33 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Shine OnSite Appointment Demo</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Shine OnSite Appointment Prototype</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       background: #0f1115;
-      color: white;
+      color: #ffffff;
     }
 
     .wrap {
       max-width: 760px;
-      margin: auto;
-      padding: 32px 18px 60px;
+      margin: 0 auto;
+      padding: 30px 18px 60px;
     }
 
     .badge {
@@ -29,27 +35,27 @@
       padding: 7px 12px;
       border: 1px solid #333845;
       border-radius: 999px;
-      color: #aab0bb;
+      color: #b0b6c1;
       font-size: 12px;
-      margin-bottom: 18px;
+      margin-bottom: 22px;
     }
 
     h1 {
       font-size: 36px;
-      margin-bottom: 8px;
+      margin: 0 0 10px;
     }
 
     .sub {
       color: #aab0bb;
       line-height: 1.5;
+      margin-bottom: 24px;
     }
 
     .card {
-      margin-top: 24px;
-      padding: 22px;
       background: #171a21;
       border: 1px solid #2a2f3a;
       border-radius: 18px;
+      padding: 22px;
     }
 
     .grid {
@@ -64,39 +70,54 @@
 
     label {
       display: block;
-      margin-bottom: 7px;
       font-size: 13px;
-      color: #d8dde5;
+      margin-bottom: 7px;
+      color: #e0e4eb;
     }
 
     input,
     select,
     textarea {
       width: 100%;
+      padding: 12px 13px;
       border: 1px solid #303643;
-      background: #101318;
-      color: white;
       border-radius: 10px;
-      padding: 12px;
+      background: #101318;
+      color: #ffffff;
       font-size: 15px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid #555e70;
+      outline-offset: 1px;
     }
 
     textarea {
       min-height: 100px;
+      resize: vertical;
     }
 
     button {
       width: 100%;
       margin-top: 18px;
       padding: 14px;
-      border: 0;
+      border: none;
       border-radius: 10px;
+      background: #f2f2f2;
+      color: #111111;
+      font-size: 15px;
       font-weight: bold;
       cursor: pointer;
     }
 
+    button:hover {
+      opacity: 0.92;
+    }
+
     button:disabled {
-      opacity: .5;
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
@@ -105,19 +126,37 @@
       margin-top: 18px;
       padding: 14px;
       border-radius: 10px;
+      line-height: 1.4;
     }
 
     .success {
       background: #12251b;
       border: 1px solid #28563b;
+      color: #d9ffe6;
     }
 
     .error {
       background: #2c1616;
       border: 1px solid #653232;
+      color: #ffdede;
+    }
+
+    .error-details {
+      margin-top: 8px;
+      font-size: 12px;
+      opacity: 0.8;
+      word-break: break-word;
+    }
+
+    .footer-note {
+      color: #777f8c;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 14px;
     }
 
     @media (max-width: 620px) {
+
       .grid {
         grid-template-columns: 1fr;
       }
@@ -125,261 +164,665 @@
       .full {
         grid-column: auto;
       }
+
+      h1 {
+        font-size: 29px;
+      }
+
     }
+
   </style>
 </head>
 
 <body>
 
-<div class="wrap">
+  <div class="wrap">
 
-  <div class="badge">
-    PROTOTYPE — NOT CURRENTLY AFFILIATED WITH SHINE ONSITE
-  </div>
+    <div class="badge">
+      PROTOTYPE — NOT CURRENTLY AFFILIATED WITH SHINE ONSITE
+    </div>
 
-  <h1>Request a Detail Appointment</h1>
+    <h1>
+      Request a Detail Appointment
+    </h1>
 
-  <p class="sub">
-    Tell us about your vehicle and the service you're interested in.
-  </p>
+    <p class="sub">
+      Tell us about your vehicle and the service you're interested in.
+    </p>
 
-  <div class="card">
+    <div class="card">
 
-    <form id="leadForm">
+      <form id="leadForm">
 
-      <div class="grid">
+        <div class="grid">
 
-        <div>
-          <label>Name *</label>
-          <input id="customer_name" required>
+          <div>
+            <label for="customer_name">
+              Name *
+            </label>
+
+            <input
+              id="customer_name"
+              type="text"
+              required
+              autocomplete="name"
+              placeholder="John Smith"
+            >
+          </div>
+
+
+          <div>
+            <label for="phone">
+              Phone
+            </label>
+
+            <input
+              id="phone"
+              type="tel"
+              autocomplete="tel"
+              placeholder="7635551234"
+            >
+          </div>
+
+
+          <div>
+            <label for="email">
+              Email
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              autocomplete="email"
+              placeholder="john@example.com"
+            >
+          </div>
+
+
+          <div>
+            <label for="vehicle">
+              Vehicle *
+            </label>
+
+            <input
+              id="vehicle"
+              type="text"
+              required
+              placeholder="2022 Chevrolet Silverado"
+            >
+          </div>
+
+
+          <div>
+            <label for="vehicle_type">
+              Vehicle Type
+            </label>
+
+            <select id="vehicle_type">
+
+              <option value="">
+                Select
+              </option>
+
+              <option value="Car">
+                Car
+              </option>
+
+              <option value="SUV">
+                SUV
+              </option>
+
+              <option value="Truck">
+                Truck
+              </option>
+
+              <option value="Van">
+                Van
+              </option>
+
+              <option value="RV / Trailer">
+                RV / Trailer
+              </option>
+
+              <option value="ATV / Golf Cart">
+                ATV / Golf Cart
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+            </select>
+          </div>
+
+
+          <div>
+            <label for="service">
+              Service *
+            </label>
+
+            <select
+              id="service"
+              required
+            >
+
+              <option value="">
+                Select
+              </option>
+
+              <option value="Interior Detail">
+                Interior Detail
+              </option>
+
+              <option value="Exterior Detail">
+                Exterior Detail
+              </option>
+
+              <option value="Interior + Exterior Detail">
+                Interior + Exterior Detail
+              </option>
+
+              <option value="Engine Bay Detail">
+                Engine Bay Detail
+              </option>
+
+              <option value="Maintenance Detail">
+                Maintenance Detail
+              </option>
+
+              <option value="RV / Trailer Detail">
+                RV / Trailer Detail
+              </option>
+
+              <option value="Other">
+                Other
+              </option>
+
+            </select>
+          </div>
+
+
+          <div>
+            <label for="service_location">
+              Service Location
+            </label>
+
+            <select id="service_location">
+
+              <option value="">
+                Select
+              </option>
+
+              <option value="Shine OnSite">
+                Shine OnSite
+              </option>
+
+              <option value="Mobile Service">
+                Mobile Service
+              </option>
+
+              <option value="Not Sure">
+                Not Sure
+              </option>
+
+            </select>
+          </div>
+
+
+          <div>
+            <label for="preferred_date">
+              Preferred Date
+            </label>
+
+            <input
+              id="preferred_date"
+              type="date"
+            >
+          </div>
+
+
+          <div class="full">
+
+            <label for="notes">
+              Additional Notes
+            </label>
+
+            <textarea
+              id="notes"
+              placeholder="Pet hair, stains, vehicle condition, special requests, etc."
+            ></textarea>
+
+          </div>
+
         </div>
 
-        <div>
-          <label>Phone</label>
-          <input id="phone" type="tel">
-        </div>
 
-        <div>
-          <label>Email</label>
-          <input id="email" type="email">
-        </div>
+        <button
+          id="submitButton"
+          type="submit"
+        >
+          Request Appointment
+        </button>
 
-        <div>
-          <label>Vehicle *</label>
-          <input
-            id="vehicle"
-            required
-            placeholder="2021 Ford F-150"
-          >
-        </div>
+      </form>
 
-        <div>
-          <label>Vehicle Type</label>
 
-          <select id="vehicle_type">
-            <option value="">Select</option>
-            <option>Car</option>
-            <option>SUV</option>
-            <option>Truck</option>
-            <option>Van</option>
-            <option>RV / Trailer</option>
-            <option>ATV / Golf Cart</option>
-            <option>Other</option>
-          </select>
-        </div>
+      <div
+        id="successMessage"
+        class="message success"
+      >
+        Your appointment request has been received.
+      </div>
 
-        <div>
-          <label>Service *</label>
 
-          <select id="service" required>
-            <option value="">Select</option>
-            <option>Interior Detail</option>
-            <option>Exterior Detail</option>
-            <option>Interior + Exterior Detail</option>
-            <option>Engine Bay Detail</option>
-            <option>Maintenance Detail</option>
-            <option>RV / Trailer Detail</option>
-            <option>Other</option>
-          </select>
-        </div>
+      <div
+        id="errorMessage"
+        class="message error"
+      >
 
-        <div>
-          <label>Service Location</label>
+        <strong>
+          Something went wrong.
+        </strong>
 
-          <select id="service_location">
-            <option value="">Select</option>
-            <option>Shine OnSite</option>
-            <option>Mobile Service</option>
-            <option>Not Sure</option>
-          </select>
-        </div>
-
-        <div>
-          <label>Preferred Date</label>
-          <input id="preferred_date" type="date">
-        </div>
-
-        <div class="full">
-          <label>Additional Notes</label>
-
-          <textarea
-            id="notes"
-            placeholder="Pet hair, stains, vehicle condition, special requests, etc."
-          ></textarea>
-        </div>
+        <div
+          id="errorDetails"
+          class="error-details"
+        ></div>
 
       </div>
 
-      <button id="submitButton" type="submit">
-        Request Appointment
-      </button>
 
-    </form>
+      <div class="footer-note">
+        Prototype only. No appointment is actually confirmed until
+        the business approves it.
+      </div>
 
-    <div id="successMessage" class="message success">
-      Your appointment request has been received.
-    </div>
-
-    <div id="errorMessage" class="message error">
-      Something went wrong. Please try again.
     </div>
 
   </div>
 
-</div>
 
-<script>
+  <script>
 
-  // Replace these TWO values with your Supabase public values.
+    /*
+    ======================================================
+    SUPABASE CONFIGURATION
+    ======================================================
 
-  const SUPABASE_URL =
-    "https://mxyikhxpzijrdrgowmxr.supabase.co/rest/v1/";
+    Replace ONLY these two values.
 
-  const SUPABASE_ANON_KEY =
-    "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
+    Project URL example:
+    https://abcdefgh.supabase.co
 
+    Publishable key example:
+    sb_publishable_xxxxxxxxxxxxx
 
-  const form =
-    document.getElementById("leadForm");
+    DO NOT put a service_role key or database password here.
+    */
 
-  const submitButton =
-    document.getElementById("submitButton");
+    const SUPABASE_URL =
+      "https://mxyikhxpzijrdrgowmxr.supabase.co/rest/v1/";
 
-  const successMessage =
-    document.getElementById("successMessage");
-
-  const errorMessage =
-    document.getElementById("errorMessage");
-
-
-  form.addEventListener("submit", async (event) => {
-
-    event.preventDefault();
-
-    successMessage.style.display = "none";
-    errorMessage.style.display = "none";
-
-    submitButton.disabled = true;
-    submitButton.textContent = "Submitting...";
+    const SUPABASE_KEY =
+      "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
 
 
-    const preferredDate =
-      document.getElementById("preferred_date").value;
+    /*
+    ======================================================
+    ELEMENTS
+    ======================================================
+    */
+
+    const form =
+      document.getElementById("leadForm");
+
+    const submitButton =
+      document.getElementById("submitButton");
+
+    const successMessage =
+      document.getElementById("successMessage");
+
+    const errorMessage =
+      document.getElementById("errorMessage");
+
+    const errorDetails =
+      document.getElementById("errorDetails");
 
 
-    const lead = {
+    /*
+    ======================================================
+    SET MINIMUM DATE TO TODAY
+    ======================================================
+    */
 
-      customer_name:
-        document.getElementById("customer_name").value.trim(),
+    const preferredDateInput =
+      document.getElementById("preferred_date");
 
-      phone:
-        document.getElementById("phone").value.trim() || null,
+    const today =
+      new Date()
+        .toISOString()
+        .split("T")[0];
 
-      email:
-        document.getElementById("email").value.trim() || null,
-
-      vehicle:
-        document.getElementById("vehicle").value.trim(),
-
-      vehicle_type:
-        document.getElementById("vehicle_type").value || null,
-
-      service:
-        document.getElementById("service").value,
-
-      service_location:
-        document.getElementById("service_location").value || null,
-
-      preferred_date:
-        preferredDate || null,
-
-      notes:
-        document.getElementById("notes").value.trim() || null,
-
-      source:
-        "website"
-    };
+    preferredDateInput.min = today;
 
 
-    try {
+    /*
+    ======================================================
+    FORM SUBMISSION
+    ======================================================
+    */
 
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/leads`,
-        {
-          method: "POST",
+    form.addEventListener(
+      "submit",
 
-          headers: {
-  "Content-Type": "application/json",
-  "apikey": SUPABASE_ANON_KEY,
-  "Prefer": "return=minimal"
-},
+      async function(event) {
 
-          body: JSON.stringify(lead)
+        event.preventDefault();
+
+
+        successMessage.style.display =
+          "none";
+
+        errorMessage.style.display =
+          "none";
+
+        errorDetails.textContent =
+          "";
+
+
+        /*
+        --------------------------------------------------
+        Basic validation
+        --------------------------------------------------
+        */
+
+        const customerName =
+          document
+            .getElementById("customer_name")
+            .value
+            .trim();
+
+        const phone =
+          document
+            .getElementById("phone")
+            .value
+            .trim();
+
+        const email =
+          document
+            .getElementById("email")
+            .value
+            .trim();
+
+        const vehicle =
+          document
+            .getElementById("vehicle")
+            .value
+            .trim();
+
+        const vehicleType =
+          document
+            .getElementById("vehicle_type")
+            .value;
+
+        const service =
+          document
+            .getElementById("service")
+            .value;
+
+        const serviceLocation =
+          document
+            .getElementById("service_location")
+            .value;
+
+        const preferredDate =
+          document
+            .getElementById("preferred_date")
+            .value;
+
+        const notes =
+          document
+            .getElementById("notes")
+            .value
+            .trim();
+
+
+        /*
+        Require at least one contact method.
+        */
+
+        if (!phone && !email) {
+
+          errorMessage.style.display =
+            "block";
+
+          errorDetails.textContent =
+            "Please enter either a phone number or email address.";
+
+          return;
+
         }
-      );
 
 
-      if (!response.ok) {
+        /*
+        Check Supabase configuration.
+        */
 
-        const errorText =
-          await response.text();
+        if (
+          SUPABASE_URL.includes("YOUR_") ||
+          SUPABASE_KEY.includes("YOUR_")
+        ) {
 
-        console.error(
-          "Supabase error:",
-          errorText
-        );
+          errorMessage.style.display =
+            "block";
 
-        throw new Error(
-          "Database submission failed"
-        );
+          errorDetails.textContent =
+            "Supabase URL or publishable key has not been configured.";
+
+          return;
+
+        }
+
+
+        /*
+        Disable button while submitting.
+        */
+
+        submitButton.disabled =
+          true;
+
+        submitButton.textContent =
+          "Submitting...";
+
+
+        /*
+        Build database record.
+        */
+
+        const lead = {
+
+          customer_name:
+            customerName,
+
+          phone:
+            phone || null,
+
+          email:
+            email || null,
+
+          vehicle:
+            vehicle,
+
+          vehicle_type:
+            vehicleType || null,
+
+          service:
+            service,
+
+          service_location:
+            serviceLocation || null,
+
+          preferred_date:
+            preferredDate || null,
+
+          notes:
+            notes || null,
+
+          status:
+            "new",
+
+          source:
+            "website"
+
+        };
+
+
+        try {
+
+          /*
+          ==================================================
+          SEND TO SUPABASE
+          ==================================================
+
+          IMPORTANT:
+
+          New Supabase publishable keys use the apikey header.
+
+          We intentionally DO NOT send:
+
+          Authorization: Bearer ...
+
+          because sb_publishable_ keys are not JWT tokens.
+          */
+
+          const response =
+            await fetch(
+
+              `${SUPABASE_URL}/rest/v1/leads`,
+
+              {
+
+                method:
+                  "POST",
+
+                headers: {
+
+                  "Content-Type":
+                    "application/json",
+
+                  "apikey":
+                    SUPABASE_KEY,
+
+                  "Prefer":
+                    "return=minimal"
+
+                },
+
+                body:
+                  JSON.stringify(lead)
+
+              }
+
+            );
+
+
+          /*
+          If Supabase returns an error,
+          read the exact message.
+          */
+
+          if (!response.ok) {
+
+            const responseText =
+              await response.text();
+
+            console.error(
+              "Supabase response:",
+              response.status,
+              responseText
+            );
+
+            throw new Error(
+              `Supabase error ${response.status}: ${responseText}`
+            );
+
+          }
+
+
+          /*
+          ==================================================
+          SUCCESS
+          ==================================================
+          */
+
+          console.log(
+            "Lead submitted successfully:",
+            lead
+          );
+
+
+          form.reset();
+
+
+          successMessage.style.display =
+            "block";
+
+
+          successMessage.scrollIntoView({
+            behavior:
+              "smooth",
+
+            block:
+              "center"
+          });
+
+        }
+
+
+        catch(error) {
+
+          /*
+          ==================================================
+          ERROR
+          ==================================================
+          */
+
+          console.error(
+            "Submission error:",
+            error
+          );
+
+
+          errorMessage.style.display =
+            "block";
+
+
+          errorDetails.textContent =
+            error.message;
+
+        }
+
+
+        finally {
+
+          /*
+          Restore button.
+          */
+
+          submitButton.disabled =
+            false;
+
+          submitButton.textContent =
+            "Request Appointment";
+
+        }
+
       }
 
+    );
 
-      form.reset();
-
-      successMessage.style.display = "block";
-
-    }
-
-    catch (error) {
-
-      console.error(error);
-
-      errorMessage.style.display = "block";
-
-    }
-
-    finally {
-
-      submitButton.disabled = false;
-
-      submitButton.textContent =
-        "Request Appointment";
-    }
-
-  });
-
-</script>
+  </script>
 
 </body>
+
 </html>
