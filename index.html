@@ -12,6 +12,7 @@
   <title>FlowOS Service Request</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -104,16 +105,16 @@
       font-size: 15px;
     }
 
-    textarea {
-      min-height: 110px;
-      resize: vertical;
-    }
-
     input:focus,
     select:focus,
     textarea:focus {
       outline: 2px solid #576273;
       outline-offset: 1px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
     }
 
     button {
@@ -133,6 +134,10 @@
       cursor: pointer;
     }
 
+    button:hover {
+      opacity: .93;
+    }
+
     button:disabled {
       opacity: .5;
       cursor: not-allowed;
@@ -145,7 +150,6 @@
       padding: 14px;
 
       border-radius: 10px;
-
       line-height: 1.5;
     }
 
@@ -164,7 +168,8 @@
     .error-details {
       margin-top: 7px;
       font-size: 12px;
-      opacity: .8;
+      opacity: .85;
+      word-break: break-word;
     }
 
     .loading {
@@ -178,7 +183,6 @@
 
     .footer {
       margin-top: 14px;
-
       color: #747d8c;
       font-size: 11px;
     }
@@ -198,928 +202,934 @@
       }
 
     }
+
   </style>
+
 </head>
 
 <body>
 
-<div class="wrap">
+  <div class="wrap">
 
-  <div class="flowos">
-    Powered by <strong>FlowOS</strong>
-  </div>
+    <div class="flowos">
+      Powered by <strong>FlowOS</strong>
+    </div>
 
-
-  <div
-    id="loading"
-    class="loading"
-  >
-    Loading business...
-  </div>
-
-
-  <div
-    id="businessContent"
-    class="hidden"
-  >
 
     <div
-      id="industry"
-      class="industry"
-    ></div>
+      id="loading"
+      class="loading"
+    >
+      Loading business...
+    </div>
 
-    <h1 id="businessName">
-      Service Request
-    </h1>
 
     <div
-      id="tagline"
-      class="tagline"
-    ></div>
+      id="businessContent"
+      class="hidden"
+    >
+
+      <div
+        id="industry"
+        class="industry"
+      ></div>
 
 
-    <div class="card">
-
-      <form id="leadForm">
-
-        <div class="grid">
+      <h1 id="businessName">
+        Service Request
+      </h1>
 
 
-          <div>
+      <div
+        id="tagline"
+        class="tagline"
+      ></div>
 
-            <label for="customer_name">
-              Name *
-            </label>
 
-            <input
-              id="customer_name"
-              type="text"
-              required
-              autocomplete="name"
-              placeholder="John Smith"
-            >
+      <div class="card">
+
+        <form id="leadForm">
+
+          <div class="grid">
+
+
+            <div>
+
+              <label for="customer_name">
+                Name *
+              </label>
+
+              <input
+                id="customer_name"
+                type="text"
+                required
+                autocomplete="name"
+                placeholder="John Smith"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="phone">
+                Phone
+              </label>
+
+              <input
+                id="phone"
+                type="tel"
+                autocomplete="tel"
+                placeholder="7635551234"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="email">
+                Email
+              </label>
+
+              <input
+                id="email"
+                type="email"
+                autocomplete="email"
+                placeholder="john@example.com"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="service">
+                Service *
+              </label>
+
+              <select
+                id="service"
+                required
+              >
+
+                <option value="">
+                  Loading services...
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div>
+
+              <label for="preferred_date">
+                Preferred Date
+              </label>
+
+              <input
+                id="preferred_date"
+                type="date"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="service_location">
+                Service Address / Location
+              </label>
+
+              <input
+                id="service_location"
+                type="text"
+                placeholder="Address or service location"
+              >
+
+            </div>
+
+
+            <div class="full">
+
+              <label for="notes">
+                Tell us what you need
+              </label>
+
+              <textarea
+                id="notes"
+                placeholder="Describe the job, problem, project, or anything the business should know."
+              ></textarea>
+
+            </div>
 
           </div>
 
 
-          <div>
+          <button
+            id="submitButton"
+            type="submit"
+          >
+            Submit Request
+          </button>
 
-            <label for="phone">
-              Phone
-            </label>
-
-            <input
-              id="phone"
-              type="tel"
-              autocomplete="tel"
-              placeholder="7635551234"
-            >
-
-          </div>
+        </form>
 
 
-          <div>
-
-            <label for="email">
-              Email
-            </label>
-
-            <input
-              id="email"
-              type="email"
-              autocomplete="email"
-              placeholder="john@example.com"
-            >
-
-          </div>
+        <div
+          id="successMessage"
+          class="message success"
+        >
+          Your request has been received. The business will follow up with you.
+        </div>
 
 
-          <div>
+        <div
+          id="errorMessage"
+          class="message error"
+        >
 
-            <label for="service">
-              Service *
-            </label>
+          <strong>
+            Something went wrong.
+          </strong>
 
-            <select
-              id="service"
-              required
-            >
-
-              <option value="">
-                Loading services...
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div>
-
-            <label for="preferred_date">
-              Preferred Date
-            </label>
-
-            <input
-              id="preferred_date"
-              type="date"
-            >
-
-          </div>
-
-
-          <div>
-
-            <label for="service_location">
-              Service Address / Location
-            </label>
-
-            <input
-              id="service_location"
-              type="text"
-              placeholder="Address or service location"
-            >
-
-          </div>
-
-
-          <div class="full">
-
-            <label for="notes">
-              Tell us what you need
-            </label>
-
-            <textarea
-              id="notes"
-              placeholder="Describe the job, problem, project, or anything the business should know."
-            ></textarea>
-
-          </div>
-
+          <div
+            id="errorDetails"
+            class="error-details"
+          ></div>
 
         </div>
 
 
-        <button
-          id="submitButton"
-          type="submit"
-        >
-          Submit Request
-        </button>
+        <div class="footer">
+          Secure request powered by FlowOS.
+        </div>
 
-      </form>
+      </div>
 
+    </div>
+
+
+    <div
+      id="businessError"
+      class="message error"
+    >
+
+      <strong>
+        Business unavailable.
+      </strong>
 
       <div
-        id="successMessage"
-        class="message success"
-      >
-        Your request has been received. The business will follow up with you.
-      </div>
-
-
-      <div
-        id="errorMessage"
-        class="message error"
-      >
-
-        <strong>
-          Something went wrong.
-        </strong>
-
-        <div
-          id="errorDetails"
-          class="error-details"
-        ></div>
-
-      </div>
-
-
-      <div class="footer">
-        Secure request powered by FlowOS.
-      </div>
+        id="businessErrorDetails"
+        class="error-details"
+      ></div>
 
     </div>
 
   </div>
 
 
-  <div
-    id="businessError"
-    class="message error"
-  >
+  <!-- SUPABASE LIBRARY -->
 
-    <strong>
-      Business unavailable.
-    </strong>
-
-    <div
-      id="businessErrorDetails"
-      class="error-details"
-    ></div>
-
-  </div>
-
-</div>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
 
 
-<script>
+  <script>
 
-  /*
-  ============================================
-  SUPABASE CONFIG
-  ============================================
+    /*
+    ============================================
+    SUPABASE CONFIG
+    ============================================
+    */
 
-  Use the exact same base URL and publishable
-  key you have already been using.
+    const SUPABASE_URL =
+      "https://mxyikhxpzijrdgowmxr.supabase.co";
 
-  Do NOT use service_role or secret keys.
-  */
-
-
-  const SUPABASE_URL =
-  "https://mxyikhxpzijrdgowmxr.supabase.co";
-  
-  const SUPABASE_KEY =
-    "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
+    const SUPABASE_KEY =
+      "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
 
 
-  /*
-  ============================================
-  BUSINESS STATE
-  ============================================
-  */
-
-  let BUSINESS_ID = null;
-
-  let BUSINESS_SLUG = null;
-
-
-  /*
-  ============================================
-  ELEMENTS
-  ============================================
-  */
-
-  const loading =
-    document.getElementById("loading");
-
-  const businessContent =
-    document.getElementById(
-      "businessContent"
-    );
-
-  const businessError =
-    document.getElementById(
-      "businessError"
-    );
-
-  const businessErrorDetails =
-    document.getElementById(
-      "businessErrorDetails"
-    );
-
-  const businessName =
-    document.getElementById(
-      "businessName"
-    );
-
-  const industry =
-    document.getElementById(
-      "industry"
-    );
-
-  const tagline =
-    document.getElementById(
-      "tagline"
-    );
-
-  const serviceSelect =
-    document.getElementById(
-      "service"
-    );
-
-  const leadForm =
-    document.getElementById(
-      "leadForm"
-    );
-
-  const submitButton =
-    document.getElementById(
-      "submitButton"
-    );
-
-  const successMessage =
-    document.getElementById(
-      "successMessage"
-    );
-
-  const errorMessage =
-    document.getElementById(
-      "errorMessage"
-    );
-
-  const errorDetails =
-    document.getElementById(
-      "errorDetails"
-    );
-
-
-  /*
-  ============================================
-  MINIMUM DATE
-  ============================================
-  */
-
-  const dateInput =
-    document.getElementById(
-      "preferred_date"
-    );
-
-  dateInput.min =
-    new Date()
-      .toISOString()
-      .split("T")[0];
-
-
-  /*
-  ============================================
-  GET BUSINESS SLUG FROM URL
-  ============================================
-
-  Example:
-
-  index.html?b=flowos-demo
-  */
-
-  function getBusinessSlug() {
-
-    const params =
-      new URLSearchParams(
-        window.location.search
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
       );
 
-    return (
-      params.get("b") ||
-      "flowos-demo"
-    );
 
-  }
+    /*
+    ============================================
+    STATE
+    ============================================
+    */
 
+    let BUSINESS_ID = null;
 
-  /*
-  ============================================
-  LOAD BUSINESS PROFILE
-  ============================================
-  */
-
-  async function loadBusiness() {
-
-    try {
-
-      BUSINESS_SLUG =
-        getBusinessSlug();
+    let BUSINESS_SLUG = null;
 
 
-      const profileUrl =
-        `${SUPABASE_URL}/rest/v1/business_public_profiles` +
-        `?slug=eq.${encodeURIComponent(BUSINESS_SLUG)}` +
-        `&active=eq.true` +
-        `&select=business_id,slug,display_name,industry,tagline` +
-        `&limit=1`;
+    /*
+    ============================================
+    ELEMENTS
+    ============================================
+    */
+
+    const loading =
+      document.getElementById(
+        "loading"
+      );
+
+    const businessContent =
+      document.getElementById(
+        "businessContent"
+      );
+
+    const businessError =
+      document.getElementById(
+        "businessError"
+      );
+
+    const businessErrorDetails =
+      document.getElementById(
+        "businessErrorDetails"
+      );
+
+    const businessName =
+      document.getElementById(
+        "businessName"
+      );
+
+    const industry =
+      document.getElementById(
+        "industry"
+      );
+
+    const tagline =
+      document.getElementById(
+        "tagline"
+      );
+
+    const serviceSelect =
+      document.getElementById(
+        "service"
+      );
+
+    const leadForm =
+      document.getElementById(
+        "leadForm"
+      );
+
+    const submitButton =
+      document.getElementById(
+        "submitButton"
+      );
+
+    const successMessage =
+      document.getElementById(
+        "successMessage"
+      );
+
+    const errorMessage =
+      document.getElementById(
+        "errorMessage"
+      );
+
+    const errorDetails =
+      document.getElementById(
+        "errorDetails"
+      );
 
 
-      const profileResponse =
-        await fetch(
-          profileUrl,
-          {
-            headers: {
-              "apikey":
-                SUPABASE_KEY
-            }
-          }
+    /*
+    ============================================
+    MINIMUM DATE
+    ============================================
+    */
+
+    const dateInput =
+      document.getElementById(
+        "preferred_date"
+      );
+
+
+    dateInput.min =
+      new Date()
+        .toISOString()
+        .split("T")[0];
+
+
+    /*
+    ============================================
+    BUSINESS SLUG
+    ============================================
+
+    Example:
+
+    ?b=flowos-demo
+
+    */
+
+    function getBusinessSlug() {
+
+      const params =
+        new URLSearchParams(
+          window.location.search
         );
 
 
-      if (!profileResponse.ok) {
-
-        throw new Error(
-          await profileResponse.text()
-        );
-
-      }
-
-
-      const profiles =
-        await profileResponse.json();
-
-
-      if (
-        !profiles ||
-        profiles.length === 0
-      ) {
-
-        throw new Error(
-          "No active business was found for this link."
-        );
-
-      }
-
-
-      const profile =
-        profiles[0];
-
-
-      BUSINESS_ID =
-        profile.business_id;
-
-
-      businessName.textContent =
-        profile.display_name;
-
-
-      document.title =
-        `${profile.display_name} | Service Request`;
-
-
-      industry.textContent =
-        profile.industry || "";
-
-
-      tagline.textContent =
-        profile.tagline ||
-        "Submit your request and we will get back to you.";
-
-
-      await loadServices();
-
-
-      loading.classList.add(
-        "hidden"
-      );
-
-      businessContent.classList.remove(
-        "hidden"
-      );
-
-    }
-
-    catch(error) {
-
-      console.error(
-        "Business loading error:",
-        error
-      );
-
-
-      loading.classList.add(
-        "hidden"
-      );
-
-
-      businessError.style.display =
-        "block";
-
-
-      businessErrorDetails.textContent =
-        error.message;
-
-    }
-
-  }
-
-
-  /*
-  ============================================
-  LOAD SERVICES
-  ============================================
-  */
-
-  async function loadServices() {
-
-    const servicesUrl =
-      `${SUPABASE_URL}/rest/v1/business_services` +
-      `?business_id=eq.${encodeURIComponent(BUSINESS_ID)}` +
-      `&active=eq.true` +
-      `&select=id,name,sort_order` +
-      `&order=sort_order.asc`;
-
-
-    const response =
-      await fetch(
-        servicesUrl,
-        {
-          headers: {
-            "apikey":
-              SUPABASE_KEY
-          }
-        }
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        await response.text()
+      return (
+        params.get("b") ||
+        "flowos-demo"
       );
 
     }
 
 
-    const services =
-      await response.json();
-
-
-    serviceSelect.innerHTML =
-      `<option value="">Select a service</option>`;
-
-
-    for (
-      const service
-      of services
-    ) {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        service.name;
-
-
-      option.textContent =
-        service.name;
-
-
-      serviceSelect.appendChild(
-        option
-      );
-
-    }
-
-
-    if (
-      services.length === 0
-    ) {
-
-      serviceSelect.innerHTML =
-        `<option value="General Inquiry">General Inquiry</option>`;
-
-    }
-
-  }
-
-
-  /*
-  ============================================
-  SUBMIT LEAD
-  ============================================
-  */
-
-  leadForm.addEventListener(
-    "submit",
-
-    async function(event) {
-
-      event.preventDefault();
-
-
-      successMessage.style.display =
-        "none";
-
-      errorMessage.style.display =
-        "none";
-
-      errorDetails.textContent =
-        "";
-
-
-      const customerName =
-        document
-          .getElementById(
-            "customer_name"
-          )
-          .value
-          .trim();
-
-
-      const phone =
-        document
-          .getElementById(
-            "phone"
-          )
-          .value
-          .trim();
-
-
-      const email =
-        document
-          .getElementById(
-            "email"
-          )
-          .value
-          .trim();
-
-
-      const service =
-        document
-          .getElementById(
-            "service"
-          )
-          .value;
-
-
-      const preferredDate =
-        document
-          .getElementById(
-            "preferred_date"
-          )
-          .value;
-
-
-      const serviceLocation =
-        document
-          .getElementById(
-            "service_location"
-          )
-          .value
-          .trim();
-
-
-      const notes =
-        document
-          .getElementById(
-            "notes"
-          )
-          .value
-          .trim();
-
-
-      /*
-      Require at least one contact method.
-      */
-
-      if (
-        !phone &&
-        !email
-      ) {
-
-        errorMessage.style.display =
-          "block";
-
-        errorDetails.textContent =
-          "Please enter either a phone number or email address.";
-
-        return;
-
-      }
-
-
-      if (!BUSINESS_ID) {
-
-        errorMessage.style.display =
-          "block";
-
-        errorDetails.textContent =
-          "Business information has not loaded.";
-
-        return;
-
-      }
-
-
-      submitButton.disabled =
-        true;
-
-      submitButton.textContent =
-        "Submitting...";
-
-
-      const lead = {
-
-        business_id:
-          BUSINESS_ID,
-
-        customer_name:
-          customerName,
-
-        phone:
-          phone || null,
-
-        email:
-          email || null,
-
-        vehicle:
-          null,
-
-        vehicle_type:
-          null,
-
-        service:
-          service,
-
-        service_location:
-          serviceLocation || null,
-
-        preferred_date:
-          preferredDate || null,
-
-        notes:
-          notes || null,
-
-        status:
-          "new",
-
-        source:
-          "website"
-
-      };
-
+    /*
+    ============================================
+    LOAD BUSINESS
+    ============================================
+    */
+
+    async function loadBusiness() {
 
       try {
 
-        /*
-        ========================================
-        SAVE LEAD
-        ========================================
-        */
-
-        const response =
-          await fetch(
-
-            `${SUPABASE_URL}/rest/v1/leads`,
-
-            {
-
-              method:
-                "POST",
-
-              headers: {
-
-                "Content-Type":
-                  "application/json",
-
-                "apikey":
-                  SUPABASE_KEY,
-
-                "Prefer":
-                  "return=minimal"
-
-              },
-
-              body:
-                JSON.stringify(
-                  lead
-                )
-
-            }
-
-          );
+        BUSINESS_SLUG =
+          getBusinessSlug();
 
 
-        if (!response.ok) {
+        const {
+          data: profile,
+          error: profileError
+        } =
+          await supabaseClient
 
-          const responseText =
-            await response.text();
+            .from(
+              "business_public_profiles"
+            )
 
+            .select(
+              "business_id, slug, display_name, industry, tagline"
+            )
+
+            .eq(
+              "slug",
+              BUSINESS_SLUG
+            )
+
+            .eq(
+              "active",
+              true
+            )
+
+            .maybeSingle();
+
+
+        if (profileError) {
+
+          throw profileError;
+
+        }
+
+
+        if (!profile) {
 
           throw new Error(
-            `Database error ${response.status}: ${responseText}`
+            "No active business was found for this link."
           );
 
         }
 
 
-        /*
-        ========================================
-        OWNER NOTIFICATION
-        ========================================
-
-        Notification failures do not cause
-        the customer submission itself to fail.
-        */
-
-        try {
-
-          const notificationResponse =
-            await fetch(
-
-              `${SUPABASE_URL}/functions/v1/notify-new-lead`,
-
-              {
-
-                method:
-                  "POST",
-
-                headers: {
-
-                  "Content-Type":
-                    "application/json",
-
-                  "apikey":
-                    SUPABASE_KEY
-
-                },
-
-                body:
-                  JSON.stringify(
-                    lead
-                  )
-
-              }
-
-            );
+        BUSINESS_ID =
+          profile.business_id;
 
 
-          if (
-            !notificationResponse.ok
-          ) {
-
-            console.error(
-              "Owner notification failed:",
-              await notificationResponse.text()
-            );
-
-          }
-
-        }
-
-        catch(notificationError) {
-
-          console.error(
-            "Notification error:",
-            notificationError
-          );
-
-        }
+        businessName.textContent =
+          profile.display_name;
 
 
-        /*
-        ========================================
-        SUCCESS
-        ========================================
-        */
-
-        leadForm.reset();
+        document.title =
+          `${profile.display_name} | Service Request`;
 
 
-        successMessage.style.display =
-          "block";
+        industry.textContent =
+          profile.industry || "";
 
 
-        successMessage.scrollIntoView({
-          behavior:
-            "smooth",
-          block:
-            "center"
-        });
+        tagline.textContent =
+          profile.tagline ||
+          "Submit your request and we will get back to you.";
+
+
+        await loadServices();
+
+
+        loading.classList.add(
+          "hidden"
+        );
+
+
+        businessContent.classList.remove(
+          "hidden"
+        );
 
       }
 
       catch(error) {
 
         console.error(
-          "Lead submission error:",
+          "Business loading error:",
           error
         );
 
 
-        errorMessage.style.display =
+        loading.classList.add(
+          "hidden"
+        );
+
+
+        businessError.style.display =
           "block";
 
 
-        errorDetails.textContent =
+        businessErrorDetails.textContent =
           error.message;
-
-      }
-
-      finally {
-
-        submitButton.disabled =
-          false;
-
-
-        submitButton.textContent =
-          "Submit Request";
 
       }
 
     }
 
-  );
+
+    /*
+    ============================================
+    LOAD SERVICES
+    ============================================
+    */
+
+    async function loadServices() {
+
+      const {
+        data: services,
+        error
+      } =
+        await supabaseClient
+
+          .from(
+            "business_services"
+          )
+
+          .select(
+            "id, name, sort_order"
+          )
+
+          .eq(
+            "business_id",
+            BUSINESS_ID
+          )
+
+          .eq(
+            "active",
+            true
+          )
+
+          .order(
+            "sort_order",
+            {
+              ascending: true
+            }
+          );
 
 
-  /*
-  ============================================
-  START
-  ============================================
-  */
+      if (error) {
 
-  loadBusiness();
+        throw error;
 
-</script>
+      }
+
+
+      serviceSelect.innerHTML =
+        `
+          <option value="">
+            Select a service
+          </option>
+        `;
+
+
+      for (
+        const service
+        of services || []
+      ) {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          service.name;
+
+
+        option.textContent =
+          service.name;
+
+
+        serviceSelect.appendChild(
+          option
+        );
+
+      }
+
+
+      if (
+        !services ||
+        services.length === 0
+      ) {
+
+        serviceSelect.innerHTML =
+          `
+            <option value="General Inquiry">
+              General Inquiry
+            </option>
+          `;
+
+      }
+
+    }
+
+
+    /*
+    ============================================
+    SUBMIT LEAD
+    ============================================
+    */
+
+    leadForm.addEventListener(
+      "submit",
+
+      async function(event) {
+
+        event.preventDefault();
+
+
+        successMessage.style.display =
+          "none";
+
+
+        errorMessage.style.display =
+          "none";
+
+
+        errorDetails.textContent =
+          "";
+
+
+        /*
+        ----------------------------------------
+        READ FORM
+        ----------------------------------------
+        */
+
+        const customerName =
+          document
+            .getElementById(
+              "customer_name"
+            )
+            .value
+            .trim();
+
+
+        const phone =
+          document
+            .getElementById(
+              "phone"
+            )
+            .value
+            .trim();
+
+
+        const email =
+          document
+            .getElementById(
+              "email"
+            )
+            .value
+            .trim();
+
+
+        const service =
+          document
+            .getElementById(
+              "service"
+            )
+            .value;
+
+
+        const preferredDate =
+          document
+            .getElementById(
+              "preferred_date"
+            )
+            .value;
+
+
+        const serviceLocation =
+          document
+            .getElementById(
+              "service_location"
+            )
+            .value
+            .trim();
+
+
+        const notes =
+          document
+            .getElementById(
+              "notes"
+            )
+            .value
+            .trim();
+
+
+        /*
+        ----------------------------------------
+        VALIDATION
+        ----------------------------------------
+        */
+
+        if (
+          !phone &&
+          !email
+        ) {
+
+          errorMessage.style.display =
+            "block";
+
+
+          errorDetails.textContent =
+            "Please enter either a phone number or email address.";
+
+
+          return;
+
+        }
+
+
+        if (!BUSINESS_ID) {
+
+          errorMessage.style.display =
+            "block";
+
+
+          errorDetails.textContent =
+            "Business information has not loaded.";
+
+
+          return;
+
+        }
+
+
+        submitButton.disabled =
+          true;
+
+
+        submitButton.textContent =
+          "Submitting...";
+
+
+        /*
+        ----------------------------------------
+        BUILD LEAD
+        ----------------------------------------
+        */
+
+        const lead = {
+
+          business_id:
+            BUSINESS_ID,
+
+          customer_name:
+            customerName,
+
+          phone:
+            phone || null,
+
+          email:
+            email || null,
+
+          vehicle:
+            null,
+
+          vehicle_type:
+            null,
+
+          service:
+            service,
+
+          service_location:
+            serviceLocation || null,
+
+          preferred_date:
+            preferredDate || null,
+
+          notes:
+            notes || null,
+
+          status:
+            "new",
+
+          source:
+            "website"
+
+        };
+
+
+        try {
+
+          /*
+          ========================================
+          SAVE TO SUPABASE
+          ========================================
+          */
+
+          const {
+            error: insertError
+          } =
+            await supabaseClient
+
+              .from("leads")
+
+              .insert(
+                lead
+              );
+
+
+          if (insertError) {
+
+            throw insertError;
+
+          }
+
+
+          /*
+          ========================================
+          OWNER NOTIFICATION
+          ========================================
+
+          If notification fails, the lead is
+          still safely stored in the database.
+          */
+
+          try {
+
+            const {
+              error: notificationError
+            } =
+              await supabaseClient
+                .functions
+                .invoke(
+                  "notify-new-lead",
+                  {
+                    body:
+                      lead
+                  }
+                );
+
+
+            if (
+              notificationError
+            ) {
+
+              console.error(
+                "Owner notification failed:",
+                notificationError
+              );
+
+            }
+
+          }
+
+          catch(notificationException) {
+
+            console.error(
+              "Notification exception:",
+              notificationException
+            );
+
+          }
+
+
+          /*
+          ========================================
+          SUCCESS
+          ========================================
+          */
+
+          leadForm.reset();
+
+
+          successMessage.style.display =
+            "block";
+
+
+          successMessage.scrollIntoView({
+            behavior:
+              "smooth",
+
+            block:
+              "center"
+          });
+
+        }
+
+        catch(error) {
+
+          console.error(
+            "Lead submission error:",
+            error
+          );
+
+
+          errorMessage.style.display =
+            "block";
+
+
+          errorDetails.textContent =
+            error.message;
+
+        }
+
+        finally {
+
+          submitButton.disabled =
+            false;
+
+
+          submitButton.textContent =
+            "Submit Request";
+
+        }
+
+      }
+
+    );
+
+
+    /*
+    ============================================
+    START
+    ============================================
+    */
+
+    loadBusiness();
+
+  </script>
 
 </body>
+
 </html>
