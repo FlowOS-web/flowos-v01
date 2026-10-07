@@ -9,51 +9,65 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Shine OnSite Appointment Prototype</title>
+  <title>FlowOS Service Request</title>
 
   <style>
-
     * {
       box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0d0f13;
+      --panel: #171a21;
+      --border: #2a303b;
+      --text: #f5f7fa;
+      --muted: #9ca4b1;
+      --input: #101318;
     }
 
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: #0f1115;
-      color: #ffffff;
+      background: var(--bg);
+      color: var(--text);
     }
 
     .wrap {
       max-width: 760px;
-      margin: 0 auto;
-      padding: 30px 18px 60px;
+      margin: auto;
+      padding: 32px 18px 60px;
     }
 
-    .badge {
-      display: inline-block;
-      padding: 7px 12px;
-      border: 1px solid #333845;
-      border-radius: 999px;
-      color: #b0b6c1;
-      font-size: 12px;
-      margin-bottom: 22px;
+    .flowos {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 25px;
+    }
+
+    .flowos strong {
+      color: white;
     }
 
     h1 {
-      font-size: 36px;
       margin: 0 0 10px;
+      font-size: 35px;
     }
 
-    .sub {
-      color: #aab0bb;
+    .industry {
+      color: #7f8897;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .tagline {
+      color: var(--muted);
       line-height: 1.5;
-      margin-bottom: 24px;
+      margin-bottom: 25px;
     }
 
     .card {
-      background: #171a21;
-      border: 1px solid #2a2f3a;
+      background: var(--panel);
+      border: 1px solid var(--border);
       border-radius: 18px;
       padding: 22px;
     }
@@ -70,9 +84,9 @@
 
     label {
       display: block;
-      font-size: 13px;
       margin-bottom: 7px;
-      color: #e0e4eb;
+      color: #e1e5eb;
+      font-size: 13px;
     }
 
     input,
@@ -80,79 +94,93 @@
     textarea {
       width: 100%;
       padding: 12px 13px;
+
+      background: var(--input);
+      color: white;
+
       border: 1px solid #303643;
       border-radius: 10px;
-      background: #101318;
-      color: #ffffff;
+
       font-size: 15px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
-      outline: 2px solid #555e70;
+      outline: 2px solid #576273;
       outline-offset: 1px;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
     }
 
     button {
       width: 100%;
       margin-top: 18px;
       padding: 14px;
-      border: none;
+
+      border: 0;
       border-radius: 10px;
-      background: #f2f2f2;
-      color: #111111;
+
+      background: #f2f3f5;
+      color: #111;
+
       font-size: 15px;
-      font-weight: bold;
+      font-weight: 700;
+
       cursor: pointer;
     }
 
-    button:hover {
-      opacity: 0.92;
-    }
-
     button:disabled {
-      opacity: 0.5;
+      opacity: .5;
       cursor: not-allowed;
     }
 
     .message {
       display: none;
+
       margin-top: 18px;
       padding: 14px;
+
       border-radius: 10px;
-      line-height: 1.4;
+
+      line-height: 1.5;
     }
 
     .success {
       background: #12251b;
       border: 1px solid #28563b;
-      color: #d9ffe6;
+      color: #d8ffe6;
     }
 
     .error {
-      background: #2c1616;
-      border: 1px solid #653232;
-      color: #ffdede;
+      background: #2d1616;
+      border: 1px solid #663434;
+      color: #ffdddd;
     }
 
     .error-details {
-      margin-top: 8px;
+      margin-top: 7px;
       font-size: 12px;
-      opacity: 0.8;
-      word-break: break-word;
+      opacity: .8;
     }
 
-    .footer-note {
-      color: #777f8c;
-      font-size: 12px;
-      line-height: 1.5;
+    .loading {
+      color: var(--muted);
+      padding: 30px 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer {
       margin-top: 14px;
+
+      color: #747d8c;
+      font-size: 11px;
     }
 
     @media (max-width: 620px) {
@@ -170,25 +198,45 @@
       }
 
     }
-
   </style>
 </head>
 
 <body>
 
-  <div class="wrap">
+<div class="wrap">
 
-    <div class="badge">
-      PROTOTYPE — NOT CURRENTLY AFFILIATED WITH SHINE ONSITE
-    </div>
+  <div class="flowos">
+    Powered by <strong>FlowOS</strong>
+  </div>
 
-    <h1>
-      Request a Detail Appointment
+
+  <div
+    id="loading"
+    class="loading"
+  >
+    Loading business...
+  </div>
+
+
+  <div
+    id="businessContent"
+    class="hidden"
+  >
+
+    <div
+      id="industry"
+      class="industry"
+    ></div>
+
+    <h1 id="businessName">
+      Service Request
     </h1>
 
-    <p class="sub">
-      Tell us about your vehicle and the service you're interested in.
-    </p>
+    <div
+      id="tagline"
+      class="tagline"
+    ></div>
+
 
     <div class="card">
 
@@ -196,7 +244,9 @@
 
         <div class="grid">
 
+
           <div>
+
             <label for="customer_name">
               Name *
             </label>
@@ -208,10 +258,12 @@
               autocomplete="name"
               placeholder="John Smith"
             >
+
           </div>
 
 
           <div>
+
             <label for="phone">
               Phone
             </label>
@@ -222,10 +274,12 @@
               autocomplete="tel"
               placeholder="7635551234"
             >
+
           </div>
 
 
           <div>
+
             <label for="email">
               Email
             </label>
@@ -236,67 +290,12 @@
               autocomplete="email"
               placeholder="john@example.com"
             >
+
           </div>
 
 
           <div>
-            <label for="vehicle">
-              Vehicle *
-            </label>
 
-            <input
-              id="vehicle"
-              type="text"
-              required
-              placeholder="2022 Chevrolet Silverado"
-            >
-          </div>
-
-
-          <div>
-            <label for="vehicle_type">
-              Vehicle Type
-            </label>
-
-            <select id="vehicle_type">
-
-              <option value="">
-                Select
-              </option>
-
-              <option value="Car">
-                Car
-              </option>
-
-              <option value="SUV">
-                SUV
-              </option>
-
-              <option value="Truck">
-                Truck
-              </option>
-
-              <option value="Van">
-                Van
-              </option>
-
-              <option value="RV / Trailer">
-                RV / Trailer
-              </option>
-
-              <option value="ATV / Golf Cart">
-                ATV / Golf Cart
-              </option>
-
-              <option value="Other">
-                Other
-              </option>
-
-            </select>
-          </div>
-
-
-          <div>
             <label for="service">
               Service *
             </label>
@@ -307,69 +306,16 @@
             >
 
               <option value="">
-                Select
-              </option>
-
-              <option value="Interior Detail">
-                Interior Detail
-              </option>
-
-              <option value="Exterior Detail">
-                Exterior Detail
-              </option>
-
-              <option value="Interior + Exterior Detail">
-                Interior + Exterior Detail
-              </option>
-
-              <option value="Engine Bay Detail">
-                Engine Bay Detail
-              </option>
-
-              <option value="Maintenance Detail">
-                Maintenance Detail
-              </option>
-
-              <option value="RV / Trailer Detail">
-                RV / Trailer Detail
-              </option>
-
-              <option value="Other">
-                Other
+                Loading services...
               </option>
 
             </select>
+
           </div>
 
 
           <div>
-            <label for="service_location">
-              Service Location
-            </label>
 
-            <select id="service_location">
-
-              <option value="">
-                Select
-              </option>
-
-              <option value="Shine OnSite">
-                Shine OnSite
-              </option>
-
-              <option value="Mobile Service">
-                Mobile Service
-              </option>
-
-              <option value="Not Sure">
-                Not Sure
-              </option>
-
-            </select>
-          </div>
-
-
-          <div>
             <label for="preferred_date">
               Preferred Date
             </label>
@@ -378,21 +324,38 @@
               id="preferred_date"
               type="date"
             >
+
+          </div>
+
+
+          <div>
+
+            <label for="service_location">
+              Service Address / Location
+            </label>
+
+            <input
+              id="service_location"
+              type="text"
+              placeholder="Address or service location"
+            >
+
           </div>
 
 
           <div class="full">
 
             <label for="notes">
-              Additional Notes
+              Tell us what you need
             </label>
 
             <textarea
               id="notes"
-              placeholder="Pet hair, stains, vehicle condition, special requests, etc."
+              placeholder="Describe the job, problem, project, or anything the business should know."
             ></textarea>
 
           </div>
+
 
         </div>
 
@@ -401,7 +364,7 @@
           id="submitButton"
           type="submit"
         >
-          Request Appointment
+          Submit Request
         </button>
 
       </form>
@@ -411,7 +374,7 @@
         id="successMessage"
         class="message success"
       >
-        Your appointment request has been received.
+        Your request has been received. The business will follow up with you.
       </div>
 
 
@@ -432,9 +395,8 @@
       </div>
 
 
-      <div class="footer-note">
-        Prototype only. No appointment is actually confirmed until
-        the business approves it.
+      <div class="footer">
+        Secure request powered by FlowOS.
       </div>
 
     </div>
@@ -442,269 +404,608 @@
   </div>
 
 
-  <script>
+  <div
+    id="businessError"
+    class="message error"
+  >
 
-    /*
-    ======================================================
-    SUPABASE CONFIGURATION
-    ======================================================
+    <strong>
+      Business unavailable.
+    </strong>
 
-    Replace ONLY these two values.
+    <div
+      id="businessErrorDetails"
+      class="error-details"
+    ></div>
 
-    Project URL example:
-    https://abcdefgh.supabase.co
+  </div>
 
-    Publishable key example:
-    sb_publishable_xxxxxxxxxxxxx
-
-    DO NOT put a service_role key or database password here.
-    */
-
-    const SUPABASE_URL =
-      "https://mxyikhxpzijrdrgowmxr.supabase.co"
-    .replace(/\/+$/, "")
-    .replace(/\/rest\/v1\/?$/, "");
-
-    const SUPABASE_KEY =
-      "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
-
-    const BUSINESS_ID =
-      "e7ac5d18-eb1e-4911-a29c-ce1c695cad5b";
-    /*
-    ======================================================
-    ELEMENTS
-    ======================================================
-    */
-
-    const form =
-      document.getElementById("leadForm");
-
-    const submitButton =
-      document.getElementById("submitButton");
-
-    const successMessage =
-      document.getElementById("successMessage");
-
-    const errorMessage =
-      document.getElementById("errorMessage");
-
-    const errorDetails =
-      document.getElementById("errorDetails");
+</div>
 
 
-    /*
-    ======================================================
-    SET MINIMUM DATE TO TODAY
-    ======================================================
-    */
+<script>
 
-    const preferredDateInput =
-      document.getElementById("preferred_date");
+  /*
+  ============================================
+  SUPABASE CONFIG
+  ============================================
 
-    const today =
-      new Date()
-        .toISOString()
-        .split("T")[0];
+  Use the exact same base URL and publishable
+  key you have already been using.
 
-    preferredDateInput.min = today;
+  Do NOT use service_role or secret keys.
+  */
 
+  const SUPABASE_URL =
+    "https://mxyikhxpzijrdrgowmxr.supabase.co/rest/v1/";
 
-    /*
-    ======================================================
-    FORM SUBMISSION
-    ======================================================
-    */
-
-    form.addEventListener(
-      "submit",
-
-      async function(event) {
-
-        event.preventDefault();
+  const SUPABASE_KEY =
+    "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
 
 
-        successMessage.style.display =
-          "none";
+  /*
+  ============================================
+  BUSINESS STATE
+  ============================================
+  */
+
+  let BUSINESS_ID = null;
+
+  let BUSINESS_SLUG = null;
+
+
+  /*
+  ============================================
+  ELEMENTS
+  ============================================
+  */
+
+  const loading =
+    document.getElementById("loading");
+
+  const businessContent =
+    document.getElementById(
+      "businessContent"
+    );
+
+  const businessError =
+    document.getElementById(
+      "businessError"
+    );
+
+  const businessErrorDetails =
+    document.getElementById(
+      "businessErrorDetails"
+    );
+
+  const businessName =
+    document.getElementById(
+      "businessName"
+    );
+
+  const industry =
+    document.getElementById(
+      "industry"
+    );
+
+  const tagline =
+    document.getElementById(
+      "tagline"
+    );
+
+  const serviceSelect =
+    document.getElementById(
+      "service"
+    );
+
+  const leadForm =
+    document.getElementById(
+      "leadForm"
+    );
+
+  const submitButton =
+    document.getElementById(
+      "submitButton"
+    );
+
+  const successMessage =
+    document.getElementById(
+      "successMessage"
+    );
+
+  const errorMessage =
+    document.getElementById(
+      "errorMessage"
+    );
+
+  const errorDetails =
+    document.getElementById(
+      "errorDetails"
+    );
+
+
+  /*
+  ============================================
+  MINIMUM DATE
+  ============================================
+  */
+
+  const dateInput =
+    document.getElementById(
+      "preferred_date"
+    );
+
+  dateInput.min =
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
+
+  /*
+  ============================================
+  GET BUSINESS SLUG FROM URL
+  ============================================
+
+  Example:
+
+  index.html?b=flowos-demo
+  */
+
+  function getBusinessSlug() {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    return (
+      params.get("b") ||
+      "flowos-demo"
+    );
+
+  }
+
+
+  /*
+  ============================================
+  LOAD BUSINESS PROFILE
+  ============================================
+  */
+
+  async function loadBusiness() {
+
+    try {
+
+      BUSINESS_SLUG =
+        getBusinessSlug();
+
+
+      const profileUrl =
+        `${SUPABASE_URL}/rest/v1/business_public_profiles` +
+        `?slug=eq.${encodeURIComponent(BUSINESS_SLUG)}` +
+        `&active=eq.true` +
+        `&select=business_id,slug,display_name,industry,tagline` +
+        `&limit=1`;
+
+
+      const profileResponse =
+        await fetch(
+          profileUrl,
+          {
+            headers: {
+              "apikey":
+                SUPABASE_KEY
+            }
+          }
+        );
+
+
+      if (!profileResponse.ok) {
+
+        throw new Error(
+          await profileResponse.text()
+        );
+
+      }
+
+
+      const profiles =
+        await profileResponse.json();
+
+
+      if (
+        !profiles ||
+        profiles.length === 0
+      ) {
+
+        throw new Error(
+          "No active business was found for this link."
+        );
+
+      }
+
+
+      const profile =
+        profiles[0];
+
+
+      BUSINESS_ID =
+        profile.business_id;
+
+
+      businessName.textContent =
+        profile.display_name;
+
+
+      document.title =
+        `${profile.display_name} | Service Request`;
+
+
+      industry.textContent =
+        profile.industry || "";
+
+
+      tagline.textContent =
+        profile.tagline ||
+        "Submit your request and we will get back to you.";
+
+
+      await loadServices();
+
+
+      loading.classList.add(
+        "hidden"
+      );
+
+      businessContent.classList.remove(
+        "hidden"
+      );
+
+    }
+
+    catch(error) {
+
+      console.error(
+        "Business loading error:",
+        error
+      );
+
+
+      loading.classList.add(
+        "hidden"
+      );
+
+
+      businessError.style.display =
+        "block";
+
+
+      businessErrorDetails.textContent =
+        error.message;
+
+    }
+
+  }
+
+
+  /*
+  ============================================
+  LOAD SERVICES
+  ============================================
+  */
+
+  async function loadServices() {
+
+    const servicesUrl =
+      `${SUPABASE_URL}/rest/v1/business_services` +
+      `?business_id=eq.${encodeURIComponent(BUSINESS_ID)}` +
+      `&active=eq.true` +
+      `&select=id,name,sort_order` +
+      `&order=sort_order.asc`;
+
+
+    const response =
+      await fetch(
+        servicesUrl,
+        {
+          headers: {
+            "apikey":
+              SUPABASE_KEY
+          }
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        await response.text()
+      );
+
+    }
+
+
+    const services =
+      await response.json();
+
+
+    serviceSelect.innerHTML =
+      `<option value="">Select a service</option>`;
+
+
+    for (
+      const service
+      of services
+    ) {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        service.name;
+
+
+      option.textContent =
+        service.name;
+
+
+      serviceSelect.appendChild(
+        option
+      );
+
+    }
+
+
+    if (
+      services.length === 0
+    ) {
+
+      serviceSelect.innerHTML =
+        `<option value="General Inquiry">General Inquiry</option>`;
+
+    }
+
+  }
+
+
+  /*
+  ============================================
+  SUBMIT LEAD
+  ============================================
+  */
+
+  leadForm.addEventListener(
+    "submit",
+
+    async function(event) {
+
+      event.preventDefault();
+
+
+      successMessage.style.display =
+        "none";
+
+      errorMessage.style.display =
+        "none";
+
+      errorDetails.textContent =
+        "";
+
+
+      const customerName =
+        document
+          .getElementById(
+            "customer_name"
+          )
+          .value
+          .trim();
+
+
+      const phone =
+        document
+          .getElementById(
+            "phone"
+          )
+          .value
+          .trim();
+
+
+      const email =
+        document
+          .getElementById(
+            "email"
+          )
+          .value
+          .trim();
+
+
+      const service =
+        document
+          .getElementById(
+            "service"
+          )
+          .value;
+
+
+      const preferredDate =
+        document
+          .getElementById(
+            "preferred_date"
+          )
+          .value;
+
+
+      const serviceLocation =
+        document
+          .getElementById(
+            "service_location"
+          )
+          .value
+          .trim();
+
+
+      const notes =
+        document
+          .getElementById(
+            "notes"
+          )
+          .value
+          .trim();
+
+
+      /*
+      Require at least one contact method.
+      */
+
+      if (
+        !phone &&
+        !email
+      ) {
 
         errorMessage.style.display =
-          "none";
+          "block";
 
         errorDetails.textContent =
-          "";
+          "Please enter either a phone number or email address.";
 
+        return;
+
+      }
+
+
+      if (!BUSINESS_ID) {
+
+        errorMessage.style.display =
+          "block";
+
+        errorDetails.textContent =
+          "Business information has not loaded.";
+
+        return;
+
+      }
+
+
+      submitButton.disabled =
+        true;
+
+      submitButton.textContent =
+        "Submitting...";
+
+
+      const lead = {
+
+        business_id:
+          BUSINESS_ID,
+
+        customer_name:
+          customerName,
+
+        phone:
+          phone || null,
+
+        email:
+          email || null,
+
+        vehicle:
+          null,
+
+        vehicle_type:
+          null,
+
+        service:
+          service,
+
+        service_location:
+          serviceLocation || null,
+
+        preferred_date:
+          preferredDate || null,
+
+        notes:
+          notes || null,
+
+        status:
+          "new",
+
+        source:
+          "website"
+
+      };
+
+
+      try {
 
         /*
-        --------------------------------------------------
-        Basic validation
-        --------------------------------------------------
+        ========================================
+        SAVE LEAD
+        ========================================
         */
 
-        const customerName =
-          document
-            .getElementById("customer_name")
-            .value
-            .trim();
+        const response =
+          await fetch(
 
-        const phone =
-          document
-            .getElementById("phone")
-            .value
-            .trim();
+            `${SUPABASE_URL}/rest/v1/leads`,
 
-        const email =
-          document
-            .getElementById("email")
-            .value
-            .trim();
+            {
 
-        const vehicle =
-          document
-            .getElementById("vehicle")
-            .value
-            .trim();
+              method:
+                "POST",
 
-        const vehicleType =
-          document
-            .getElementById("vehicle_type")
-            .value;
+              headers: {
 
-        const service =
-          document
-            .getElementById("service")
-            .value;
+                "Content-Type":
+                  "application/json",
 
-        const serviceLocation =
-          document
-            .getElementById("service_location")
-            .value;
+                "apikey":
+                  SUPABASE_KEY,
 
-        const preferredDate =
-          document
-            .getElementById("preferred_date")
-            .value;
+                "Prefer":
+                  "return=minimal"
 
-        const notes =
-          document
-            .getElementById("notes")
-            .value
-            .trim();
+              },
+
+              body:
+                JSON.stringify(
+                  lead
+                )
+
+            }
+
+          );
 
 
-        /*
-        Require at least one contact method.
-        */
+        if (!response.ok) {
 
-        if (!phone && !email) {
+          const responseText =
+            await response.text();
 
-          errorMessage.style.display =
-            "block";
 
-          errorDetails.textContent =
-            "Please enter either a phone number or email address.";
-
-          return;
+          throw new Error(
+            `Database error ${response.status}: ${responseText}`
+          );
 
         }
 
 
         /*
-        Check Supabase configuration.
+        ========================================
+        OWNER NOTIFICATION
+        ========================================
+
+        Notification failures do not cause
+        the customer submission itself to fail.
         */
-
-        if (
-          SUPABASE_URL.includes("YOUR_") ||
-          SUPABASE_KEY.includes("YOUR_")
-        ) {
-
-          errorMessage.style.display =
-            "block";
-
-          errorDetails.textContent =
-            "Supabase URL or publishable key has not been configured.";
-
-          return;
-
-        }
-
-
-        /*
-        Disable button while submitting.
-        */
-
-        submitButton.disabled =
-          true;
-
-        submitButton.textContent =
-          "Submitting...";
-
-
-        /*
-        Build database record.
-        */
-
-        const lead = {
-
-          business_id:
-            BUSINESS_ID,
-
-          customer_name:
-            customerName,
-
-          phone:
-            phone || null,
-
-          email:
-            email || null,
-
-          vehicle:
-            vehicle,
-
-          vehicle_type:
-            vehicleType || null,
-
-          service:
-            service,
-
-          service_location:
-            serviceLocation || null,
-
-          preferred_date:
-            preferredDate || null,
-
-          notes:
-            notes || null,
-
-          status:
-            "new",
-
-          source:
-            "website"
-
-        };
-
 
         try {
 
-          /*
-          ==================================================
-          SEND TO SUPABASE
-          ==================================================
-
-          IMPORTANT:
-
-          New Supabase publishable keys use the apikey header.
-
-          We intentionally DO NOT send:
-
-          Authorization: Bearer ...
-
-          because sb_publishable_ keys are not JWT tokens.
-          */
-
-          const response =
+          const notificationResponse =
             await fetch(
 
-              `${SUPABASE_URL}/rest/v1/leads`,
+              `${SUPABASE_URL}/functions/v1/notify-new-lead`,
 
               {
 
@@ -717,160 +1018,107 @@
                     "application/json",
 
                   "apikey":
-                    SUPABASE_KEY,
-
-                  "Prefer":
-                    "return=minimal"
+                    SUPABASE_KEY
 
                 },
 
                 body:
-                  JSON.stringify(lead)
+                  JSON.stringify(
+                    lead
+                  )
 
               }
 
             );
 
 
-          /*
-          If Supabase returns an error,
-          read the exact message.
-          */
-
-          if (!response.ok) {
-
-            const responseText =
-              await response.text();
+          if (
+            !notificationResponse.ok
+          ) {
 
             console.error(
-              "Supabase response:",
-              response.status,
-              responseText
-            );
-
-            throw new Error(
-              `Supabase error ${response.status}: ${responseText}`
+              "Owner notification failed:",
+              await notificationResponse.text()
             );
 
           }
-/*
-=============================================
-NOTIFY BUSINESS OWNER
-=============================================
-*/
-
-try {
-
-  const notificationResponse = await fetch(
-    `${SUPABASE_URL}/functions/v1/notify-new-lead`,
-    {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY
-      },
-
-      body: JSON.stringify(lead)
-    }
-  );
-
-
-  if (!notificationResponse.ok) {
-
-    const notificationError =
-      await notificationResponse.text();
-
-    console.error(
-      "Owner notification failed:",
-      notificationError
-    );
-
-  }
-
-} catch (notificationError) {
-
-  console.error(
-    "Owner notification error:",
-    notificationError
-  );
-
-}
-
-          /*
-          ==================================================
-          SUCCESS
-          ==================================================
-          */
-
-          console.log(
-            "Lead submitted successfully:",
-            lead
-          );
-
-
-          form.reset();
-
-
-          successMessage.style.display =
-            "block";
-
-
-          successMessage.scrollIntoView({
-            behavior:
-              "smooth",
-
-            block:
-              "center"
-          });
 
         }
 
-
-        catch(error) {
-
-          /*
-          ==================================================
-          ERROR
-          ==================================================
-          */
+        catch(notificationError) {
 
           console.error(
-            "Submission error:",
-            error
+            "Notification error:",
+            notificationError
           );
 
-
-          errorMessage.style.display =
-            "block";
-
-
-          errorDetails.textContent =
-            error.message;
-
         }
 
 
-        finally {
+        /*
+        ========================================
+        SUCCESS
+        ========================================
+        */
 
-          /*
-          Restore button.
-          */
+        leadForm.reset();
 
-          submitButton.disabled =
-            false;
 
-          submitButton.textContent =
-            "Request Appointment";
+        successMessage.style.display =
+          "block";
 
-        }
+
+        successMessage.scrollIntoView({
+          behavior:
+            "smooth",
+          block:
+            "center"
+        });
 
       }
 
-    );
+      catch(error) {
 
-  </script>
+        console.error(
+          "Lead submission error:",
+          error
+        );
+
+
+        errorMessage.style.display =
+          "block";
+
+
+        errorDetails.textContent =
+          error.message;
+
+      }
+
+      finally {
+
+        submitButton.disabled =
+          false;
+
+
+        submitButton.textContent =
+          "Submit Request";
+
+      }
+
+    }
+
+  );
+
+
+  /*
+  ============================================
+  START
+  ============================================
+  */
+
+  loadBusiness();
+
+</script>
 
 </body>
-
 </html>
