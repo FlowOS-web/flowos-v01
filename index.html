@@ -749,7 +749,49 @@
             );
 
           }
+/*
+=============================================
+NOTIFY BUSINESS OWNER
+=============================================
+*/
 
+try {
+
+  const notificationResponse = await fetch(
+    `${SUPABASE_URL}/functions/v1/notify-new-lead`,
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY
+      },
+
+      body: JSON.stringify(lead)
+    }
+  );
+
+
+  if (!notificationResponse.ok) {
+
+    const notificationError =
+      await notificationResponse.text();
+
+    console.error(
+      "Owner notification failed:",
+      notificationError
+    );
+
+  }
+
+} catch (notificationError) {
+
+  console.error(
+    "Owner notification error:",
+    notificationError
+  );
+
+}
 
           /*
           ==================================================
