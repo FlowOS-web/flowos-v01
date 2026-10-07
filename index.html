@@ -436,9 +436,14 @@
   Do NOT use service_role or secret keys.
   */
 
-  const SUPABASE_URL =
-    "https://mxyikhxpzijrdrgowmxr.supabase.co/rest/v1/";
 
+  const SUPABASE_URL =
+  "https://mxyikhxpzijrdgowmxr.supabase.co"
+    .replace(/\/+$/, "")
+    .replace(/\/rest\/v1\/?$/, "")
+    .replace(/\/auth\/v1\/?$/, "")
+    .replace(/\/functions\/v1\/?$/, "");
+  
   const SUPABASE_KEY =
     "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
 
