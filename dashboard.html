@@ -1,0 +1,1701 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>FlowOS Dashboard</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0d0f13;
+      --panel: #151820;
+      --panel-2: #1a1e27;
+      --border: #2a303b;
+      --text: #f5f7fa;
+      --muted: #969eac;
+      --green: #1f9d68;
+      --yellow: #ba8b2e;
+      --red: #b84c4c;
+      --blue: #4778d9;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* LOGIN */
+
+    .login-wrap {
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+
+      padding: 30px;
+
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .logo span {
+      color: #9ba5b7;
+    }
+
+    .login-subtitle {
+      color: var(--muted);
+      margin: 0 0 26px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: #dce0e7;
+      font-size: 13px;
+    }
+
+    input {
+      width: 100%;
+
+      padding: 12px 13px;
+      margin-bottom: 15px;
+
+      color: white;
+      background: #0f1218;
+
+      border: 1px solid #303643;
+      border-radius: 10px;
+    }
+
+    input:focus {
+      outline: 2px solid #566275;
+      outline-offset: 1px;
+    }
+
+    .primary-button {
+      width: 100%;
+
+      border: 0;
+      border-radius: 10px;
+
+      padding: 13px;
+
+      font-weight: 700;
+      cursor: pointer;
+
+      color: #111;
+      background: #f3f4f6;
+    }
+
+    .primary-button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .login-error {
+      margin-top: 15px;
+
+      padding: 12px;
+
+      background: #2e1515;
+      border: 1px solid #613131;
+      border-radius: 9px;
+
+      color: #ffdede;
+      font-size: 13px;
+    }
+
+    /* DASHBOARD */
+
+    .dashboard {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      min-height: 72px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 28px;
+
+      background: #11141a;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .brand span {
+      color: #99a2b0;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .business-name {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .logout-button,
+    .refresh-button {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+
+      padding: 9px 13px;
+
+      background: #191d25;
+      color: white;
+
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1250px;
+      margin: auto;
+      padding: 28px 22px 60px;
+    }
+
+    .heading-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 15px;
+
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 7px;
+    }
+
+    /* STATS */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 13px;
+
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      padding: 18px;
+
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+
+      margin-bottom: 8px;
+    }
+
+    .stat-number {
+      font-size: 29px;
+      font-weight: 800;
+    }
+
+    /* FILTERS */
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+
+      margin-bottom: 18px;
+    }
+
+    .filter-button {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      padding: 8px 13px;
+
+      background: #171b22;
+      color: #cbd0d8;
+
+      cursor: pointer;
+    }
+
+    .filter-button.active {
+      background: white;
+      color: #111;
+
+      border-color: white;
+    }
+
+    /* LEADS */
+
+    .lead-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .lead-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+
+      padding: 20px;
+    }
+
+    .lead-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      gap: 12px;
+
+      margin-bottom: 15px;
+    }
+
+    .customer-name {
+      font-size: 19px;
+      font-weight: 700;
+
+      margin-bottom: 4px;
+    }
+
+    .vehicle {
+      color: #c3c9d2;
+    }
+
+    .status {
+      display: inline-block;
+
+      padding: 6px 10px;
+
+      border-radius: 999px;
+
+      font-size: 11px;
+      font-weight: 800;
+
+      text-transform: uppercase;
+    }
+
+    .status-new {
+      background: #183552;
+      color: #9fcdf9;
+    }
+
+    .status-contacted {
+      background: #403515;
+      color: #f4d57a;
+    }
+
+    .status-booked {
+      background: #143b29;
+      color: #91dfb8;
+    }
+
+    .status-completed {
+      background: #302457;
+      color: #c7b7ff;
+    }
+
+    .status-lost {
+      background: #441e1e;
+      color: #f4a7a7;
+    }
+
+    .lead-grid {
+      display: grid;
+
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+
+      gap: 13px;
+
+      margin-bottom: 15px;
+    }
+
+    .field-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+
+      margin-bottom: 4px;
+    }
+
+    .field-value {
+      color: #e6e9ee;
+
+      overflow-wrap: anywhere;
+    }
+
+    .notes {
+      padding: 13px;
+
+      background: #101318;
+      border: 1px solid #262c35;
+      border-radius: 9px;
+
+      margin-top: 8px;
+      margin-bottom: 15px;
+
+      color: #cbd0d8;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .action-button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+
+      padding: 9px 12px;
+
+      color: white;
+      background: #1b2029;
+
+      cursor: pointer;
+    }
+
+    .action-button:hover {
+      background: #252b36;
+    }
+
+    .book-button {
+      border-color: #285c45;
+    }
+
+    .lost-button {
+      border-color: #693737;
+    }
+
+    .complete-button {
+      border-color: #51447e;
+    }
+
+    .empty-state {
+      text-align: center;
+
+      padding: 50px 20px;
+
+      color: var(--muted);
+
+      border: 1px dashed var(--border);
+      border-radius: 15px;
+    }
+
+    .loading {
+      color: var(--muted);
+      padding: 30px 0;
+    }
+
+    .dashboard-error {
+      padding: 14px;
+
+      margin-bottom: 18px;
+
+      background: #2c1616;
+      border: 1px solid #673333;
+      border-radius: 10px;
+
+      color: #ffdede;
+    }
+
+    @media (max-width: 900px) {
+      .stats {
+        grid-template-columns:
+          repeat(2, 1fr);
+      }
+
+      .lead-grid {
+        grid-template-columns:
+          repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        padding: 0 16px;
+      }
+
+      .business-name {
+        display: none;
+      }
+
+      .container {
+        padding:
+          22px 14px 45px;
+      }
+
+      .stats {
+        grid-template-columns:
+          1fr 1fr;
+      }
+
+      .lead-grid {
+        grid-template-columns:
+          1fr;
+      }
+
+      .heading-row {
+        align-items: flex-start;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+
+  <section
+    id="loginSection"
+    class="login-wrap"
+  >
+
+    <div class="login-card">
+
+      <div class="logo">
+        Flow<span>OS</span>
+      </div>
+
+      <p class="login-subtitle">
+        Business Dashboard
+      </p>
+
+      <form id="loginForm">
+
+        <label for="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          required
+          autocomplete="email"
+        >
+
+
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          required
+          autocomplete="current-password"
+        >
+
+
+        <button
+          id="loginButton"
+          class="primary-button"
+          type="submit"
+        >
+          Sign In
+        </button>
+
+      </form>
+
+      <div
+        id="loginError"
+        class="login-error hidden"
+      ></div>
+
+    </div>
+
+  </section>
+
+
+  <!-- DASHBOARD -->
+
+  <section
+    id="dashboardSection"
+    class="dashboard hidden"
+  >
+
+    <header class="topbar">
+
+      <div class="brand">
+        Flow<span>OS</span>
+      </div>
+
+      <div class="top-right">
+
+        <div
+          id="businessName"
+          class="business-name"
+        >
+          Loading business...
+        </div>
+
+        <button
+          id="logoutButton"
+          class="logout-button"
+        >
+          Sign Out
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <main class="container">
+
+      <div class="heading-row">
+
+        <div>
+          <h1>
+            Customer Operations
+          </h1>
+
+          <div class="subtitle">
+            Manage incoming leads and appointments.
+          </div>
+        </div>
+
+        <button
+          id="refreshButton"
+          class="refresh-button"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+
+      <div
+        id="dashboardError"
+        class="dashboard-error hidden"
+      ></div>
+
+
+      <!-- STATS -->
+
+      <div class="stats">
+
+        <div class="stat-card">
+          <div class="stat-label">
+            New
+          </div>
+
+          <div
+            id="newCount"
+            class="stat-number"
+          >
+            0
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-label">
+            Contacted
+          </div>
+
+          <div
+            id="contactedCount"
+            class="stat-number"
+          >
+            0
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-label">
+            Booked
+          </div>
+
+          <div
+            id="bookedCount"
+            class="stat-number"
+          >
+            0
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-label">
+            Completed
+          </div>
+
+          <div
+            id="completedCount"
+            class="stat-number"
+          >
+            0
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-label">
+            Lost
+          </div>
+
+          <div
+            id="lostCount"
+            class="stat-number"
+          >
+            0
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- FILTERS -->
+
+      <div class="filters">
+
+        <button
+          class="filter-button active"
+          data-filter="all"
+        >
+          All
+        </button>
+
+        <button
+          class="filter-button"
+          data-filter="new"
+        >
+          New
+        </button>
+
+        <button
+          class="filter-button"
+          data-filter="contacted"
+        >
+          Contacted
+        </button>
+
+        <button
+          class="filter-button"
+          data-filter="booked"
+        >
+          Booked
+        </button>
+
+        <button
+          class="filter-button"
+          data-filter="completed"
+        >
+          Completed
+        </button>
+
+        <button
+          class="filter-button"
+          data-filter="lost"
+        >
+          Lost
+        </button>
+
+      </div>
+
+
+      <div
+        id="loading"
+        class="loading"
+      >
+        Loading leads...
+      </div>
+
+
+      <div
+        id="leadList"
+        class="lead-list"
+      ></div>
+
+    </main>
+
+  </section>
+
+
+  <!-- SUPABASE -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+
+  <script>
+
+    /*
+    ========================================
+    CONFIG
+    ========================================
+
+    Use the SAME public project URL and
+    sb_publishable_ key from index.html.
+
+    NEVER use the service_role key here.
+    */
+
+    const SUPABASE_URL =
+      "https://mxyikhxpzijrdrgowmxr.supabase.co/rest/v1/";
+
+    const SUPABASE_KEY =
+      "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
+
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    /*
+    ========================================
+    STATE
+    ========================================
+    */
+
+    let currentBusinessId = null;
+
+    let allLeads = [];
+
+    let currentFilter = "all";
+
+
+    /*
+    ========================================
+    ELEMENTS
+    ========================================
+    */
+
+    const loginSection =
+      document.getElementById(
+        "loginSection"
+      );
+
+    const dashboardSection =
+      document.getElementById(
+        "dashboardSection"
+      );
+
+    const loginForm =
+      document.getElementById(
+        "loginForm"
+      );
+
+    const loginButton =
+      document.getElementById(
+        "loginButton"
+      );
+
+    const loginError =
+      document.getElementById(
+        "loginError"
+      );
+
+    const dashboardError =
+      document.getElementById(
+        "dashboardError"
+      );
+
+    const businessName =
+      document.getElementById(
+        "businessName"
+      );
+
+    const leadList =
+      document.getElementById(
+        "leadList"
+      );
+
+    const loading =
+      document.getElementById(
+        "loading"
+      );
+
+
+    /*
+    ========================================
+    HTML SAFETY
+    ========================================
+    */
+
+    function escapeHtml(value) {
+
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+    /*
+    ========================================
+    DATE
+    ========================================
+    */
+
+    function formatDate(value) {
+
+      if (!value) {
+        return "Not provided";
+      }
+
+      const date =
+        new Date(`${value}T00:00:00`);
+
+      return date.toLocaleDateString(
+        undefined,
+        {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        }
+      );
+
+    }
+
+
+    /*
+    ========================================
+    LOGIN
+    ========================================
+    */
+
+    loginForm.addEventListener(
+      "submit",
+      async function(event) {
+
+        event.preventDefault();
+
+        loginError.classList.add(
+          "hidden"
+        );
+
+        loginButton.disabled = true;
+
+        loginButton.textContent =
+          "Signing In...";
+
+
+        const email =
+          document.getElementById(
+            "email"
+          ).value.trim();
+
+        const password =
+          document.getElementById(
+            "password"
+          ).value;
+
+
+        const {
+          data,
+          error
+        } =
+          await supabaseClient.auth
+            .signInWithPassword({
+              email,
+              password
+            });
+
+
+        if (error) {
+
+          loginError.textContent =
+            error.message;
+
+          loginError.classList.remove(
+            "hidden"
+          );
+
+          loginButton.disabled =
+            false;
+
+          loginButton.textContent =
+            "Sign In";
+
+          return;
+
+        }
+
+
+        await startDashboard();
+
+        loginButton.disabled =
+          false;
+
+        loginButton.textContent =
+          "Sign In";
+
+      }
+    );
+
+
+    /*
+    ========================================
+    LOGOUT
+    ========================================
+    */
+
+    document
+      .getElementById("logoutButton")
+      .addEventListener(
+        "click",
+        async function() {
+
+          await supabaseClient.auth
+            .signOut();
+
+          currentBusinessId =
+            null;
+
+          allLeads = [];
+
+          dashboardSection.classList
+            .add("hidden");
+
+          loginSection.classList
+            .remove("hidden");
+
+        }
+      );
+
+
+    /*
+    ========================================
+    GET BUSINESS MEMBERSHIP
+    ========================================
+    */
+
+    async function getBusiness() {
+
+      const {
+        data: membership,
+        error: membershipError
+      } =
+        await supabaseClient
+          .from("business_users")
+          .select(
+            "business_id, role"
+          )
+          .limit(1)
+          .maybeSingle();
+
+
+      if (membershipError) {
+        throw membershipError;
+      }
+
+
+      if (!membership) {
+
+        throw new Error(
+          "This account is not connected to a FlowOS business."
+        );
+
+      }
+
+
+      currentBusinessId =
+        membership.business_id;
+
+
+      const {
+        data: business,
+        error: businessError
+      } =
+        await supabaseClient
+          .from("businesses")
+          .select(
+            "id, name, industry"
+          )
+          .eq(
+            "id",
+            currentBusinessId
+          )
+          .single();
+
+
+      if (businessError) {
+        throw businessError;
+      }
+
+
+      businessName.textContent =
+        business.name;
+
+    }
+
+
+    /*
+    ========================================
+    LOAD LEADS
+    ========================================
+    */
+
+    async function loadLeads() {
+
+      loading.classList.remove(
+        "hidden"
+      );
+
+      dashboardError.classList.add(
+        "hidden"
+      );
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("leads")
+          .select("*")
+          .eq(
+            "business_id",
+            currentBusinessId
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          );
+
+
+      loading.classList.add(
+        "hidden"
+      );
+
+
+      if (error) {
+
+        dashboardError.textContent =
+          error.message;
+
+        dashboardError.classList.remove(
+          "hidden"
+        );
+
+        return;
+
+      }
+
+
+      allLeads =
+        data || [];
+
+
+      updateStats();
+
+      renderLeads();
+
+    }
+
+
+    /*
+    ========================================
+    STATS
+    ========================================
+    */
+
+    function updateStats() {
+
+      const counts = {
+        new: 0,
+        contacted: 0,
+        booked: 0,
+        completed: 0,
+        lost: 0
+      };
+
+
+      for (const lead of allLeads) {
+
+        if (
+          counts[lead.status] !==
+          undefined
+        ) {
+
+          counts[lead.status]++;
+
+        }
+
+      }
+
+
+      document.getElementById(
+        "newCount"
+      ).textContent =
+        counts.new;
+
+
+      document.getElementById(
+        "contactedCount"
+      ).textContent =
+        counts.contacted;
+
+
+      document.getElementById(
+        "bookedCount"
+      ).textContent =
+        counts.booked;
+
+
+      document.getElementById(
+        "completedCount"
+      ).textContent =
+        counts.completed;
+
+
+      document.getElementById(
+        "lostCount"
+      ).textContent =
+        counts.lost;
+
+    }
+
+
+    /*
+    ========================================
+    RENDER LEADS
+    ========================================
+    */
+
+    function renderLeads() {
+
+      leadList.innerHTML = "";
+
+
+      let filtered =
+        allLeads;
+
+
+      if (
+        currentFilter !== "all"
+      ) {
+
+        filtered =
+          allLeads.filter(
+            lead =>
+              lead.status ===
+              currentFilter
+          );
+
+      }
+
+
+      if (
+        filtered.length === 0
+      ) {
+
+        leadList.innerHTML = `
+          <div class="empty-state">
+            No leads in this category.
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      for (const lead of filtered) {
+
+        const card =
+          document.createElement(
+            "div"
+          );
+
+        card.className =
+          "lead-card";
+
+
+        const statusClass =
+          `status-${lead.status}`;
+
+
+        card.innerHTML = `
+
+          <div class="lead-top">
+
+            <div>
+
+              <div class="customer-name">
+                ${escapeHtml(
+                  lead.customer_name
+                )}
+              </div>
+
+              <div class="vehicle">
+                ${escapeHtml(
+                  lead.vehicle
+                )}
+              </div>
+
+            </div>
+
+
+            <div
+              class="
+                status
+                ${statusClass}
+              "
+            >
+              ${escapeHtml(
+                lead.status
+              )}
+            </div>
+
+          </div>
+
+
+          <div class="lead-grid">
+
+            <div>
+              <div class="field-label">
+                Service
+              </div>
+
+              <div class="field-value">
+                ${escapeHtml(
+                  lead.service
+                )}
+              </div>
+            </div>
+
+
+            <div>
+              <div class="field-label">
+                Preferred Date
+              </div>
+
+              <div class="field-value">
+                ${escapeHtml(
+                  formatDate(
+                    lead.preferred_date
+                  )
+                )}
+              </div>
+            </div>
+
+
+            <div>
+              <div class="field-label">
+                Service Location
+              </div>
+
+              <div class="field-value">
+                ${escapeHtml(
+                  lead.service_location ||
+                  "Not provided"
+                )}
+              </div>
+            </div>
+
+
+            <div>
+              <div class="field-label">
+                Phone
+              </div>
+
+              <div class="field-value">
+                ${escapeHtml(
+                  lead.phone ||
+                  "Not provided"
+                )}
+              </div>
+            </div>
+
+
+            <div>
+              <div class="field-label">
+                Email
+              </div>
+
+              <div class="field-value">
+                ${escapeHtml(
+                  lead.email ||
+                  "Not provided"
+                )}
+              </div>
+            </div>
+
+
+            <div>
+              <div class="field-label">
+                Vehicle Type
+              </div>
+
+              <div class="field-value">
+                ${escapeHtml(
+                  lead.vehicle_type ||
+                  "Not provided"
+                )}
+              </div>
+            </div>
+
+          </div>
+
+
+          ${
+            lead.notes
+              ?
+              `
+                <div class="notes">
+                  ${escapeHtml(
+                    lead.notes
+                  )}
+                </div>
+              `
+              :
+              ""
+          }
+
+
+          <div class="actions">
+
+            <button
+              class="action-button"
+              data-id="${lead.id}"
+              data-status="contacted"
+            >
+              Contacted
+            </button>
+
+
+            <button
+              class="
+                action-button
+                book-button
+              "
+              data-id="${lead.id}"
+              data-status="booked"
+            >
+              Booked
+            </button>
+
+
+            <button
+              class="
+                action-button
+                complete-button
+              "
+              data-id="${lead.id}"
+              data-status="completed"
+            >
+              Completed
+            </button>
+
+
+            <button
+              class="
+                action-button
+                lost-button
+              "
+              data-id="${lead.id}"
+              data-status="lost"
+            >
+              Lost
+            </button>
+
+          </div>
+
+        `;
+
+
+        leadList.appendChild(
+          card
+        );
+
+      }
+
+
+      /*
+      Attach status buttons.
+      */
+
+      document
+        .querySelectorAll(
+          ".action-button[data-id]"
+        )
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            function() {
+
+              updateLeadStatus(
+                button.dataset.id,
+                button.dataset.status,
+                button
+              );
+
+            }
+          );
+
+        });
+
+    }
+
+
+    /*
+    ========================================
+    UPDATE STATUS
+    ========================================
+    */
+
+    async function updateLeadStatus(
+      leadId,
+      newStatus,
+      button
+    ) {
+
+      const originalText =
+        button.textContent;
+
+      button.disabled = true;
+
+      button.textContent =
+        "Updating...";
+
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("leads")
+          .update({
+            status:
+              newStatus
+          })
+          .eq(
+            "id",
+            leadId
+          )
+          .eq(
+            "business_id",
+            currentBusinessId
+          );
+
+
+      if (error) {
+
+        dashboardError.textContent =
+          error.message;
+
+        dashboardError.classList.remove(
+          "hidden"
+        );
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          originalText;
+
+        return;
+
+      }
+
+
+      await loadLeads();
+
+    }
+
+
+    /*
+    ========================================
+    FILTER BUTTONS
+    ========================================
+    */
+
+    document
+      .querySelectorAll(
+        ".filter-button"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          function() {
+
+            document
+              .querySelectorAll(
+                ".filter-button"
+              )
+              .forEach(item => {
+
+                item.classList.remove(
+                  "active"
+                );
+
+              });
+
+
+            button.classList.add(
+              "active"
+            );
+
+
+            currentFilter =
+              button.dataset.filter;
+
+
+            renderLeads();
+
+          }
+        );
+
+      });
+
+
+    /*
+    ========================================
+    REFRESH
+    ========================================
+    */
+
+    document
+      .getElementById(
+        "refreshButton"
+      )
+      .addEventListener(
+        "click",
+        loadLeads
+      );
+
+
+    /*
+    ========================================
+    START DASHBOARD
+    ========================================
+    */
+
+    async function startDashboard() {
+
+      try {
+
+        loginSection.classList.add(
+          "hidden"
+        );
+
+        dashboardSection.classList
+          .remove("hidden");
+
+
+        await getBusiness();
+
+        await loadLeads();
+
+      }
+
+      catch(error) {
+
+        dashboardSection.classList
+          .add("hidden");
+
+        loginSection.classList.remove(
+          "hidden"
+        );
+
+        loginError.textContent =
+          error.message;
+
+        loginError.classList.remove(
+          "hidden"
+        );
+
+      }
+
+    }
+
+
+    /*
+    ========================================
+    RESTORE LOGIN SESSION
+    ========================================
+    */
+
+    async function initialize() {
+
+      const {
+        data: {
+          session
+        }
+      } =
+        await supabaseClient.auth
+          .getSession();
+
+
+      if (session) {
+
+        await startDashboard();
+
+      }
+
+    }
+
+
+    initialize();
+
+  </script>
+
+</body>
+</html>
