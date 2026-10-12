@@ -491,6 +491,33 @@
         align-items: flex-start;
       }
     }
+
+    /* Lead timing and business performance */
+    .metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 13px; margin: 12px 0; }
+    .metric-number { font-size: clamp(20px, 2.2vw, 28px); font-weight: 800; overflow-wrap: anywhere; }
+    .metric-detail, .metrics-note, .received-time, .value-note, .value-feedback { color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .metric-detail { margin-top: 8px; }
+    .metrics-note { margin: 0 0 24px; }
+    .received-time { margin-top: 7px; }
+    .lead-age { display: inline-block; margin-top: 5px; color: #bdc8d9; }
+    .lead-age.awaiting-contact { color: #f4d57a; }
+    .lead-values { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 12px; align-items: end; padding: 16px 0; margin-bottom: 16px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .lead-values input { margin: 0; }
+    .value-note, .value-feedback { grid-column: 1 / -1; margin: 0; }
+    .value-feedback:empty { display: none; }
+    .value-feedback.success { color: #91dfb8; }
+    .value-feedback.error { color: #ffb5b5; }
+    .value-save-button { min-height: 44px; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    button:focus-visible { outline: 2px solid #9fcdf9; outline-offset: 3px; }
+    .value-tracking-notice { color: #f4d57a; font-size: 13px; margin-bottom: 18px; }
+    @media (max-width: 1100px) { .metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 600px) {
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .lead-values { grid-template-columns: minmax(0, 1fr); }
+      .value-save-button { width: 100%; }
+      .metric-number { font-size: 23px; }
+    }
   </style>
 
 </head>
@@ -553,6 +580,7 @@
       <div
         id="loginError"
         class="login-error hidden"
+        role="alert"
       ></div>
 
     </div>
@@ -621,6 +649,7 @@
       <div
         id="dashboardError"
         class="dashboard-error hidden"
+        role="alert"
       ></div>
 
 
@@ -700,6 +729,43 @@
       </div>
 
 
+      <!-- BUSINESS PERFORMANCE: independent of lead-list filters -->
+      <div class="metrics" aria-label="Business performance">
+        <div class="stat-card">
+          <div class="stat-label">Total leads</div>
+          <div id="totalLeadCount" class="metric-number">0</div>
+          <div class="metric-detail">All received inquiries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Booking conversion</div>
+          <div id="conversionRate" class="metric-number">—</div>
+          <div id="conversionDetail" class="metric-detail">No leads yet</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Contacted or further</div>
+          <div id="progressRate" class="metric-number">—</div>
+          <div id="progressDetail" class="metric-detail">No leads yet</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Open pipeline estimate</div>
+          <div id="pipelineValue" class="metric-number">—</div>
+          <div id="pipelineDetail" class="metric-detail">New + Contacted estimates</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Booked revenue</div>
+          <div id="revenueValue" class="metric-number">—</div>
+          <div id="revenueDetail" class="metric-detail">Booked + Completed values</div>
+        </div>
+      </div>
+      <p id="metricsNote" class="metrics-note">
+        All-time totals for this business. Filters change the list below.
+        Values are in USD; booked revenue is recorded job value, not cash collected.
+        <span id="lastRefreshed"></span>
+      </p>
+      <div id="valueTrackingNotice" class="value-tracking-notice hidden" role="status">
+        Lead value tracking is not available yet. You can still manage lead statuses.
+      </div>
+
       <!-- FILTERS -->
 
       <div class="filters">
@@ -775,18 +841,6 @@
 
 
   <script>
-
-    /*
-    ========================================
-    CONFIG
-    ========================================
-
-    Use the SAME public project URL and
-    sb_publishable_ key from index.html.
-
-    NEVER use the service_role key here.
-    */
-
     const SUPABASE_URL =
       "https://mxyikhxpzijrdrgowmxr.supabase.co";
 
@@ -801,898 +855,524 @@
       );
 
 
-    /*
-    ========================================
-    STATE
-    ========================================
-    */
+
+    // Keep the public URL/key and password authentication from the working dashboard.
 
     let currentBusinessId = null;
-
     let allLeads = [];
-
     let currentFilter = "all";
-
-
-    /*
-    ========================================
-    ELEMENTS
-    ========================================
-    */
-
-    const loginSection =
-      document.getElementById(
-        "loginSection"
-      );
-
-    const dashboardSection =
-      document.getElementById(
-        "dashboardSection"
-      );
-
-    const loginForm =
-      document.getElementById(
-        "loginForm"
-      );
-
-    const loginButton =
-      document.getElementById(
-        "loginButton"
-      );
-
-    const loginError =
-      document.getElementById(
-        "loginError"
-      );
-
-    const dashboardError =
-      document.getElementById(
-        "dashboardError"
-      );
-
-    const businessName =
-      document.getElementById(
-        "businessName"
-      );
-
-    const leadList =
-      document.getElementById(
-        "leadList"
-      );
-
-    const loading =
-      document.getElementById(
-        "loading"
-      );
-
-
-    /*
-    ========================================
-    HTML SAFETY
-    ========================================
-    */
+    let moneyFieldsAvailable = false;
+    let dashboardEpoch = 0;
+    let loadSequence = 0;
+    let currentSessionUserId = null;
+    const pendingLeadIds = new Set();
+    const leadValueDrafts = new Map();
+    const validStatuses = new Set(["new", "contacted", "booked", "completed", "lost"]);
+    const MAX_MONEY = 9999999999.99;
+    const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+    const loginSection = document.getElementById("loginSection");
+    const dashboardSection = document.getElementById("dashboardSection");
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+    const loginError = document.getElementById("loginError");
+    const dashboardError = document.getElementById("dashboardError");
+    const businessName = document.getElementById("businessName");
+    const leadList = document.getElementById("leadList");
+    const loading = document.getElementById("loading");
+    const refreshButton = document.getElementById("refreshButton");
 
     function escapeHtml(value) {
-
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-
+      return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
     }
-
-
-    /*
-    ========================================
-    DATE
-    ========================================
-    */
 
     function formatDate(value) {
-
-      if (!value) {
-        return "Not provided";
-      }
-
-      const date =
-        new Date(`${value}T00:00:00`);
-
-      return date.toLocaleDateString(
-        undefined,
-        {
-          year: "numeric",
-          month: "short",
-          day: "numeric"
-        }
-      );
-
+      if (!value) return "Not provided";
+      const date = new Date(`${value}T00:00:00`);
+      return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleDateString(undefined,
+        { year: "numeric", month: "short", day: "numeric" });
     }
 
+    function receivedTimestamp(value) {
+      if (typeof value !== "string" || !value.trim()) return null;
+      const timestamp = Date.parse(value);
+      return Number.isFinite(timestamp) ? timestamp : null;
+    }
 
-    /*
-    ========================================
-    LOGIN
-    ========================================
-    */
+    function formatReceivedTime(value) {
+      const timestamp = receivedTimestamp(value);
+      if (timestamp === null) return "Not available";
+      return new Date(timestamp).toLocaleString(undefined, {
+        year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short"
+      });
+    }
 
-    loginForm.addEventListener(
-      "submit",
-      async function(event) {
+    function formatLeadAge(value, now = Date.now()) {
+      const timestamp = receivedTimestamp(value);
+      if (timestamp === null) return "Age unavailable";
+      const elapsed = now - timestamp;
+      if (elapsed < -60000) return "In the future";
+      const minutes = Math.floor(Math.max(0, elapsed) / 60000);
+      if (minutes < 1) return "Just received";
+      if (minutes < 60) return `${minutes} min ago`;
+      if (minutes < 1440) return `${Math.floor(minutes / 60)} hr ago`;
+      return `${Math.floor(minutes / 1440)} day${minutes >= 2880 ? "s" : ""} ago`;
+    }
 
-        event.preventDefault();
+    // Convert to integer cents when summing to avoid decimal rounding drift.
+    function moneyCents(value) {
+      if (value === null || value === undefined || value === "") return null;
+      if (typeof value !== "number" && typeof value !== "string") return null;
+      const amount = Number(value);
+      if (!Number.isFinite(amount) || amount < 0 || amount > MAX_MONEY) return null;
+      return Math.round(amount * 100);
+    }
 
-        loginError.classList.add(
-          "hidden"
-        );
+    function parseMoneyInput(raw) {
+      const value = String(raw ?? "").trim();
+      if (!value) return null;
+      if (!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(value)) {
+        throw new Error("Enter a positive dollar amount or 0, with up to two decimal places. Leave blank for not set.");
+      }
+      const amount = Number(value);
+      if (!Number.isFinite(amount) || amount > MAX_MONEY) {
+        throw new Error("Enter an amount no greater than $9,999,999,999.99.");
+      }
+      return amount;
+    }
 
-        loginButton.disabled = true;
+    function moneyInputValue(value) {
+      const cents = moneyCents(value);
+      return cents === null ? "" : (cents / 100).toFixed(2);
+    }
 
-        loginButton.textContent =
-          "Signing In...";
+    function showDashboardError(message) {
+      dashboardError.textContent = message;
+      dashboardError.classList.remove("hidden");
+    }
 
+    function resetDashboardState() {
+      dashboardEpoch++;
+      loadSequence++;
+      currentBusinessId = null;
+      allLeads = [];
+      moneyFieldsAvailable = false;
+      pendingLeadIds.clear();
+      leadValueDrafts.clear();
+      currentFilter = "all";
+      leadList.innerHTML = "";
+      businessName.textContent = "Loading business...";
+      document.getElementById("lastRefreshed").textContent = "";
+      document.getElementById("valueTrackingNotice").classList.add("hidden");
+      dashboardError.classList.add("hidden");
+      refreshButton.disabled = false;
+      loading.classList.add("hidden");
+      document.querySelectorAll(".filter-button").forEach(button => {
+        button.classList.toggle("active", button.dataset.filter === "all");
+        button.setAttribute("aria-pressed", String(button.dataset.filter === "all"));
+      });
+      updateStats();
+    }
 
-        const email =
-          document.getElementById(
-            "email"
-          ).value.trim();
+    function isCurrentContext(epoch, businessId) {
+      return epoch === dashboardEpoch && businessId === currentBusinessId && businessId !== null;
+    }
 
-        const password =
-          document.getElementById(
-            "password"
-          ).value;
-
-
-        const {
-          data,
-          error
-        } =
-          await supabaseClient.auth
-            .signInWithPassword({
-              email,
-              password
-            });
-
-
-        if (error) {
-
-          loginError.textContent =
-            error.message;
-
-          loginError.classList.remove(
-            "hidden"
-          );
-
-          loginButton.disabled =
-            false;
-
-          loginButton.textContent =
-            "Sign In";
-
-          return;
-
-        }
-
-
+    loginForm.addEventListener("submit", async function(event) {
+      event.preventDefault();
+      loginError.classList.add("hidden");
+      loginButton.disabled = true;
+      loginButton.textContent = "Signing In...";
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: document.getElementById("email").value.trim(),
+          password: document.getElementById("password").value
+        });
+        if (error) throw error;
+        currentSessionUserId = data.user.id;
+        document.getElementById("password").value = "";
         await startDashboard();
-
-        loginButton.disabled =
-          false;
-
-        loginButton.textContent =
-          "Sign In";
-
+      } catch (error) {
+        loginError.textContent = error.message || "Unable to sign in. Please try again.";
+        loginError.classList.remove("hidden");
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Sign In";
       }
-    );
+    });
 
-
-    /*
-    ========================================
-    LOGOUT
-    ========================================
-    */
-
-    document
-      .getElementById("logoutButton")
-      .addEventListener(
-        "click",
-        async function() {
-
-          await supabaseClient.auth
-            .signOut();
-
-          currentBusinessId =
-            null;
-
-          allLeads = [];
-
-          dashboardSection.classList
-            .add("hidden");
-
-          loginSection.classList
-            .remove("hidden");
-
-        }
-      );
-
-
-    /*
-    ========================================
-    GET BUSINESS MEMBERSHIP
-    ========================================
-    */
-
-    async function getBusiness() {
-
-      const {
-        data: membership,
-        error: membershipError
-      } =
-        await supabaseClient
-          .from("business_users")
-          .select(
-            "business_id, role"
-          )
-          .limit(1)
-          .maybeSingle();
-
-
-      if (membershipError) {
-        throw membershipError;
+    document.getElementById("logoutButton").addEventListener("click", async function() {
+      resetDashboardState();
+      currentSessionUserId = null;
+      dashboardSection.classList.add("hidden");
+      loginSection.classList.remove("hidden");
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+      } catch (error) {
+        loginError.textContent = "Sign out could not complete. Please try signing in and signing out again. " + (error.message || "");
+        loginError.classList.remove("hidden");
       }
+    });
 
-
-      if (!membership) {
-
-        throw new Error(
-          "This account is not connected to a FlowOS business."
-        );
-
+    // Clear customer data if the session expires or another account signs in in another tab.
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || (currentSessionUserId && session?.user?.id && session.user.id !== currentSessionUserId)) {
+        resetDashboardState();
+        currentSessionUserId = null;
+        dashboardSection.classList.add("hidden");
+        loginSection.classList.remove("hidden");
       }
+    });
 
-
-      currentBusinessId =
-        membership.business_id;
-
-
-      const {
-        data: business,
-        error: businessError
-      } =
-        await supabaseClient
-          .from("businesses")
-          .select(
-            "id, name, industry"
-          )
-          .eq(
-            "id",
-            currentBusinessId
-          )
-          .single();
-
-
-      if (businessError) {
-        throw businessError;
-      }
-
-
-      businessName.textContent =
-        business.name;
-
+    async function getBusiness(epoch = dashboardEpoch) {
+      // Membership RLS remains the authority for the business this account can access.
+      const { data: membership, error: membershipError } = await supabaseClient
+        .from("business_users").select("business_id, role").limit(1).maybeSingle();
+      if (epoch !== dashboardEpoch) return;
+      if (membershipError) throw membershipError;
+      if (!membership) throw new Error("This account is not connected to a FlowOS business.");
+      const { data: business, error: businessError } = await supabaseClient
+        .from("businesses").select("id, name, industry").eq("id", membership.business_id).single();
+      if (epoch !== dashboardEpoch) return;
+      if (businessError) throw businessError;
+      if (!business || business.id !== membership.business_id) throw new Error("Business unavailable.");
+      currentBusinessId = membership.business_id;
+      businessName.textContent = business.name;
     }
-
-
-    /*
-    ========================================
-    LOAD LEADS
-    ========================================
-    */
 
     async function loadLeads() {
-
-      loading.classList.remove(
-        "hidden"
-      );
-
-      dashboardError.classList.add(
-        "hidden"
-      );
-
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from("leads")
-          .select("*")
-          .eq(
-            "business_id",
-            currentBusinessId
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          );
-
-
-      loading.classList.add(
-        "hidden"
-      );
-
-
-      if (error) {
-
-        dashboardError.textContent =
-          error.message;
-
-        dashboardError.classList.remove(
-          "hidden"
-        );
-
-        return;
-
+      const businessId = currentBusinessId;
+      if (!businessId) return;
+      const epoch = dashboardEpoch;
+      const request = ++loadSequence;
+      const isCurrent = () => isCurrentContext(epoch, businessId) && request === loadSequence;
+      loading.classList.remove("hidden");
+      refreshButton.disabled = true;
+      dashboardError.classList.add("hidden");
+      try {
+        const rows = [];
+        let expectedCount = null;
+        let offset = 0;
+        // Fetch every page: business-wide metrics must include more than the API's default row limit.
+        while (true) {
+          const { data, error, count } = await supabaseClient.from("leads").select("*", { count: "exact" })
+            .eq("business_id", businessId).order("created_at", { ascending: false })
+            .order("id", { ascending: false }).range(offset, offset + 499);
+          if (!isCurrent()) return;
+          if (error) throw error;
+          const page = data || [];
+          if (page.some(lead => lead.business_id !== businessId)) throw new Error("Unable to load this business's leads. Please refresh.");
+          if (expectedCount === null && Number.isInteger(count)) expectedCount = count;
+          rows.push(...page);
+          offset += page.length;
+          if (expectedCount !== null ? offset >= expectedCount : page.length < 500) break;
+          if (page.length === 0) throw new Error("The lead list changed while loading. Please refresh.");
+        }
+        const uniqueRows = [...new Map(rows.map(lead => [lead.id, lead])).values()];
+        if (expectedCount !== null && uniqueRows.length !== expectedCount) {
+          throw new Error("The lead list changed while loading. Please refresh.");
+        }
+        allLeads = uniqueRows;
+        moneyFieldsAvailable = !allLeads.length || allLeads.every(lead =>
+          Object.hasOwn(lead, "estimated_value") && Object.hasOwn(lead, "booked_revenue"));
+        document.getElementById("valueTrackingNotice").classList.toggle("hidden", moneyFieldsAvailable);
+        updateStats();
+        renderLeads();
+        document.getElementById("lastRefreshed").textContent = " Updated " + new Date().toLocaleTimeString(undefined,
+          { hour: "numeric", minute: "2-digit" }) + ".";
+      } catch (error) {
+        if (isCurrent()) showDashboardError((error.message || "Unable to load leads.") + " Totals reflect the last successful refresh.");
+      } finally {
+        if (isCurrent()) {
+          loading.classList.add("hidden");
+          refreshButton.disabled = false;
+        }
       }
-
-
-      allLeads =
-        data || [];
-
-
-      updateStats();
-
-      renderLeads();
-
     }
-
-
-    /*
-    ========================================
-    STATS
-    ========================================
-    */
 
     function updateStats() {
-
-      const counts = {
-        new: 0,
-        contacted: 0,
-        booked: 0,
-        completed: 0,
-        lost: 0
-      };
-
-
-      for (const lead of allLeads) {
-
-        if (
-          counts[lead.status] !==
-          undefined
-        ) {
-
-          counts[lead.status]++;
-
-        }
-
-      }
-
-
-      document.getElementById(
-        "newCount"
-      ).textContent =
-        counts.new;
-
-
-      document.getElementById(
-        "contactedCount"
-      ).textContent =
-        counts.contacted;
-
-
-      document.getElementById(
-        "bookedCount"
-      ).textContent =
-        counts.booked;
-
-
-      document.getElementById(
-        "completedCount"
-      ).textContent =
-        counts.completed;
-
-
-      document.getElementById(
-        "lostCount"
-      ).textContent =
-        counts.lost;
-
+      const counts = { new: 0, contacted: 0, booked: 0, completed: 0, lost: 0 };
+      for (const lead of allLeads) if (validStatuses.has(lead.status)) counts[lead.status]++;
+      for (const status of validStatuses) document.getElementById(status + "Count").textContent = counts[status];
+      const total = allLeads.length;
+      const converted = counts.booked + counts.completed;
+      const progressed = counts.contacted + converted;
+      document.getElementById("totalLeadCount").textContent = total;
+      document.getElementById("conversionRate").textContent = total ? (converted / total * 100).toFixed(1) + "%" : "—";
+      document.getElementById("conversionDetail").textContent = total ? converted + " / " + total + " · Booked + Completed" : "No leads yet";
+      document.getElementById("progressRate").textContent = total ? (progressed / total * 100).toFixed(1) + "%" : "—";
+      document.getElementById("progressDetail").textContent = total ? progressed + " / " + total + " · Contacted + Booked + Completed" : "No leads yet";
+      const open = allLeads.filter(lead => lead.status === "new" || lead.status === "contacted");
+      const won = allLeads.filter(lead => lead.status === "booked" || lead.status === "completed");
+      renderMoneyMetric("pipeline", open, "estimated_value", "New + Contacted");
+      renderMoneyMetric("revenue", won, "booked_revenue", "Booked + Completed");
     }
 
+    function renderMoneyMetric(prefix, leads, field, description) {
+      const recorded = leads.map(lead => moneyCents(lead[field])).filter(value => value !== null);
+      const cents = recorded.reduce((sum, value) => sum + value, 0);
+      document.getElementById(prefix + "Value").textContent = !moneyFieldsAvailable || (leads.length && !recorded.length)
+        ? "—" : currency.format(cents / 100);
+      document.getElementById(prefix + "Detail").textContent = !moneyFieldsAvailable ? "Value tracking unavailable"
+        : description + " · " + recorded.length + " / " + leads.length + " values set";
+    }
 
-    /*
-    ========================================
-    RENDER LEADS
-    ========================================
-    */
+    function valueEditorHtml(lead) {
+      if (!moneyFieldsAvailable) return "";
+      const id = escapeHtml(lead.id);
+      const draft = leadValueDrafts.get(lead.id);
+      return `<form class="lead-values" data-id="${id}">
+        <div><label for="estimate-${id}">Estimated lead value (USD)</label>
+          <input id="estimate-${id}" name="estimated_value" type="text" inputmode="decimal" maxlength="32"
+            value="${escapeHtml(draft ? draft.estimated_value : moneyInputValue(lead.estimated_value))}" placeholder="Not set" autocomplete="off"></div>
+        <div><label for="revenue-${id}">Booked job value (USD)</label>
+          <input id="revenue-${id}" name="booked_revenue" type="text" inputmode="decimal" maxlength="32"
+            value="${escapeHtml(draft ? draft.booked_revenue : moneyInputValue(lead.booked_revenue))}" placeholder="Not set" autocomplete="off"></div>
+        <button type="submit" class="action-button value-save-button">Save values</button>
+        <p class="value-note">Blank means not set; 0 means $0. Booked job value counts when the lead is Booked or Completed.</p>
+        <div class="value-feedback${draft?.error ? " error" : ""}" role="status" aria-live="polite">${escapeHtml(draft?.error || "")}</div>
+      </form>`;
+    }
 
     function renderLeads() {
-
       leadList.innerHTML = "";
-
-
-      let filtered =
-        allLeads;
-
-
-      if (
-        currentFilter !== "all"
-      ) {
-
-        filtered =
-          allLeads.filter(
-            lead =>
-              lead.status ===
-              currentFilter
-          );
-
-      }
-
-
-      if (
-        filtered.length === 0
-      ) {
-
-        leadList.innerHTML = `
-          <div class="empty-state">
-            No leads in this category.
-          </div>
-        `;
-
+      const filtered = currentFilter === "all" ? allLeads : allLeads.filter(lead => lead.status === currentFilter);
+      if (!filtered.length) {
+        leadList.innerHTML = '<div class="empty-state">No leads in this category.</div>';
         return;
-
       }
-
-
       for (const lead of filtered) {
-
-        const card =
-          document.createElement(
-            "div"
-          );
-
-        card.className =
-          "lead-card";
-
-
-        const statusClass =
-          `status-${lead.status}`;
-
-
+        const card = document.createElement("div");
+        card.className = "lead-card";
+        const status = validStatuses.has(lead.status) ? lead.status : "unknown";
+        const fields = [
+          ["Service", lead.service], ["Preferred Date", formatDate(lead.preferred_date)],
+          ["Service Location", lead.service_location], ["Phone", lead.phone], ["Email", lead.email],
+          ["Vehicle Type", lead.vehicle_type]
+        ];
         card.innerHTML = `
-
           <div class="lead-top">
-
-            <div>
-
-              <div class="customer-name">
-                ${escapeHtml(
-                  lead.customer_name
-                )}
-              </div>
-
-              <div class="vehicle">
-                ${escapeHtml(
-                  lead.vehicle
-                )}
-              </div>
-
+            <div><div class="customer-name">${escapeHtml(lead.customer_name)}</div>
+              ${lead.vehicle ? '<div class="vehicle">' + escapeHtml(lead.vehicle) + '</div>' : ""}
+              <div class="received-time">Received ${escapeHtml(formatReceivedTime(lead.created_at))}</div>
+              <span class="lead-age" data-received-at="${escapeHtml(lead.created_at)}" data-status="${status}"></span>
             </div>
-
-
-            <div
-              class="
-                status
-                ${statusClass}
-              "
-            >
-              ${escapeHtml(
-                lead.status
-              )}
-            </div>
-
+            <div class="status status-${status}">${escapeHtml(lead.status)}</div>
           </div>
-
-
-          <div class="lead-grid">
-
-            <div>
-              <div class="field-label">
-                Service
-              </div>
-
-              <div class="field-value">
-                ${escapeHtml(
-                  lead.service
-                )}
-              </div>
-            </div>
-
-
-            <div>
-              <div class="field-label">
-                Preferred Date
-              </div>
-
-              <div class="field-value">
-                ${escapeHtml(
-                  formatDate(
-                    lead.preferred_date
-                  )
-                )}
-              </div>
-            </div>
-
-
-            <div>
-              <div class="field-label">
-                Service Location
-              </div>
-
-              <div class="field-value">
-                ${escapeHtml(
-                  lead.service_location ||
-                  "Not provided"
-                )}
-              </div>
-            </div>
-
-
-            <div>
-              <div class="field-label">
-                Phone
-              </div>
-
-              <div class="field-value">
-                ${escapeHtml(
-                  lead.phone ||
-                  "Not provided"
-                )}
-              </div>
-            </div>
-
-
-            <div>
-              <div class="field-label">
-                Email
-              </div>
-
-              <div class="field-value">
-                ${escapeHtml(
-                  lead.email ||
-                  "Not provided"
-                )}
-              </div>
-            </div>
-
-
-            <div>
-              <div class="field-label">
-                Vehicle Type
-              </div>
-
-              <div class="field-value">
-                ${escapeHtml(
-                  lead.vehicle_type ||
-                  "Not provided"
-                )}
-              </div>
-            </div>
-
-          </div>
-
-
-          ${
-            lead.notes
-              ?
-              `
-                <div class="notes">
-                  ${escapeHtml(
-                    lead.notes
-                  )}
-                </div>
-              `
-              :
-              ""
-          }
-
-
+          <div class="lead-grid">${fields.map(([label, value]) => `<div><div class="field-label">${label}</div>
+            <div class="field-value">${escapeHtml(value || "Not provided")}</div></div>`).join("")}</div>
+          ${lead.notes ? '<div class="notes">' + escapeHtml(lead.notes) + '</div>' : ""}
+          ${valueEditorHtml(lead)}
           <div class="actions">
-
-            <button
-              class="action-button"
-              data-id="${lead.id}"
-              data-status="contacted"
-            >
-              Contacted
-            </button>
-
-
-            <button
-              class="
-                action-button
-                book-button
-              "
-              data-id="${lead.id}"
-              data-status="booked"
-            >
-              Booked
-            </button>
-
-
-            <button
-              class="
-                action-button
-                complete-button
-              "
-              data-id="${lead.id}"
-              data-status="completed"
-            >
-              Completed
-            </button>
-
-
-            <button
-              class="
-                action-button
-                lost-button
-              "
-              data-id="${lead.id}"
-              data-status="lost"
-            >
-              Lost
-            </button>
-
-          </div>
-
-        `;
-
-
-        leadList.appendChild(
-          card
-        );
-
+            ${["contacted", "booked", "completed", "lost"].map(next => `<button type="button"
+              class="action-button ${next === "booked" ? "book-button" : next === "completed" ? "complete-button" : next === "lost" ? "lost-button" : ""}"
+              data-id="${escapeHtml(lead.id)}" data-status="${next}">${next[0].toUpperCase() + next.slice(1)}</button>`).join("")}
+          </div>`;
+        leadList.appendChild(card);
+        if (pendingLeadIds.has(lead.id)) card.querySelectorAll("button, input").forEach(control => { control.disabled = true; });
       }
-
-
-      /*
-      Attach status buttons.
-      */
-
-      document
-        .querySelectorAll(
-          ".action-button[data-id]"
-        )
-        .forEach(button => {
-
-          button.addEventListener(
-            "click",
-            function() {
-
-              updateLeadStatus(
-                button.dataset.id,
-                button.dataset.status,
-                button
-              );
-
-            }
-          );
-
-        });
-
-    }
-
-
-    /*
-    ========================================
-    UPDATE STATUS
-    ========================================
-    */
-
-    async function updateLeadStatus(
-      leadId,
-      newStatus,
-      button
-    ) {
-
-      const originalText =
-        button.textContent;
-
-      button.disabled = true;
-
-      button.textContent =
-        "Updating...";
-
-
-      const {
-        error
-      } =
-        await supabaseClient
-          .from("leads")
-          .update({
-            status:
-              newStatus
-          })
-          .eq(
-            "id",
-            leadId
-          )
-          .eq(
-            "business_id",
-            currentBusinessId
-          );
-
-
-      if (error) {
-
-        dashboardError.textContent =
-          error.message;
-
-        dashboardError.classList.remove(
-          "hidden"
-        );
-
-        button.disabled =
-          false;
-
-        button.textContent =
-          originalText;
-
-        return;
-
-      }
-
-
-      await loadLeads();
-
-    }
-
-
-    /*
-    ========================================
-    FILTER BUTTONS
-    ========================================
-    */
-
-    document
-      .querySelectorAll(
-        ".filter-button"
-      )
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          function() {
-
-            document
-              .querySelectorAll(
-                ".filter-button"
-              )
-              .forEach(item => {
-
-                item.classList.remove(
-                  "active"
-                );
-
-              });
-
-
-            button.classList.add(
-              "active"
-            );
-
-
-            currentFilter =
-              button.dataset.filter;
-
-
-            renderLeads();
-
-          }
-        );
-
+      leadList.querySelectorAll(".action-button[data-status]").forEach(button => {
+        button.addEventListener("click", () => updateLeadStatus(button.dataset.id, button.dataset.status, button));
       });
+      leadList.querySelectorAll(".lead-values").forEach(form => {
+        form.addEventListener("input", () => {
+          leadValueDrafts.set(form.dataset.id, {
+            estimated_value: form.elements.namedItem("estimated_value").value,
+            booked_revenue: form.elements.namedItem("booked_revenue").value
+          });
+          const feedback = form.querySelector(".value-feedback");
+          feedback.textContent = "";
+          feedback.classList.remove("error", "success");
+        });
+        form.addEventListener("submit", event => { event.preventDefault(); saveLeadValues(form); });
+      });
+      updateLeadAges();
+    }
 
+    function updateLeadAges() {
+      const now = Date.now();
+      leadList.querySelectorAll(".lead-age").forEach(element => {
+        const timestamp = receivedTimestamp(element.dataset.receivedAt);
+        const awaiting = element.dataset.status === "new" && timestamp !== null && now - timestamp >= 86400000;
+        element.textContent = (awaiting ? "Awaiting contact · " : "") + formatLeadAge(element.dataset.receivedAt, now);
+        element.classList.toggle("awaiting-contact", awaiting);
+      });
+    }
 
-    /*
-    ========================================
-    REFRESH
-    ========================================
-    */
+    function setLeadBusy(leadId, busy) {
+      if (busy) pendingLeadIds.add(leadId); else pendingLeadIds.delete(leadId);
+      leadList.querySelectorAll(".lead-card").forEach(card => {
+        if (card.querySelector("[data-id]")?.dataset.id === leadId) {
+          card.querySelectorAll("button, input").forEach(control => { control.disabled = busy; });
+        }
+      });
+    }
 
-    document
-      .getElementById(
-        "refreshButton"
-      )
-      .addEventListener(
-        "click",
-        loadLeads
-      );
+    async function updateLeadStatus(leadId, newStatus, button) {
+      const businessId = currentBusinessId;
+      const epoch = dashboardEpoch;
+      if (!businessId || !validStatuses.has(newStatus) || pendingLeadIds.has(leadId) ||
+        !allLeads.some(lead => lead.id === leadId && lead.business_id === businessId)) return;
+      const originalText = button.textContent;
+      setLeadBusy(leadId, true);
+      let lockHeld = true;
+      button.disabled = true;
+      button.textContent = "Updating...";
+      dashboardError.classList.add("hidden");
+      try {
+        const { data, error } = await supabaseClient.from("leads").update({ status: newStatus })
+          .eq("id", leadId).eq("business_id", businessId).select("id, business_id, status").maybeSingle();
+        if (!isCurrentContext(epoch, businessId)) return;
+        if (error) throw error;
+        if (!data || data.id !== leadId || data.business_id !== businessId || data.status !== newStatus) {
+          throw new Error("Lead was not updated. Refresh and check your access.");
+        }
+        // Only status is written; completing a lead never erases its recorded job value.
+        allLeads = allLeads.map(lead => lead.id === leadId ? { ...lead, status: data.status } : lead);
+        updateStats();
+        renderLeads();
+        setLeadBusy(leadId, false);
+        lockHeld = false;
+        await loadLeads();
+      } catch (error) {
+        if (isCurrentContext(epoch, businessId)) showDashboardError(error.message || "Unable to update status.");
+      } finally {
+        if (isCurrentContext(epoch, businessId)) {
+          if (lockHeld) setLeadBusy(leadId, false);
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      }
+    }
 
+    async function saveLeadValues(form) {
+      const businessId = currentBusinessId;
+      const epoch = dashboardEpoch;
+      const leadId = form.dataset.id;
+      if (!businessId || !moneyFieldsAvailable || pendingLeadIds.has(leadId) ||
+        !allLeads.some(lead => lead.id === leadId && lead.business_id === businessId)) return;
+      const feedback = form.querySelector(".value-feedback");
+      const button = form.querySelector(".value-save-button");
+      feedback.classList.remove("success", "error");
+      feedback.textContent = "";
+      const submitted = {
+        estimated_value: form.elements.namedItem("estimated_value").value,
+        booked_revenue: form.elements.namedItem("booked_revenue").value
+      };
+      leadValueDrafts.set(leadId, submitted);
+      let values;
+      try {
+        values = {
+          estimated_value: parseMoneyInput(submitted.estimated_value),
+          booked_revenue: parseMoneyInput(submitted.booked_revenue)
+        };
+      } catch (error) {
+        leadValueDrafts.set(leadId, { ...submitted, error: error.message });
+        feedback.textContent = error.message;
+        feedback.classList.add("error");
+        return;
+      }
+      setLeadBusy(leadId, true);
+      button.disabled = true;
+      button.textContent = "Saving...";
+      try {
+        const { data, error } = await supabaseClient.from("leads").update(values)
+          .eq("id", leadId).eq("business_id", businessId)
+          .select("id, business_id, estimated_value, booked_revenue").maybeSingle();
+        if (!isCurrentContext(epoch, businessId)) return;
+        if (error) throw error;
+        if (!data || data.id !== leadId || data.business_id !== businessId) {
+          throw new Error("Values were not saved. Refresh and check your access.");
+        }
+        // Invalidate any read started before the save response; keep other forms' drafts intact.
+        loadSequence++;
+        loading.classList.add("hidden");
+        refreshButton.disabled = false;
+        allLeads = allLeads.map(lead => lead.id === leadId ? { ...lead,
+          estimated_value: data.estimated_value, booked_revenue: data.booked_revenue } : lead);
+        leadValueDrafts.delete(leadId);
+        updateStats();
+        // A filter/refresh may have replaced the original form while this write was pending.
+        const visibleForm = [...leadList.querySelectorAll(".lead-values")].find(item => item.dataset.id === leadId);
+        const savedForm = visibleForm || form;
+        savedForm.elements.namedItem("estimated_value").value = moneyInputValue(data.estimated_value);
+        savedForm.elements.namedItem("booked_revenue").value = moneyInputValue(data.booked_revenue);
+        const savedFeedback = savedForm.querySelector(".value-feedback");
+        savedFeedback.textContent = "Values saved.";
+        savedFeedback.classList.remove("error");
+        savedFeedback.classList.add("success");
+      } catch (error) {
+        if (isCurrentContext(epoch, businessId)) {
+          const message = error.message || "Unable to save values. Please try again.";
+          leadValueDrafts.set(leadId, { ...submitted, error: message });
+          const visibleForm = [...leadList.querySelectorAll(".lead-values")].find(item => item.dataset.id === leadId);
+          const failedForm = visibleForm || form;
+          failedForm.elements.namedItem("estimated_value").value = submitted.estimated_value;
+          failedForm.elements.namedItem("booked_revenue").value = submitted.booked_revenue;
+          const failedFeedback = failedForm.querySelector(".value-feedback");
+          failedFeedback.textContent = message;
+          failedFeedback.classList.remove("success");
+          failedFeedback.classList.add("error");
+        }
+      } finally {
+        if (isCurrentContext(epoch, businessId)) {
+          setLeadBusy(leadId, false);
+          button.disabled = false;
+          button.textContent = "Save values";
+        }
+      }
+    }
 
-    /*
-    ========================================
-    START DASHBOARD
-    ========================================
-    */
+    document.querySelectorAll(".filter-button").forEach(button => {
+      button.setAttribute("aria-pressed", String(button.dataset.filter === currentFilter));
+      button.addEventListener("click", function() {
+        document.querySelectorAll(".filter-button").forEach(item => {
+          item.classList.toggle("active", item === button);
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+        currentFilter = button.dataset.filter;
+        renderLeads();
+      });
+    });
+    refreshButton.addEventListener("click", loadLeads);
 
     async function startDashboard() {
-
+      resetDashboardState();
+      const epoch = dashboardEpoch;
+      loginSection.classList.add("hidden");
+      dashboardSection.classList.remove("hidden");
       try {
-
-        loginSection.classList.add(
-          "hidden"
-        );
-
-        dashboardSection.classList
-          .remove("hidden");
-
-
-        await getBusiness();
-
-        await loadLeads();
-
+        await getBusiness(epoch);
+        if (epoch === dashboardEpoch) await loadLeads();
+      } catch (error) {
+        if (epoch !== dashboardEpoch) return;
+        resetDashboardState();
+        dashboardSection.classList.add("hidden");
+        loginSection.classList.remove("hidden");
+        loginError.textContent = error.message || "Unable to open this business.";
+        loginError.classList.remove("hidden");
       }
-
-      catch(error) {
-
-        dashboardSection.classList
-          .add("hidden");
-
-        loginSection.classList.remove(
-          "hidden"
-        );
-
-        loginError.textContent =
-          error.message;
-
-        loginError.classList.remove(
-          "hidden"
-        );
-
-      }
-
     }
-
-
-    /*
-    ========================================
-    RESTORE LOGIN SESSION
-    ========================================
-    */
 
     async function initialize() {
-
-      const {
-        data: {
-          session
+      const epoch = dashboardEpoch;
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (epoch !== dashboardEpoch) return;
+        if (error) throw error;
+        if (session) {
+          currentSessionUserId = session.user.id;
+          await startDashboard();
         }
-      } =
-        await supabaseClient.auth
-          .getSession();
-
-
-      if (session) {
-
-        await startDashboard();
-
+      } catch (error) {
+        if (epoch !== dashboardEpoch) return;
+        loginError.textContent = error.message || "Unable to restore your session. Please sign in.";
+        loginError.classList.remove("hidden");
       }
-
     }
-
-
+    // Update text only, so refreshing ages never discards an unsaved value input.
+    setInterval(() => { if (currentBusinessId) updateLeadAges(); }, 60000);
     initialize();
 
   </script>
