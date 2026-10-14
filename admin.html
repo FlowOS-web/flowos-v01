@@ -42,8 +42,9 @@
               <h2>Business profile</h2>
               <p>This profile appears on the customer request page.</p>
               <label for="businessName">Business name</label><input id="businessName" maxlength="120" required>
-              <label for="slug">Request page name</label><input id="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="northstar-home-services" required aria-describedby="slugHint">
-              <p id="slugHint" class="hint">3–60 lowercase letters, numbers, or single hyphens. Choose a unique name; it becomes the public request link.</p>
+              <label for="slug">Request page name</label><input id="slug" maxlength="120" placeholder="Northstar Home Services" required aria-describedby="slugHint slugPreview">
+              <p id="slugHint" class="hint">Spaces, underscores, and capitals are converted automatically. Choose a unique name with 3–60 letters or numbers, separated by hyphens.</p>
+              <p id="slugPreview" class="hint" aria-live="polite" style="overflow-wrap:anywhere"></p>
               <label for="industry">Industry</label><input id="industry" maxlength="120" placeholder="Home services">
               <label for="tagline">Customer-facing tagline</label><textarea id="tagline" maxlength="280" style="min-height:90px"></textarea>
               <div class="row">
@@ -116,13 +117,27 @@
       if (!["http:", "https:"].includes(url.protocol)) throw new Error("Website and logo URLs must use http or https.");
       return url.toString();
     }
+    function normalizeSlug(value) {
+      return value.trim().toLowerCase().replace(/[\s_]+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+    }
+    function updateSlugPreview() {
+      const value = normalizeSlug($("slug").value);
+      $("slugPreview").textContent = value ? "Your request link name: " + value : "";
+    }
+    $("slug").addEventListener("input", updateSlugPreview);
+    $("slug").addEventListener("blur", () => { $("slug").value = normalizeSlug($("slug").value); updateSlugPreview(); });
     function payload() {
       const ownerEmail = $("ownerEmail").value.trim().toLowerCase();
       const name = $("businessName").value.trim();
-      const slug = $("slug").value.trim();
+      const slug = normalizeSlug($("slug").value);
       const services = $("services").value.split(/\r?\n/).map(name => name.trim()).filter(Boolean);
       if (!name || name.length > 120) throw new Error("Enter a business name up to 120 characters.");
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 3 || slug.length > 60) throw new Error("Choose a request page name with 3–60 lowercase letters, numbers, or single hyphens.");
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 3 || slug.length > 60) {
+        $("slug").focus();
+        throw new Error("Use letters, numbers, spaces, underscores, or hyphens for the request page name. After conversion, it needs 3–60 characters.");
+      }
+      $("slug").value = slug;
+      updateSlugPreview();
       if (!services.length || services.length > 20 || services.some(name => name.length > 120)) throw new Error("Add 1–20 services, each up to 120 characters.");
       if (new Set(services.map(name => name.toLowerCase())).size !== services.length) throw new Error("Each service name must be distinct.");
       return { business: { name, slug, industry: $("industry").value.trim() || null, tagline: $("tagline").value.trim() || null, contact_phone: $("contactPhone").value.trim() || null, website_url: normalizeUrl($("websiteUrl").value), logo_url: normalizeUrl($("logoUrl").value), primary_color: $("primaryColor").value, notification_email: $("notificationEmail").value.trim().toLowerCase() || ownerEmail }, owner_email: ownerEmail, services };
@@ -139,6 +154,7 @@
         $("ownerEmail").value = typeof data.owner_email === "string" ? data.owner_email : "";
         $("services").value = data.services.filter(name => typeof name === "string").join("\n");
         pending = saved;
+        updateSlugPreview();
         feedback("provisionFeedback", "Your last submission is restored. Submit unchanged to safely retry it.", true);
       } catch { clearPending(); }
     }
@@ -220,17 +236,17 @@
       } catch (error) { feedback("loginFeedback", error.message || "Unable to sign in."); }
       finally { $("loginButton").disabled = false; }
     });
-    $("provisionForm").addEventListener("input", () => { if (!busy) { clearPending(); clearResult(); feedback("provisionFeedback", ""); } });
+    $("provisionForm").addEventListener("input", () => { if (!busy) { clearResult(); feedback("provisionFeedback", ""); } });
     $("provisionForm").addEventListener("submit", async event => {
       event.preventDefault();
       if (!adminUserId || busy) return;
       const epoch = accessEpoch;
       busy = true;
-      $("provisionFields").disabled = true;
       clearResult();
       feedback("provisionFeedback", "Creating business and owner access…", true);
       try {
         const body = payload();
+        $("provisionFields").disabled = true;
         const canonical = JSON.stringify(body);
         if (!pending || pending.canonical !== canonical) pending = { request_id: crypto.randomUUID(), canonical, admin_user_id: adminUserId };
         if (pending.admin_user_id && pending.admin_user_id !== adminUserId) pending = { request_id: crypto.randomUUID(), canonical, admin_user_id: adminUserId };
@@ -259,7 +275,7 @@
       } catch (error) { if (epoch === accessEpoch) feedback("resultFeedback", error.message || "Unable to generate owner setup link."); }
       finally { busy = false; $("regenerateButton").disabled = false; $("provisionFields").disabled = false; }
     });
-    $("newBusinessButton").addEventListener("click", () => { clearPending(); clearResult(); $("provisionForm").reset(); feedback("provisionFeedback", ""); $("businessName").focus(); });
+    $("newBusinessButton").addEventListener("click", () => { clearPending(); clearResult(); $("provisionForm").reset(); updateSlugPreview(); feedback("provisionFeedback", ""); $("businessName").focus(); });
     document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {
       const input = $(button.dataset.copy);
       if (!input.value) return;
