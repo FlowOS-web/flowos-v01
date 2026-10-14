@@ -35,6 +35,19 @@ Auth invitation creation and tenant SQL cannot share one transaction. If Auth cr
 
 Source changes live on `sellable-v1`. Publishing copies changed HTML files only into `main/v1-preview/`; production root pages are preserved. Function configuration is in `supabase/config.toml`; both administrator provisioning and the standalone notification endpoint require JWT verification. The public submission endpoint continues to authenticate its requests with Turnstile.
 
+## Lead email setup
+
+Customer requests are saved before notification emails are attempted. A saved request remains available in the owner dashboard and Admin console even if email sending fails. The request page checks `customer_confirmation_sent` and reports a confirmation-email failure without asking the customer to submit again. A successful send flag means the email provider accepted the message; it does not guarantee inbox delivery.
+
+The current Resend test sender is restricted to the email associated with the Resend account. Runtime logs confirmed a `403 validation_error` for other recipients. To enable notifications to customer and business addresses:
+
+1. Add a domain you own in [Resend Domains](https://resend.com/domains), and add the DNS records Resend provides to your domain's DNS host.
+2. Wait for the domain's sending status to be verified.
+3. Set the Supabase Edge Function secret `FROM_EMAIL` to a sender on that verified domain, such as `FlowOS <requests@notifications.example.com>` using your actual verified domain. Keep `RESEND_API_KEY` private. Changing an owner's notification address does not configure the sender.
+4. Send an explicitly authorized test request and check both provider acceptance and the receiving inbox. Previously failed notifications are not automatically resent.
+
+Domain verification is included in [Resend's Free plan](https://resend.com/pricing). A domain must be owned and its DNS editable; Gmail addresses and the shared GitHub Pages hostname cannot be verified as FlowOS domains. See [Resend's testing-sender restriction](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain) and [domain setup](https://resend.com/docs/add-a-domain).
+
 ## Verification
 
 - `node --test supabase/functions/flowos-admin-onboarding/handler.test.ts`: offline authentication, authorization, validation, retries, existing-owner protection, and interrupted-setup recovery tests.
