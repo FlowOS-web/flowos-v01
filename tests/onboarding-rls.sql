@@ -11,7 +11,10 @@ create temporary table flowos_test_context (
 ) on commit drop;
 create temporary table flowos_test_results (check_name text primary key, passed boolean not null)
   on commit drop;
-grant usage on schema pg_temp to service_role,authenticated,anon;
+do $$ begin
+  execute format('grant usage on schema %I to service_role,authenticated,anon',
+    (select nspname from pg_namespace where oid=pg_my_temp_schema()));
+end $$;
 insert into flowos_test_context(actor,owner_id,owner_email,request_id,slug)
 select a.user_id,u.id,lower(u.email),gen_random_uuid(),
   'onboarding-test-' || replace(gen_random_uuid()::text,'-','')
