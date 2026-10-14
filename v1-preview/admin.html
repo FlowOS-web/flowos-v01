@@ -4,82 +4,127 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>FlowOS Business Onboarding</title>
+  <title>FlowOS Admin Console</title>
   <style>
-    *{box-sizing:border-box}:root{--bg:#0d0f13;--panel:#151820;--border:#2a303b;--text:#f5f7fa;--muted:#969eac;--ok:#68d9a0}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}a{color:inherit;text-decoration:none}button,input,textarea{font:inherit}
-    .topbar{min-height:72px;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#11141a;border-bottom:1px solid var(--border);gap:14px}.brand{font-size:22px;font-weight:800}.brand span{color:#99a2b0}.top-actions{display:flex;gap:10px;align-items:center}
-    .btn{border:1px solid var(--border);border-radius:9px;padding:10px 14px;background:#191d25;color:white;cursor:pointer;display:inline-block}.btn.primary{background:#f3f4f6;color:#111;border-color:#f3f4f6;font-weight:700}.btn:disabled{opacity:.55;cursor:not-allowed}
-    .container{max-width:1050px;margin:auto;padding:30px 22px 60px}h1{margin:0 0 9px;font-size:30px}h2{margin:0 0 8px;font-size:20px}p{color:var(--muted);line-height:1.55}.subtitle{margin:0 0 26px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px}.login{max-width:440px;margin:30px auto}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    label{display:block;margin:15px 0 7px;font-size:13px;color:#dce0e7}input,textarea{width:100%;padding:12px 13px;color:white;background:#0f1218;border:1px solid #303643;border-radius:10px}input[type="color"]{height:44px;padding:7px;cursor:pointer}textarea{min-height:148px;resize:vertical}input:focus,textarea:focus{outline:2px solid #566275;outline-offset:1px}.hint{font-size:12px;color:var(--muted);margin:7px 0 0}.feedback{margin-top:16px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}.feedback.ok{color:var(--ok)}.feedback.error{color:#ffb6b6}.hidden{display:none!important}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}.copy-row{display:flex;gap:8px;align-items:center}.copy-row .btn{flex-shrink:0}.notice{padding:14px;border:1px solid #5f4b2a;background:#261f12;border-radius:10px;color:#f2d58c;font-size:14px;line-height:1.5;margin:16px 0}.result{margin-top:20px}.result p{margin:8px 0}.status{color:var(--muted);line-height:1.5}
-    @media(max-width:760px){.grid,.row{grid-template-columns:1fr}.topbar{padding:14px 16px;flex-wrap:wrap}.container{padding:24px 14px 45px}.card{padding:20px}.copy-row{align-items:stretch}.copy-row input{min-width:0}}
+    *{box-sizing:border-box}:root{--bg:#0d0f13;--panel:#151820;--border:#2a303b;--text:#f5f7fa;--muted:#a1a9b7;--ok:#68d9a0;--accent:#a5baff}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}a{color:inherit;text-decoration:none}button,input,textarea,select{font:inherit}button,a,input,textarea,select{touch-action:manipulation}
+    .topbar{min-height:76px;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#11141a;border-bottom:1px solid var(--border);gap:14px}.brand{font-size:23px;font-weight:800;letter-spacing:-1px}.brand span{color:var(--accent)}.brand small{font-size:12px;letter-spacing:1px;color:var(--muted);font-weight:400;margin-left:18px}.top-actions{display:flex;gap:10px;align-items:center}
+    .btn{border:1px solid #3b4351;border-radius:9px;padding:11px 15px;background:#191d25;color:white;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.3;min-height:42px}.btn:hover:not(:disabled){background:#232a35}.btn.primary{background:#d4deff;color:#141a2d;border-color:#d4deff;font-weight:700}.btn.primary:hover:not(:disabled){background:#edf1ff}.btn:disabled{opacity:.5;cursor:not-allowed}.btn.text{background:transparent;border-color:transparent;color:var(--muted)}.btn:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    .container{max-width:1190px;margin:auto;padding:34px 24px 70px}h1{margin:0 0 10px;font-size:32px;letter-spacing:-.7px}h2{margin:0 0 9px;font-size:21px;letter-spacing:-.3px}h3{font-size:16px;margin:0 0 9px}p{color:var(--muted);line-height:1.6}.subtitle{margin:0 0 20px;max-width:760px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px}.login{max-width:440px;margin:34px auto}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hidden{display:none!important}
+    label{display:block;margin:15px 0 7px;font-size:13px;color:#dce0e7}input,textarea,select{width:100%;padding:12px 13px;color:white;background:#0f1218;border:1px solid #303643;border-radius:10px}input[type="color"]{height:44px;padding:7px;cursor:pointer}textarea{min-height:148px;resize:vertical}input:focus,textarea:focus,select:focus{outline:2px solid #7e91c0;outline-offset:1px}.hint{font-size:12px;color:var(--muted);margin:7px 0 0}.feedback{margin-top:16px;font-size:14px;line-height:1.55;overflow-wrap:anywhere;white-space:pre-line}.feedback.ok{color:var(--ok)}.feedback.error{color:#ffb6b6}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}.copy-row{display:flex;gap:8px;align-items:center}.copy-row .btn{flex-shrink:0}.copy-row input{min-width:0}.notice{padding:14px;border:1px solid #5f4b2a;background:#261f12;border-radius:10px;color:#f2d58c;font-size:14px;line-height:1.55;margin:16px 0}.result{margin-top:20px}.result p{margin:8px 0}.status{color:var(--muted);line-height:1.5;font-size:13px;overflow-wrap:anywhere}
+    .console-nav{display:flex;gap:8px;border-bottom:1px solid var(--border);padding-bottom:16px;margin:24px 0}.console-nav .selected{border-color:#8b9dc8;color:#d4deff;background:#20293d}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}.summary-card{padding:20px 24px;background:linear-gradient(120deg,#1b2230,#151820);border:1px solid var(--border);border-radius:14px}.summary-card:first-child{border-color:#354660}.summary-label{display:block;font-size:13px;color:var(--muted);margin-bottom:9px}.summary-value{font-size:32px;letter-spacing:-1px;font-weight:700}.summary-card:first-child .summary-value{color:var(--ok)}.section-heading{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.section-heading p{margin:4px 0 0;font-size:14px}.filters{display:flex;gap:12px;align-items:flex-end;margin-bottom:20px}.filters .search-field{flex:1}.filters label{margin:0 0 7px}.filters .status-field{width:175px}.enrollment-list{display:grid;gap:10px}.enrollment{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.3fr) auto;gap:18px;align-items:center;padding:20px;background:#11151c;border:1px solid var(--border);border-radius:12px}.business-title{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.business-title h3{margin:0;font-size:17px;overflow-wrap:anywhere}.business-meta,.owner-meta{font-size:13px;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}.owner-email{font-size:14px;overflow-wrap:anywhere;margin-bottom:5px}.tag{font-size:11px;border:1px solid #3c4555;border-radius:20px;padding:4px 8px;white-space:nowrap;color:#c0c8d4;display:inline-flex;line-height:1}.tag.active{color:#94e2b7;border-color:#31543f;background:#16251d}.tag.pending{color:#efcf88;border-color:#615032;background:#2a2216}.list-message{padding:36px 22px;text-align:center;border:1px dashed #394252;border-radius:12px;color:var(--muted);line-height:1.6}.pagination{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:18px}.pagination .range{margin-right:auto;color:var(--muted);font-size:13px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.3px;color:var(--accent);margin:0 0 8px}.detail-header{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.detail-header h2{font-size:26px;margin:0 0 9px;overflow-wrap:anywhere}.detail-metrics{display:flex;gap:28px;margin:20px 0 0;font-size:13px;color:var(--muted)}.detail-metrics strong{font-size:22px;display:block;color:var(--text);margin-bottom:5px}.detail-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-top:18px}.definition{display:grid;grid-template-columns:140px 1fr;gap:12px;font-size:14px;line-height:1.5;margin:18px 0 0}.definition dt{color:var(--muted)}.definition dd{margin:0;overflow-wrap:anywhere;white-space:pre-line}.service-list{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:8px}.service-list li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--border);font-size:14px;overflow-wrap:anywhere}.detail-leads{margin-top:18px}.leads-list{display:grid;gap:12px}.lead{padding:18px;background:#11151c;border:1px solid var(--border);border-radius:12px}.lead-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.lead-top h3{margin-bottom:5px;overflow-wrap:anywhere}.lead-date{font-size:12px;color:var(--muted)}.lead-details{display:grid;grid-template-columns:1fr 1fr;gap:9px 20px;font-size:13px;line-height:1.6;margin-top:14px;overflow-wrap:anywhere}.lead-details strong{font-weight:400;color:var(--muted)}.lead-notes{white-space:pre-wrap;font-size:13px;line-height:1.6;overflow-wrap:anywhere;margin:12px 0 0;color:#d9dee7}.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.section-intro{margin:0 0 20px}.account-note{padding:13px 0 0;margin:0;font-size:14px}.freshness{font-size:12px;color:var(--muted);margin-top:16px}.form-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px}
+    @media(max-width:850px){.detail-grid{grid-template-columns:1fr}.enrollment{grid-template-columns:minmax(0,1fr) auto}.enrollment-owner{grid-column:1}.enrollment-actions{grid-column:2;grid-row:1/3}.grid{grid-template-columns:1fr}}
+    @media(max-width:580px){.row,.lead-details{grid-template-columns:1fr}.topbar{padding:14px 16px;flex-wrap:wrap}.topbar .brand small{margin-left:12px}.container{padding:25px 14px 45px}h1{font-size:28px}.card{padding:19px}.summary{gap:8px}.summary-card{padding:16px 12px}.summary-label{font-size:11px}.summary-value{font-size:27px}.section-heading,.form-heading{align-items:flex-start;flex-wrap:wrap}.filters{flex-wrap:wrap}.filters .search-field{flex-basis:100%}.filters .status-field{flex:1;width:auto}.enrollment{gap:10px;padding:16px}.enrollment-actions .btn{padding:10px 12px}.enrollment-owner{margin-top:2px}.definition{grid-template-columns:105px 1fr}.detail-header{flex-wrap:wrap}.detail-metrics{gap:23px}.pagination{flex-wrap:wrap}.pagination .range{flex-basis:100%;margin-bottom:4px}.console-nav .btn{flex:1}.copy-row{align-items:stretch}}
   </style>
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="dashboard.html">Flow<span>OS</span></a>
-    <div class="top-actions"><a class="btn" href="dashboard.html">Dashboard</a><button id="logoutButton" class="btn hidden" type="button">Sign Out</button></div>
+    <a class="brand" href="admin.html" aria-label="FlowOS admin home">Flow<span>OS</span><small>ADMIN CONSOLE</small></a>
+    <div class="top-actions"><a class="btn text" href="dashboard.html">Owner sign-in</a><button id="logoutButton" class="btn hidden" type="button">Sign out</button></div>
   </header>
   <main class="container">
-    <h1>Business onboarding</h1>
-    <p class="subtitle">Create a service business, its customer request page, and owner access in one step.</p>
+    <h1>Business enrollments</h1>
+    <p class="subtitle">Manage every enrolled business, check customer requests, and recover owner setup access.</p>
     <div id="accessStatus" class="status" role="status">Checking administrator access…</div>
     <section id="loginSection" class="card login hidden">
       <h2>Administrator sign in</h2>
-      <p>Use your existing FlowOS platform administrator account.</p>
+      <p>Use your FlowOS platform administrator account to open the business console.</p>
       <form id="loginForm">
         <label for="email">Email</label><input id="email" type="email" autocomplete="username" maxlength="200" required>
         <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
-        <button id="loginButton" class="btn primary" type="submit" style="margin-top:20px">Sign In</button>
+        <button id="loginButton" class="btn primary" type="submit" style="margin-top:20px">Sign in</button>
       </form>
       <div id="loginFeedback" class="feedback" role="alert"></div>
     </section>
-    <section id="adminContent" class="hidden">
-      <form id="provisionForm">
-        <fieldset id="provisionFields" style="border:0;padding:0;margin:0">
-          <div class="grid">
-            <div class="card">
-              <h2>Business profile</h2>
-              <p>This profile appears on the customer request page.</p>
-              <label for="businessName">Business name</label><input id="businessName" maxlength="120" required>
-              <label for="slug">Request page name</label><input id="slug" maxlength="120" placeholder="Northstar Home Services" required aria-describedby="slugHint slugPreview">
-              <p id="slugHint" class="hint">Spaces, underscores, and capitals are converted automatically. Choose a unique name with 3–60 letters or numbers, separated by hyphens.</p>
-              <p id="slugPreview" class="hint" aria-live="polite" style="overflow-wrap:anywhere"></p>
-              <label for="industry">Industry</label><input id="industry" maxlength="120" placeholder="Home services">
-              <label for="tagline">Customer-facing tagline</label><textarea id="tagline" maxlength="280" style="min-height:90px"></textarea>
-              <div class="row">
-                <div><label for="contactPhone">Public phone</label><input id="contactPhone" type="tel" maxlength="50"></div>
-                <div><label for="primaryColor">Brand color</label><input id="primaryColor" type="color" value="#6fa7ff"></div>
-              </div>
-              <label for="websiteUrl">Website</label><input id="websiteUrl" type="url" maxlength="300" placeholder="https://example.com">
-              <label for="logoUrl">Logo image URL</label><input id="logoUrl" type="url" maxlength="500" placeholder="https://example.com/logo.png">
-            </div>
-            <div class="card">
-              <h2>Owner and services</h2>
-              <p>The owner can view leads and manage this business’s profile and services.</p>
-              <label for="ownerEmail">Owner sign-in email</label><input id="ownerEmail" type="email" autocomplete="off" maxlength="200" required>
-              <p class="hint">An existing account keeps its password. A new owner receives a private setup link for choosing their password.</p>
-              <label for="notificationEmail">Lead notification email</label><input id="notificationEmail" type="email" maxlength="200" placeholder="Defaults to owner email">
-              <label for="services">Initial services</label><textarea id="services" maxlength="2500" required placeholder="Plumbing repair&#10;Drain cleaning&#10;Water heater service" aria-describedby="servicesHint"></textarea>
-              <p id="servicesHint" class="hint">One service per line. Add 1–20 distinct services, up to 120 characters each. All start enabled.</p>
-              <div class="notice">Only platform administrators can create businesses here. Check the owner’s email before provisioning access.</div>
-            </div>
-          </div>
-          <div class="actions"><button id="provisionButton" class="btn primary" type="submit">Create business and owner access</button><button id="newBusinessButton" class="btn" type="button">Clear for another business</button></div>
-        </fieldset>
-      </form>
-      <div id="provisionFeedback" class="feedback" role="status" aria-live="polite"></div>
-      <section id="resultSection" class="card result hidden" aria-label="Provisioned business">
-        <h2>Business is ready</h2>
-        <p id="ownerStatus"></p>
-        <label for="requestLink">Public customer request link</label><div class="copy-row"><input id="requestLink" readonly><button class="btn" type="button" data-copy="requestLink">Copy</button></div>
-        <div class="actions"><a id="requestPage" class="btn" target="_blank" rel="noopener noreferrer">Open request page</a><a id="dashboardLink" class="btn" target="_blank" rel="noopener noreferrer">Owner dashboard</a><a id="settingsLink" class="btn" target="_blank" rel="noopener noreferrer">Business settings</a></div>
-        <div id="setupSection" class="hidden">
-          <div class="notice">Private one-time owner setup link. Share it only with <strong id="setupOwner"></strong> through a trusted channel. Anyone with this link can activate that owner account. It expires and is cleared when you leave this page.</div>
-          <label for="setupLink">Private owner setup link</label><div class="copy-row"><input id="setupLink" readonly autocomplete="off"><button class="btn" type="button" data-copy="setupLink">Copy</button></div>
+    <section id="adminContent" class="hidden" aria-label="Administrator console">
+      <nav class="console-nav" aria-label="Admin sections"><button id="enrollmentsTab" class="btn selected" type="button" aria-current="page">Enrollments</button><button id="createTab" class="btn" type="button">+ New business</button></nav>
+      <section id="enrollmentsSection" aria-label="Business enrollments">
+        <div class="summary" aria-label="Enrollment totals">
+          <div class="summary-card"><span class="summary-label">Active businesses</span><span id="activeCount" class="summary-value">—</span></div>
+          <div class="summary-card"><span class="summary-label">Inactive businesses</span><span id="inactiveCount" class="summary-value">—</span></div>
+          <div class="summary-card"><span class="summary-label">Total enrolled</span><span id="totalCount" class="summary-value">—</span></div>
         </div>
-        <button id="regenerateButton" class="btn hidden" type="button" style="margin-top:18px">Generate a new owner setup link</button>
-        <div id="resultFeedback" class="feedback" role="status" aria-live="polite"></div>
+        <div class="card">
+          <div class="section-heading"><div><h2>Your businesses</h2><p>Open a business to view its profile, leads, and owner access.</p></div><button id="refreshButton" class="btn" type="button">Refresh</button></div>
+          <form id="searchForm" class="filters" role="search">
+            <div class="search-field"><label for="searchInput">Find a business</label><input id="searchInput" type="search" maxlength="120" placeholder="Business name or request page name" autocomplete="off"></div>
+            <div class="status-field"><label for="activeFilter">Enrollment status</label><select id="activeFilter"><option value="active">Active</option><option value="all">All businesses</option><option value="inactive">Inactive</option></select></div>
+            <button class="btn" type="submit">Search</button>
+          </form>
+          <div id="listFeedback" class="feedback" role="status" aria-live="polite"></div>
+          <div id="businessList" class="enrollment-list"></div>
+          <div class="pagination"><span id="listRange" class="range"></span><button id="listPrevious" class="btn" type="button" disabled>Previous</button><button id="listNext" class="btn" type="button" disabled>Next</button></div>
+          <p id="listUpdated" class="freshness"></p>
+        </div>
+      </section>
+      <section id="detailsSection" class="hidden" aria-label="Business details">
+        <div class="section-heading"><button id="backToListButton" class="btn" type="button">← All enrollments</button><button id="refreshDetailsButton" class="btn" type="button">Refresh business</button></div>
+        <div id="detailFeedback" class="feedback" role="status" aria-live="polite"></div>
+        <div id="detailContent" class="hidden">
+          <div class="card">
+            <div class="detail-header"><div><p class="eyebrow">Business overview</p><h2 id="detailName"></h2><div id="detailMeta" class="business-meta"></div></div><span id="detailActive" class="tag"></span></div>
+            <div class="detail-metrics"><div><strong id="detailServiceCount">—</strong>Services</div><div><strong id="detailLeadCount">—</strong>Customer requests</div></div>
+            <label for="detailRequestLink">Public customer request link</label><div class="copy-row"><input id="detailRequestLink" readonly><button class="btn" type="button" data-copy="detailRequestLink">Copy</button></div>
+            <div class="detail-actions"><a id="detailRequestPage" class="btn" target="_blank" rel="noopener noreferrer">Open request page</a></div>
+          </div>
+          <div class="detail-grid">
+            <div class="card">
+              <h2>Owner access</h2><div id="detailOwnerList"></div><p id="detailAccessNote" class="account-note"></p>
+              <button id="detailSetupButton" class="btn primary hidden" type="button" style="margin-top:18px">Generate owner setup link</button>
+              <div id="detailSetupSection" class="hidden">
+                <div class="notice">Private one-time owner setup link. Share only with <strong id="detailSetupOwner"></strong> through a trusted channel. Anyone with this link can activate that owner account. The link expires and is cleared when you leave this view.</div>
+                <label for="detailSetupLink">Private owner setup link</label><div class="copy-row"><input id="detailSetupLink" readonly autocomplete="off"><button class="btn" type="button" data-copy="detailSetupLink">Copy</button></div>
+              </div>
+              <div id="detailSetupFeedback" class="feedback" role="status" aria-live="polite"></div>
+            </div>
+            <div class="card"><h2>Business profile</h2><dl id="detailProfile" class="definition"></dl></div>
+          </div>
+          <div class="card" style="margin-top:18px"><h2>Services</h2><ul id="detailServices" class="service-list"></ul></div>
+          <div class="card detail-leads">
+            <div class="section-heading"><div><h2>Customer requests</h2><p>View this business’s leads directly with your administrator account.</p></div></div>
+            <div id="detailLeads" class="leads-list"></div>
+            <div class="pagination"><span id="leadRange" class="range"></span><button id="leadPrevious" class="btn" type="button" disabled>Previous</button><button id="leadNext" class="btn" type="button" disabled>Next</button></div>
+          </div>
+        </div>
+      </section>
+      <section id="createSection" class="hidden" aria-label="Create a business">
+        <div class="form-heading"><div><h2>Enroll a new business</h2><p class="section-intro">Create its public profile, initial services, and owner access.</p></div><button id="backFromCreateButton" class="btn" type="button">← Enrollments</button></div>
+        <form id="provisionForm">
+          <fieldset id="provisionFields" style="border:0;padding:0;margin:0">
+            <div class="grid">
+              <div class="card">
+                <h2>Business profile</h2><p>This profile appears on the customer request page.</p>
+                <label for="businessName">Business name</label><input id="businessName" maxlength="120" required>
+                <label for="slug">Request page name</label><input id="slug" maxlength="120" placeholder="Northstar Home Services" required aria-describedby="slugHint slugPreview">
+                <p id="slugHint" class="hint">Spaces, underscores, and capitals are converted automatically. Choose a unique name with 3–60 letters or numbers, separated by hyphens.</p><p id="slugPreview" class="hint" aria-live="polite" style="overflow-wrap:anywhere"></p>
+                <label for="industry">Industry</label><input id="industry" maxlength="120" placeholder="Home services">
+                <label for="tagline">Customer-facing tagline</label><textarea id="tagline" maxlength="280" style="min-height:90px"></textarea>
+                <div class="row"><div><label for="contactPhone">Public phone</label><input id="contactPhone" type="tel" maxlength="50"></div><div><label for="primaryColor">Brand color</label><input id="primaryColor" type="color" value="#6fa7ff"></div></div>
+                <label for="websiteUrl">Website</label><input id="websiteUrl" type="url" maxlength="300" placeholder="https://example.com">
+                <label for="logoUrl">Logo image URL</label><input id="logoUrl" type="url" maxlength="500" placeholder="https://example.com/logo.png">
+              </div>
+              <div class="card">
+                <h2>Owner and services</h2><p>The owner can view leads and manage this business’s profile and services.</p>
+                <label for="ownerEmail">Owner sign-in email</label><input id="ownerEmail" type="email" autocomplete="off" maxlength="200" required>
+                <p class="hint">An existing account keeps its password. For a new owner, generate and share a private setup link so they can choose their password.</p>
+                <label for="notificationEmail">Lead notification email</label><input id="notificationEmail" type="email" maxlength="200" placeholder="Defaults to owner email">
+                <label for="services">Initial services</label><textarea id="services" maxlength="2500" required placeholder="Plumbing repair&#10;Drain cleaning&#10;Water heater service" aria-describedby="servicesHint"></textarea>
+                <p id="servicesHint" class="hint">One service per line. Add 1–20 distinct services, up to 120 characters each. All start enabled.</p>
+                <div class="notice">Check the owner’s email before provisioning access. You can reopen this business from Enrollments after creating it.</div>
+              </div>
+            </div>
+            <div class="actions"><button id="provisionButton" class="btn primary" type="submit">Create business and owner access</button><button id="newBusinessButton" class="btn" type="button">Clear form</button></div>
+          </fieldset>
+        </form>
+        <div id="provisionFeedback" class="feedback" role="status" aria-live="polite"></div>
+        <section id="resultSection" class="card result hidden" aria-label="Provisioned business">
+          <h2>Business is ready</h2><p id="ownerStatus"></p>
+          <label for="requestLink">Public customer request link</label><div class="copy-row"><input id="requestLink" readonly><button class="btn" type="button" data-copy="requestLink">Copy</button></div>
+          <div class="actions"><button id="viewCreatedButton" class="btn primary" type="button">View business in admin</button><a id="requestPage" class="btn" target="_blank" rel="noopener noreferrer">Open request page</a><a id="dashboardLink" class="btn" target="_blank" rel="noopener noreferrer">Owner dashboard</a><a id="settingsLink" class="btn" target="_blank" rel="noopener noreferrer">Owner settings</a></div>
+          <p class="hint">The owner dashboard and settings require the owner to sign in.</p>
+          <div id="setupSection" class="hidden"><div class="notice">Private one-time owner setup link. Share it only with <strong id="setupOwner"></strong> through a trusted channel. Anyone with this link can activate that owner account. It expires and is cleared when you leave this view.</div><label for="setupLink">Private owner setup link</label><div class="copy-row"><input id="setupLink" readonly autocomplete="off"><button class="btn" type="button" data-copy="setupLink">Copy</button></div></div>
+          <button id="regenerateButton" class="btn hidden" type="button" style="margin-top:18px">Generate a new owner setup link</button><div id="resultFeedback" class="feedback" role="status" aria-live="polite"></div>
+        </section>
       </section>
     </section>
   </main>
@@ -89,79 +134,67 @@
     const PENDING_KEY = "flowos:onboarding:pending:v1";
     const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     const $ = id => document.getElementById(id);
-    let pending = null;
-    let resultRequestId = null;
-    let adminUserId = null;
-    let accessEpoch = 0;
-    let busy = false;
+    const LIST_LIMIT = 50, LEAD_LIMIT = 25;
+    let pending = null, resultRequestId = null, createdBusinessId = null, adminUserId = null, authUserId = null;
+    let accessEpoch = 0, listEpoch = 0, detailEpoch = 0, busy = false, currentView = "enrollments";
+    let listOffset = 0, listTotal = 0, listActive = true, listSearch = "";
+    let selectedBusiness = null, leadOffset = 0, leadTotal = 0;
     function feedback(id, message, ok = false) {
       $(id).textContent = message;
       $(id).classList.toggle("ok", ok);
       $(id).classList.toggle("error", Boolean(message) && !ok);
     }
+    function node(tag, text, className) {
+      const element = document.createElement(tag);
+      if (text !== undefined && text !== null) element.textContent = String(text);
+      if (className) element.className = className;
+      return element;
+    }
+    function clearSetupLinks() {
+      $("setupLink").value = ""; $("detailSetupLink").value = "";
+      $("setupSection").classList.add("hidden"); $("detailSetupSection").classList.add("hidden");
+      $("setupOwner").textContent = ""; $("detailSetupOwner").textContent = "";
+    }
     function clearResult() {
-      $("setupLink").value = "";
-      $("setupSection").classList.add("hidden");
-      $("regenerateButton").classList.add("hidden");
-      $("resultSection").classList.add("hidden");
-      resultRequestId = null;
+      clearSetupLinks();
+      $("regenerateButton").classList.add("hidden"); $("resultSection").classList.add("hidden");
+      $("requestLink").value = ""; $("ownerStatus").textContent = "";
+      resultRequestId = null; createdBusinessId = null;
       feedback("resultFeedback", "");
     }
-    function clearPending() {
-      pending = null;
-      try { sessionStorage.removeItem(PENDING_KEY); } catch {}
+    function clearPending() { pending = null; try { sessionStorage.removeItem(PENDING_KEY); } catch {} }
+    function clearAdminData(resetForm = true, discardPending = true) {
+      clearResult(); if (discardPending) clearPending(); listEpoch++; detailEpoch++;
+      selectedBusiness = null; listOffset = 0; listTotal = 0; leadOffset = 0; leadTotal = 0;
+      listSearch = ""; listActive = true; $("searchInput").value = ""; $("activeFilter").value = "active";
+      $("businessList").replaceChildren(); $("detailOwnerList").replaceChildren(); $("detailProfile").replaceChildren(); $("detailServices").replaceChildren(); $("detailLeads").replaceChildren();
+      for (const id of ["detailName", "detailMeta", "detailActive", "detailAccessNote", "listRange", "listUpdated", "leadRange"]) $(id).textContent = "";
+      for (const id of ["activeCount", "inactiveCount", "totalCount", "detailServiceCount", "detailLeadCount"]) $(id).textContent = "—";
+      $("detailRequestLink").value = ""; $("detailSetupButton").classList.add("hidden"); $("detailContent").classList.add("hidden");
+      for (const id of ["listFeedback", "detailFeedback", "detailSetupFeedback", "provisionFeedback", "loginFeedback"]) feedback(id, "");
+      for (const id of ["requestPage", "dashboardLink", "settingsLink", "detailRequestPage"]) $(id).removeAttribute("href");
+      $("listPrevious").disabled = true; $("listNext").disabled = true; $("leadPrevious").disabled = true; $("leadNext").disabled = true;
+      $("adminContent").classList.add("hidden");
+      if (resetForm) { $("provisionForm").reset(); updateSlugPreview(); $("password").value = ""; }
     }
-    function normalizeUrl(value) {
-      if (!value.trim()) return null;
-      const url = new URL(value.trim());
-      if (!["http:", "https:"].includes(url.protocol)) throw new Error("Website and logo URLs must use http or https.");
-      return url.toString();
+    function dateText(value, includeTime = false) {
+      const date = new Date(value);
+      if (!value || Number.isNaN(date.getTime())) return "Date unavailable";
+      return includeTime ? date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
     }
-    function normalizeSlug(value) {
-      return value.trim().toLowerCase().replace(/[\s_]+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+    function ownerState(business) {
+      if (!Array.isArray(business.owners) || !business.owners.length) return "No owner assigned";
+      if (business.owners.some(owner => owner.confirmed && owner.has_password)) return "Owner account set up";
+      return business.owner_setup_required ? "Owner setup incomplete" : "Owner access needs review";
     }
-    function updateSlugPreview() {
-      const value = normalizeSlug($("slug").value);
-      $("slugPreview").textContent = value ? "Your request link name: " + value : "";
-    }
-    $("slug").addEventListener("input", updateSlugPreview);
-    $("slug").addEventListener("blur", () => { $("slug").value = normalizeSlug($("slug").value); updateSlugPreview(); });
-    function payload() {
-      const ownerEmail = $("ownerEmail").value.trim().toLowerCase();
-      const name = $("businessName").value.trim();
-      const slug = normalizeSlug($("slug").value);
-      const services = $("services").value.split(/\r?\n/).map(name => name.trim()).filter(Boolean);
-      if (!name || name.length > 120) throw new Error("Enter a business name up to 120 characters.");
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 3 || slug.length > 60) {
-        $("slug").focus();
-        throw new Error("Use letters, numbers, spaces, underscores, or hyphens for the request page name. After conversion, it needs 3–60 characters.");
-      }
-      $("slug").value = slug;
-      updateSlugPreview();
-      if (!services.length || services.length > 20 || services.some(name => name.length > 120)) throw new Error("Add 1–20 services, each up to 120 characters.");
-      if (new Set(services.map(name => name.toLowerCase())).size !== services.length) throw new Error("Each service name must be distinct.");
-      return { business: { name, slug, industry: $("industry").value.trim() || null, tagline: $("tagline").value.trim() || null, contact_phone: $("contactPhone").value.trim() || null, website_url: normalizeUrl($("websiteUrl").value), logo_url: normalizeUrl($("logoUrl").value), primary_color: $("primaryColor").value, notification_email: $("notificationEmail").value.trim().toLowerCase() || ownerEmail }, owner_email: ownerEmail, services };
-    }
-    function restorePending() {
-      try {
-        const saved = JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null");
-        if (!saved || !UUID.test(saved.request_id) || typeof saved.canonical !== "string" || saved.canonical.length > 9000) return;
-        if (saved.admin_user_id && saved.admin_user_id !== adminUserId) { clearPending(); return; }
-        const data = JSON.parse(saved.canonical);
-        if (!data.business || !Array.isArray(data.services)) return;
-        const fields = { businessName: "name", slug: "slug", industry: "industry", tagline: "tagline", contactPhone: "contact_phone", websiteUrl: "website_url", logoUrl: "logo_url", primaryColor: "primary_color", notificationEmail: "notification_email" };
-        for (const [id, key] of Object.entries(fields)) if (typeof data.business[key] === "string" || data.business[key] === null) $(id).value = data.business[key] || (id === "primaryColor" ? "#6fa7ff" : "");
-        $("ownerEmail").value = typeof data.owner_email === "string" ? data.owner_email : "";
-        $("services").value = data.services.filter(name => typeof name === "string").join("\n");
-        pending = saved;
-        updateSlugPreview();
-        feedback("provisionFeedback", "Your last submission is restored. Submit unchanged to safely retry it.", true);
-      } catch { clearPending(); }
+    function verifyBusiness(business) {
+      if (!business || !UUID.test(business.business_id || "") || typeof business.name !== "string" || typeof business.active !== "boolean" || typeof business.slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(business.slug) || !Array.isArray(business.owners)) throw new Error("The business response could not be verified. Refresh and try again.");
+      return business;
     }
     async function invoke(options) {
       const { data, error } = await supabaseClient.functions.invoke("flowos-admin-onboarding", options);
       if (error) {
-        let message = "Unable to complete onboarding. Check your administrator access and try again.";
+        let message = "Unable to complete this administrator request. Try again.";
         try { const detail = await error.context?.json(); if (typeof detail?.error === "string") message = detail.error.slice(0, 300); } catch {}
         throw new Error(message);
       }
@@ -173,134 +206,265 @@
       for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
       return url.href;
     }
-    function showSetupLink(value, ownerEmail, businessId) {
-      $("setupLink").value = "";
-      $("setupSection").classList.add("hidden");
-      if (!value) return;
-      const url = new URL(value);
-      const params = new URLSearchParams(url.hash.slice(1));
-      if (url.origin !== "https://flowos-web.github.io" || url.pathname !== "/flowos-v01/v1-preview/activate.html" || url.search || !["invite", "recovery"].includes(params.get("type")) || !/^[a-zA-Z0-9_-]{20,256}$/.test(params.get("token_hash") || "") || params.get("business_id") !== businessId) throw new Error("Business created, but the owner setup link could not be displayed. Generate a new setup link.");
-      $("setupLink").value = url.href;
-      $("setupOwner").textContent = ownerEmail;
-      $("setupSection").classList.remove("hidden");
+    function setView(view) {
+      currentView = view;
+      clearSetupLinks(); feedback("detailSetupFeedback", "");
+      if (view !== "details") detailEpoch++;
+      $("enrollmentsSection").classList.toggle("hidden", view !== "enrollments");
+      $("detailsSection").classList.toggle("hidden", view !== "details");
+      $("createSection").classList.toggle("hidden", view !== "create");
+      $("enrollmentsTab").classList.toggle("selected", view !== "create");
+      $("createTab").classList.toggle("selected", view === "create");
+      for (const [id, selected] of [["enrollmentsTab", view !== "create"], ["createTab", view === "create"]]) {
+        if (selected) $(id).setAttribute("aria-current", "page"); else $(id).removeAttribute("aria-current");
+      }
+      if (view !== "details") { const url = new URL(location.href); url.searchParams.delete("business_id"); history.replaceState(null, "", url); }
+      if (view !== "create") clearResult();
+    }
+    function renderBusinesses(businesses) {
+      const list = $("businessList"); list.replaceChildren();
+      if (!businesses.length) { list.append(node("div", listSearch ? "No businesses match this search. Try another name or choose All businesses." : "No businesses in this view. Choose All businesses to see other enrollments, or add a new business.", "list-message")); return; }
+      for (const business of businesses) {
+        const item = node("article", null, "enrollment");
+        const info = node("div");
+        const title = node("div", null, "business-title");
+        title.append(node("h3", business.name), node("span", business.active ? "Active" : "Inactive", "tag" + (business.active ? " active" : "")));
+        info.append(title, node("div", [business.industry || "Service business", business.slug].join(" · "), "business-meta"), node("div", "Enrolled " + dateText(business.created_at) + " · " + Number(business.service_count || 0) + " services · " + Number(business.lead_count || 0) + " leads", "business-meta"));
+        const owner = node("div", null, "enrollment-owner");
+        owner.append(node("div", business.owner_email || "No owner email", "owner-email"), node("span", ownerState(business), "tag" + (business.owner_setup_required ? " pending" : "")));
+        const actions = node("div", null, "enrollment-actions");
+        const view = node("button", "View business", "btn"); view.type = "button"; view.setAttribute("aria-label", "View " + business.name);
+        view.addEventListener("click", () => openBusiness(business.business_id)); actions.append(view);
+        item.append(info, owner, actions); list.append(item);
+      }
+    }
+    async function loadBusinesses() {
+      if (!adminUserId) return;
+      const epoch = accessEpoch, requestEpoch = ++listEpoch;
+      $("refreshButton").disabled = true; $("listPrevious").disabled = true; $("listNext").disabled = true;
+      feedback("listFeedback", "Loading business enrollments…", true);
+      try {
+        const data = await invoke({ body: { action: "list_businesses", offset: listOffset, limit: LIST_LIMIT, active: listActive, search: listSearch } });
+        if (epoch !== accessEpoch || requestEpoch !== listEpoch || !adminUserId) return;
+        if (data?.success !== true || !Array.isArray(data.businesses) || !Number.isSafeInteger(data.total) || data.total < 0 || !data.counts || ![data.counts.active, data.counts.inactive, data.counts.total].every(value => Number.isSafeInteger(value) && value >= 0)) throw new Error("The enrollments response could not be verified. Refresh and try again.");
+        const businesses = data.businesses.map(verifyBusiness);
+        if (listOffset && data.total <= listOffset) { listOffset = Math.max(0, Math.floor(Math.max(0, data.total - 1) / LIST_LIMIT) * LIST_LIMIT); await loadBusinesses(); return; }
+        listTotal = data.total; renderBusinesses(businesses);
+        $("activeCount").textContent = data.counts.active; $("inactiveCount").textContent = data.counts.inactive; $("totalCount").textContent = data.counts.total;
+        $("listRange").textContent = listTotal ? (listOffset + 1) + "–" + Math.min(listOffset + businesses.length, listTotal) + " of " + listTotal + " businesses" : "0 businesses";
+        $("listPrevious").disabled = listOffset === 0; $("listNext").disabled = listOffset + LIST_LIMIT >= listTotal;
+        $("listUpdated").textContent = "Updated " + new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        feedback("listFeedback", "");
+      } catch (error) {
+        if (epoch === accessEpoch && requestEpoch === listEpoch) { $("businessList").replaceChildren(); $("listRange").textContent = ""; feedback("listFeedback", error.message || "Unable to load enrollments. Refresh to try again."); }
+      } finally { if (epoch === accessEpoch && requestEpoch === listEpoch) $("refreshButton").disabled = false; }
+    }
+    function addDefinition(list, label, value) { list.append(node("dt", label), node("dd", value === null || value === undefined || value === "" ? "Not provided" : value)); }
+    function renderDetails(data) {
+      const business = verifyBusiness(data.business); selectedBusiness = business;
+      $("detailName").textContent = business.name;
+      $("detailMeta").textContent = (business.industry || "Service business") + " · Enrolled " + dateText(business.created_at);
+      $("detailActive").textContent = business.active ? "Active enrollment" : "Inactive enrollment"; $("detailActive").className = "tag" + (business.active ? " active" : "");
+      $("detailServiceCount").textContent = Number(business.service_count || 0); $("detailLeadCount").textContent = Number(business.lead_count || 0);
+      $("detailRequestLink").value = previewLink("request.html", { b: business.slug }); $("detailRequestPage").href = $("detailRequestLink").value;
+      const ownerList = $("detailOwnerList"); ownerList.replaceChildren();
+      if (!business.owners.length) ownerList.append(node("p", "No owner assigned."));
+      for (const owner of business.owners) {
+        const item = node("div");
+        item.append(node("p", owner.email || "Email unavailable", "owner-email"), node("span", owner.confirmed && owner.has_password ? "Active owner account" : "Owner setup incomplete", "tag" + (owner.confirmed && owner.has_password ? "" : " pending")));
+        ownerList.append(item);
+      }
+      const canSetUp = business.setup_available === true && business.owner_setup_required === true && UUID.test(business.request_id || "");
+      $("detailSetupButton").classList.toggle("hidden", !canSetUp);
+      $("detailAccessNote").textContent = !business.owners.length ? "This business does not have an owner account assigned." : canSetUp ? "Lost the original setup link? Generate a new one here and share it with the owner. You can still view this business’s leads below." : business.owners.some(owner => owner.confirmed && owner.has_password) ? "The owner account is already set up. Use the owner's existing sign-in credentials; no new setup link is needed. You can inspect this business's leads here with your admin account." : "Owner access needs review. A setup link cannot be issued for the current account or enrollment state. You can inspect this business's leads here with your admin account.";
+      const profile = data.profile || {}, definitions = $("detailProfile"); definitions.replaceChildren();
+      for (const [label, key] of [["Tagline", "tagline"], ["Public phone", "contact_phone"], ["Website", "website_url"]]) addDefinition(definitions, label, profile[key]);
+      const services = $("detailServices"); services.replaceChildren();
+      if (!data.services.length) services.append(node("li", "No services configured."));
+      for (const service of data.services) { const item = node("li"); item.append(node("span", service.name || "Unnamed service"), node("span", service.active ? "Enabled" : "Disabled", "tag" + (service.active ? " active" : ""))); services.append(item); }
+      const leads = $("detailLeads"); leads.replaceChildren();
+      if (!data.leads.length) leads.append(node("div", "No customer requests yet. Use the public request link above to submit a test request.", "list-message"));
+      for (const lead of data.leads) {
+        const item = node("article", null, "lead"), top = node("div", null, "lead-top"), title = node("div");
+        title.append(node("h3", lead.customer_name || "Customer"), node("div", dateText(lead.created_at, true), "lead-date"));
+        top.append(title, node("span", lead.status || "New", "tag")); item.append(top);
+        const info = node("div", null, "lead-details");
+        for (const [label, value] of [["Service", lead.service], ["Phone", lead.phone], ["Email", lead.email], ["Location", lead.service_location], ["Preferred date", lead.preferred_date], ["Estimated value", lead.estimated_value], ["Booked revenue", lead.booked_revenue]]) {
+          if (value === undefined || value === null || value === "") continue;
+          const detail = node("div"); detail.append(node("strong", label + ": "), document.createTextNode(String(value))); info.append(detail);
+        }
+        item.append(info); if (lead.notes) item.append(node("p", lead.notes, "lead-notes")); leads.append(item);
+      }
+      leadTotal = data.total_leads;
+      $("leadRange").textContent = leadTotal ? (leadOffset + 1) + "–" + Math.min(leadOffset + data.leads.length, leadTotal) + " of " + leadTotal + " requests" : "0 requests";
+      $("leadPrevious").disabled = leadOffset === 0; $("leadNext").disabled = leadOffset + LEAD_LIMIT >= leadTotal;
+      $("detailContent").classList.remove("hidden");
+    }
+    async function openBusiness(businessId, offset = 0) {
+      if (!adminUserId || !UUID.test(businessId || "")) return;
+      setView("details"); clearSetupLinks(); leadOffset = offset;
+      const url = new URL(location.href); url.searchParams.set("business_id", businessId); history.replaceState(null, "", url);
+      const epoch = accessEpoch, requestEpoch = ++detailEpoch;
+      selectedBusiness = null; $("detailContent").classList.add("hidden");
+      $("detailOwnerList").replaceChildren(); $("detailProfile").replaceChildren(); $("detailServices").replaceChildren(); $("detailLeads").replaceChildren();
+      $("refreshDetailsButton").disabled = true; $("leadPrevious").disabled = true; $("leadNext").disabled = true;
+      feedback("detailFeedback", "Loading business profile and customer requests…", true);
+      try {
+        const data = await invoke({ body: { action: "business_details", business_id: businessId, offset, limit: LEAD_LIMIT } });
+        if (epoch !== accessEpoch || requestEpoch !== detailEpoch || !adminUserId || currentView !== "details") return;
+        if (data?.success !== true || data.business?.business_id !== businessId || !Array.isArray(data.services) || !Array.isArray(data.leads) || !Number.isSafeInteger(data.total_leads) || data.total_leads < 0 || data.leads.some(lead => lead.business_id !== businessId)) throw new Error("The business details could not be verified. Open the business again.");
+        if (offset && data.total_leads <= offset) { await openBusiness(businessId, Math.max(0, Math.floor(Math.max(0, data.total_leads - 1) / LEAD_LIMIT) * LEAD_LIMIT)); return; }
+        renderDetails(data); feedback("detailFeedback", "");
+      } catch (error) { if (epoch === accessEpoch && requestEpoch === detailEpoch) feedback("detailFeedback", error.message || "Unable to load business details."); }
+      finally { if (epoch === accessEpoch && requestEpoch === detailEpoch) $("refreshDetailsButton").disabled = false; }
+    }
+    function normalizeUrl(value) {
+      if (!value.trim()) return null;
+      const url = new URL(value.trim());
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error("Website and logo URLs must use http or https.");
+      return url.toString();
+    }
+    function normalizeSlug(value) { return value.trim().toLowerCase().replace(/[\s_]+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, ""); }
+    function updateSlugPreview() { const value = normalizeSlug($("slug").value); $("slugPreview").textContent = value ? "Your request link name: " + value : ""; }
+    $("slug").addEventListener("input", updateSlugPreview);
+    $("slug").addEventListener("blur", () => { $("slug").value = normalizeSlug($("slug").value); updateSlugPreview(); });
+    function payload() {
+      const ownerEmail = $("ownerEmail").value.trim().toLowerCase(), name = $("businessName").value.trim(), slug = normalizeSlug($("slug").value);
+      const services = $("services").value.split(/\r?\n/).map(name => name.trim()).filter(Boolean);
+      if (!name || name.length > 120) throw new Error("Enter a business name up to 120 characters.");
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 3 || slug.length > 60) { $("slug").focus(); throw new Error("Use letters, numbers, spaces, underscores, or hyphens for the request page name. After conversion, it needs 3–60 characters."); }
+      $("slug").value = slug; updateSlugPreview();
+      if (!services.length || services.length > 20 || services.some(name => name.length > 120)) throw new Error("Add 1–20 services, each up to 120 characters.");
+      if (new Set(services.map(name => name.toLowerCase())).size !== services.length) throw new Error("Each service name must be distinct.");
+      return { business: { name, slug, industry: $("industry").value.trim() || null, tagline: $("tagline").value.trim() || null, contact_phone: $("contactPhone").value.trim() || null, website_url: normalizeUrl($("websiteUrl").value), logo_url: normalizeUrl($("logoUrl").value), primary_color: $("primaryColor").value, notification_email: $("notificationEmail").value.trim().toLowerCase() || ownerEmail }, owner_email: ownerEmail, services };
+    }
+    function restorePending() {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null");
+        if (!saved || !UUID.test(saved.request_id) || typeof saved.canonical !== "string" || saved.canonical.length > 9000) return;
+        if (saved.admin_user_id !== adminUserId) { clearPending(); return; }
+        const data = JSON.parse(saved.canonical); if (!data.business || !Array.isArray(data.services)) return;
+        const fields = { businessName: "name", slug: "slug", industry: "industry", tagline: "tagline", contactPhone: "contact_phone", websiteUrl: "website_url", logoUrl: "logo_url", primaryColor: "primary_color", notificationEmail: "notification_email" };
+        for (const [id, key] of Object.entries(fields)) if (typeof data.business[key] === "string" || data.business[key] === null) $(id).value = data.business[key] || (id === "primaryColor" ? "#6fa7ff" : "");
+        $("ownerEmail").value = typeof data.owner_email === "string" ? data.owner_email : ""; $("services").value = data.services.filter(name => typeof name === "string").join("\n");
+        pending = saved; updateSlugPreview(); feedback("provisionFeedback", "Your last submission is restored. Submit unchanged to safely retry it.", true);
+      } catch { clearPending(); }
+    }
+    function showSetupLink(value, ownerEmail, businessId, prefix = "") {
+      const inputId = prefix ? "detailSetupLink" : "setupLink", sectionId = prefix ? "detailSetupSection" : "setupSection", ownerId = prefix ? "detailSetupOwner" : "setupOwner";
+      $(inputId).value = ""; $(sectionId).classList.add("hidden"); if (!value) return;
+      const url = new URL(value), params = new URLSearchParams(url.hash.slice(1));
+      if (url.origin !== "https://flowos-web.github.io" || url.pathname !== "/flowos-v01/v1-preview/activate.html" || url.search || !["invite", "recovery"].includes(params.get("type")) || !/^[a-zA-Z0-9_-]{20,256}$/.test(params.get("token_hash") || "") || params.get("business_id") !== businessId) throw new Error("The owner setup link could not be verified. Generate a new setup link.");
+      $(inputId).value = url.href; $(ownerId).textContent = ownerEmail; $(sectionId).classList.remove("hidden");
     }
     function renderResult(data, requestId) {
       if (!data?.success || !UUID.test(data.business_id || "") || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug || "") || typeof data.owner_email !== "string") throw new Error("The onboarding response could not be verified. Retry the same submission.");
-      resultRequestId = requestId;
-      $("resultSection").classList.remove("hidden");
-      $("requestLink").value = previewLink("request.html", { b: data.slug });
-      $("requestPage").href = $("requestLink").value;
-      $("dashboardLink").href = previewLink("dashboard.html", { business_id: data.business_id });
-      $("settingsLink").href = previewLink("settings.html", { business_id: data.business_id });
-      const requiresSetup = data.owner_existing === false || data.owner_setup_required === true || Boolean(data.setup_url || data.setup_error);
-      $("ownerStatus").textContent = requiresSetup ? "Owner access is ready for " + data.owner_email + ". Share the private setup link below so they can choose their password." : data.owner_email + " already has a FlowOS account. Share the dashboard link; they can sign in with their existing password.";
-      $("regenerateButton").classList.toggle("hidden", !requiresSetup);
-      showSetupLink(data.setup_url, data.owner_email, data.business_id);
-      feedback("resultFeedback", data.setup_error ? "Business and membership were created. " + String(data.setup_error).slice(0, 300) + " Use the button above to retry owner setup." : "", false);
+      resultRequestId = requestId; createdBusinessId = data.business_id; $("resultSection").classList.remove("hidden");
+      $("requestLink").value = previewLink("request.html", { b: data.slug }); $("requestPage").href = $("requestLink").value;
+      $("dashboardLink").href = previewLink("dashboard.html", { business_id: data.business_id }); $("settingsLink").href = previewLink("settings.html", { business_id: data.business_id });
+      const requiresSetup = data.owner_setup_required === true || Boolean(data.setup_url || data.setup_error);
+      $("ownerStatus").textContent = requiresSetup ? "Owner access is ready for " + data.owner_email + ". Share the private setup link below so they can choose their password. You can recover a new link later from Enrollments." : data.owner_email + " already has a FlowOS account. They can sign in with their current password.";
+      $("regenerateButton").classList.toggle("hidden", !requiresSetup); showSetupLink(data.setup_url, data.owner_email, data.business_id);
+      feedback("resultFeedback", data.setup_error ? "Business and membership were created. " + String(data.setup_error).slice(0, 300) + " Generate a new setup link to retry." : "");
     }
     async function checkAccess() {
-      const epoch = ++accessEpoch;
-      adminUserId = null;
-      clearResult();
-      $("adminContent").classList.add("hidden");
-      $("loginSection").classList.add("hidden");
-      $("accessStatus").textContent = "Checking administrator access…";
+      const requestedBusinessId = new URL(location.href).searchParams.get("business_id");
+      const epoch = ++accessEpoch; adminUserId = null; clearResult(); listEpoch++; detailEpoch++;
+      $("adminContent").classList.add("hidden"); $("loginSection").classList.add("hidden"); $("accessStatus").textContent = "Checking administrator access…"; $("accessStatus").setAttribute("role", "status");
       try {
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-        if (error) throw error;
-        if (epoch !== accessEpoch) return;
+        const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+        if (epoch !== accessEpoch) return; if (sessionError) throw sessionError;
         $("logoutButton").classList.toggle("hidden", !session);
-        if (!session) { $("accessStatus").textContent = "Administrator sign-in is required."; $("loginSection").classList.remove("hidden"); return; }
-        const data = await invoke({ method: "GET" });
-        if (epoch !== accessEpoch) return;
+        if (!session) { authUserId = null; clearAdminData(); $("accessStatus").textContent = "Administrator sign-in is required."; $("loginSection").classList.remove("hidden"); return; }
+        if (authUserId && authUserId !== session.user.id) clearAdminData(); authUserId = session.user.id;
+        const { data: { user }, error } = await supabaseClient.auth.getUser();
+        if (epoch !== accessEpoch) return; if (error || !user || user.id !== authUserId) throw new Error("Your session could not be verified. Sign out and sign in again.");
+        const data = await invoke({ method: "GET" }); if (epoch !== accessEpoch) return;
         if (data?.is_admin !== true) throw new Error("This account does not have platform administrator access.");
-        adminUserId = session.user.id;
-        $("accessStatus").textContent = "Signed in as " + session.user.email + ". Platform administrator access confirmed.";
-        $("adminContent").classList.remove("hidden");
-        restorePending();
-      } catch (error) {
-        if (epoch !== accessEpoch) return;
-        $("accessStatus").textContent = error.message || "Administrator access could not be checked. Sign out and try again.";
-        $("accessStatus").setAttribute("role", "alert");
-      }
+        adminUserId = user.id; $("accessStatus").textContent = "Signed in as " + user.email + " · Platform administrator";
+        $("adminContent").classList.remove("hidden"); restorePending(); setView("enrollments"); await loadBusinesses();
+        if (epoch !== accessEpoch || !adminUserId) return;
+        if (requestedBusinessId && UUID.test(requestedBusinessId)) await openBusiness(requestedBusinessId);
+        else if (requestedBusinessId) feedback("listFeedback", "That business link is not valid. Choose a business from Enrollments.");
+      } catch (error) { if (epoch === accessEpoch) { clearAdminData(); $("accessStatus").textContent = error.message || "Administrator access could not be checked. Sign out and try again."; $("accessStatus").setAttribute("role", "alert"); } }
     }
     $("loginForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      $("loginButton").disabled = true;
-      feedback("loginFeedback", "");
-      try {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
-        if (error) throw error;
-        $("password").value = "";
-        await checkAccess();
-      } catch (error) { feedback("loginFeedback", error.message || "Unable to sign in."); }
+      event.preventDefault(); $("loginButton").disabled = true; feedback("loginFeedback", ""); const epoch = accessEpoch;
+      try { const { error } = await supabaseClient.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value }); if (error) throw error; $("password").value = ""; await checkAccess(); }
+      catch (error) { if (epoch === accessEpoch) feedback("loginFeedback", error.message || "Unable to sign in."); }
       finally { $("loginButton").disabled = false; }
     });
+    $("enrollmentsTab").addEventListener("click", () => { setView("enrollments"); loadBusinesses(); });
+    $("backToListButton").addEventListener("click", () => { setView("enrollments"); loadBusinesses(); });
+    $("backFromCreateButton").addEventListener("click", () => { setView("enrollments"); loadBusinesses(); });
+    $("createTab").addEventListener("click", () => { setView("create"); $("businessName").focus(); });
+    $("refreshButton").addEventListener("click", loadBusinesses);
+    $("searchForm").addEventListener("submit", event => { event.preventDefault(); listOffset = 0; listSearch = $("searchInput").value.trim(); listActive = $("activeFilter").value === "all" ? null : $("activeFilter").value === "active"; loadBusinesses(); });
+    $("activeFilter").addEventListener("change", () => $("searchForm").requestSubmit());
+    $("listPrevious").addEventListener("click", () => { if (listOffset > 0) { listOffset = Math.max(0, listOffset - LIST_LIMIT); loadBusinesses(); } });
+    $("listNext").addEventListener("click", () => { if (listOffset + LIST_LIMIT < listTotal) { listOffset += LIST_LIMIT; loadBusinesses(); } });
+    $("refreshDetailsButton").addEventListener("click", () => { if (selectedBusiness) openBusiness(selectedBusiness.business_id, leadOffset); });
+    $("leadPrevious").addEventListener("click", () => { if (selectedBusiness && leadOffset > 0) openBusiness(selectedBusiness.business_id, Math.max(0, leadOffset - LEAD_LIMIT)); });
+    $("leadNext").addEventListener("click", () => { if (selectedBusiness && leadOffset + LEAD_LIMIT < leadTotal) openBusiness(selectedBusiness.business_id, leadOffset + LEAD_LIMIT); });
     $("provisionForm").addEventListener("input", () => { if (!busy) { clearResult(); feedback("provisionFeedback", ""); } });
     $("provisionForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      if (!adminUserId || busy) return;
-      const epoch = accessEpoch;
-      busy = true;
-      clearResult();
-      feedback("provisionFeedback", "Creating business and owner access…", true);
+      event.preventDefault(); if (!adminUserId || busy) return; const epoch = accessEpoch;
+      busy = true; clearResult(); feedback("provisionFeedback", "Creating business and owner access…", true);
       try {
-        const body = payload();
-        $("provisionFields").disabled = true;
-        const canonical = JSON.stringify(body);
-        if (!pending || pending.canonical !== canonical) pending = { request_id: crypto.randomUUID(), canonical, admin_user_id: adminUserId };
-        if (pending.admin_user_id && pending.admin_user_id !== adminUserId) pending = { request_id: crypto.randomUUID(), canonical, admin_user_id: adminUserId };
+        const body = payload(); $("provisionFields").disabled = true; const canonical = JSON.stringify(body);
+        if (!pending || pending.canonical !== canonical || pending.admin_user_id !== adminUserId) pending = { request_id: crypto.randomUUID(), canonical, admin_user_id: adminUserId };
         try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(pending)); } catch {}
-        const data = await invoke({ body: { action: "provision", request_id: pending.request_id, ...body } });
-        if (epoch !== accessEpoch) return;
-        renderResult(data, pending.request_id);
-        feedback("provisionFeedback", "Business created. Share the public request link and owner access below.", true);
+        const requestId = pending.request_id;
+        const data = await invoke({ body: { action: "provision", request_id: requestId, ...body } });
+        if (epoch !== accessEpoch || !adminUserId) return;
+        if (currentView === "create") renderResult(data, requestId);
+        feedback("provisionFeedback", "Business created. You can reopen it at any time from Enrollments.", true); await loadBusinesses();
       } catch (error) { if (epoch === accessEpoch) feedback("provisionFeedback", (error.message || "Unable to create business.") + " Keep the form unchanged to retry the same request."); }
       finally { busy = false; $("provisionFields").disabled = false; }
     });
-    $("regenerateButton").addEventListener("click", async () => {
-      if (!adminUserId || !resultRequestId || busy) return;
-      const epoch = accessEpoch;
-      busy = true;
-      $("regenerateButton").disabled = true;
-      $("provisionFields").disabled = true;
-      $("setupLink").value = "";
-      $("setupSection").classList.add("hidden");
-      feedback("resultFeedback", "Generating a private owner setup link…", true);
+    $("viewCreatedButton").addEventListener("click", () => { if (createdBusinessId) openBusiness(createdBusinessId); });
+    async function generateSetup(fromDetails) {
+      const business = selectedBusiness, requestId = fromDetails ? business?.request_id : resultRequestId;
+      if (!adminUserId || !UUID.test(requestId || "") || busy || (fromDetails && (!business.setup_available || !business.owner_setup_required))) return;
+      const epoch = accessEpoch, viewEpoch = detailEpoch, buttonId = fromDetails ? "detailSetupButton" : "regenerateButton", feedbackId = fromDetails ? "detailSetupFeedback" : "resultFeedback";
+      busy = true; $(buttonId).disabled = true; $("provisionFields").disabled = true; clearSetupLinks(); feedback(feedbackId, "Generating a private owner setup link…", true);
       try {
-        const data = await invoke({ body: { action: "setup_link", request_id: resultRequestId } });
-        if (epoch !== accessEpoch) return;
-        renderResult(data, resultRequestId);
-        feedback("resultFeedback", data.setup_url ? "New setup link is ready. Previously generated links may no longer work." : "The owner already has a confirmed account. They can sign in with their existing password.", true);
-      } catch (error) { if (epoch === accessEpoch) feedback("resultFeedback", error.message || "Unable to generate owner setup link."); }
-      finally { busy = false; $("regenerateButton").disabled = false; $("provisionFields").disabled = false; }
-    });
+        const data = await invoke({ body: { action: "setup_link", request_id: requestId } });
+        if (epoch !== accessEpoch || !adminUserId || (fromDetails && (viewEpoch !== detailEpoch || currentView !== "details")) || (!fromDetails && (currentView !== "create" || requestId !== resultRequestId))) return;
+        if (fromDetails) {
+          if (data?.success !== true || data.business_id !== business.business_id || typeof data.owner_email !== "string") throw new Error("The owner setup response could not be verified.");
+          if (data.setup_error) throw new Error(String(data.setup_error).slice(0, 300));
+          showSetupLink(data.setup_url, data.owner_email, business.business_id, "detail");
+          if (!data.setup_url) { selectedBusiness.setup_available = false; selectedBusiness.owner_setup_required = false; $("detailSetupButton").classList.add("hidden"); $("detailAccessNote").textContent = "The owner already has an active account. They can sign in with their current credentials."; }
+        } else renderResult(data, requestId);
+        feedback(feedbackId, data.setup_url ? "New setup link is ready. Previously generated links may no longer work." : "The owner already has an active account. They can sign in with their current credentials.", true);
+      } catch (error) { if (epoch === accessEpoch && (!fromDetails || viewEpoch === detailEpoch)) feedback(feedbackId, error.message || "Unable to generate owner setup link."); }
+      finally { busy = false; $(buttonId).disabled = false; $("provisionFields").disabled = false; }
+    }
+    $("detailSetupButton").addEventListener("click", () => generateSetup(true));
+    $("regenerateButton").addEventListener("click", () => generateSetup(false));
     $("newBusinessButton").addEventListener("click", () => { clearPending(); clearResult(); $("provisionForm").reset(); updateSlugPreview(); feedback("provisionFeedback", ""); $("businessName").focus(); });
     document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {
-      const input = $(button.dataset.copy);
-      if (!input.value) return;
-      try { await navigator.clipboard.writeText(input.value); feedback("resultFeedback", button.dataset.copy === "setupLink" ? "Private setup link copied. Share only with the owner." : "Public request link copied.", true); }
-      catch { input.focus(); input.select(); feedback("resultFeedback", "Select and copy the link above.", true); }
+      if (!adminUserId) return; const input = $(button.dataset.copy), epoch = accessEpoch; if (!input.value) return;
+      const detailCopy = button.dataset.copy.startsWith("detail"), privateCopy = button.dataset.copy.toLowerCase().includes("setup"), feedbackId = detailCopy ? "detailSetupFeedback" : "resultFeedback";
+      try { await navigator.clipboard.writeText(input.value); if (epoch === accessEpoch) feedback(feedbackId, privateCopy ? "Private setup link copied. Share only with the owner." : "Public request link copied.", true); }
+      catch { if (epoch === accessEpoch) { input.focus(); input.select(); feedback(feedbackId, "Select and copy the link above.", true); } }
     }));
     $("logoutButton").addEventListener("click", async () => {
-      accessEpoch++;
-      adminUserId = null;
-      clearResult();
-      clearPending();
-      $("provisionForm").reset();
-      $("adminContent").classList.add("hidden");
+      accessEpoch++; adminUserId = null; authUserId = null; clearAdminData();
       const { error } = await supabaseClient.auth.signOut();
-      if (error) $("accessStatus").textContent = "Sign out could not complete. Please try again.";
+      if (error) { $("accessStatus").textContent = "Sign out could not complete. Please try again."; $("logoutButton").classList.remove("hidden"); }
       else await checkAccess();
     });
     supabaseClient.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || (adminUserId && session?.user?.id && session.user.id !== adminUserId)) {
-        accessEpoch++; adminUserId = null; clearResult(); clearPending(); $("provisionForm").reset();
-        $("adminContent").classList.add("hidden"); $("loginSection").classList.remove("hidden"); $("logoutButton").classList.add("hidden");
-        $("accessStatus").textContent = "Administrator sign-in is required.";
+      if (event === "SIGNED_OUT" || (authUserId && session?.user?.id && session.user.id !== authUserId)) {
+        accessEpoch++; adminUserId = null; authUserId = null; clearAdminData();
+        $("loginSection").classList.remove("hidden"); $("logoutButton").classList.add("hidden"); $("accessStatus").textContent = "Administrator sign-in is required.";
+        if (session?.user?.id) setTimeout(checkAccess, 0);
       }
     });
-    window.addEventListener("pagehide", () => { $("setupLink").value = ""; });
+    window.addEventListener("pagehide", () => { accessEpoch++; adminUserId = null; authUserId = null; clearAdminData(true, false); });
+    window.addEventListener("pageshow", event => { if (event.persisted) checkAccess(); });
     checkAccess();
   </script>
 </body>
