@@ -24,6 +24,28 @@ export type ProvisionRecord = {
   business_id: string; slug: string; owner_email: string; owner_user_id: string;
   owner_existing: boolean; owner_setup_required: boolean; payload: Payload;
 };
+export type Enrollment = {
+  business_id: string; name: string; slug: string; industry: string | null;
+  active: boolean; created_at: string; owner_email: string | null;
+  owners: { user_id: string; email: string; confirmed: boolean; has_password: boolean }[];
+  service_count: number; lead_count: number; request_id: string | null;
+  setup_available: boolean; owner_setup_required: boolean;
+};
+type BusinessList = {
+  businesses: Enrollment[]; total: number;
+  counts: { active: number; inactive: number; total: number };
+};
+type BusinessDetails = {
+  business: Enrollment; profile: ObjectValue | null;
+  services: ObjectValue[]; leads: ObjectValue[]; total_leads: number;
+};
+const ENROLLMENT_FIELDS = ["business_id", "name", "slug", "industry", "active", "created_at", "owner_email",
+  "service_count", "lead_count", "request_id", "setup_available", "owner_setup_required"];
+const PROFILE_FIELDS = ["business_id", "slug", "display_name", "industry", "tagline", "active", "logo_url",
+  "primary_color", "contact_phone", "website_url"];
+const SERVICE_FIELDS = ["id", "business_id", "name", "active", "sort_order"];
+const LEAD_FIELDS = ["id", "business_id", "created_at", "customer_name", "phone", "email", "vehicle",
+  "vehicle_type", "service", "service_location", "preferred_date", "notes", "status", "source", "estimated_value", "booked_revenue"];
 export interface AdminClient {
   auth: {
     getUser(token: string): Promise<Result<{ user: AuthUser | null }>>;
@@ -124,6 +146,42 @@ function requestId(value: unknown): string {
   }
   return value.toLowerCase();
 }
+function businessId(value: unknown): string {
+  if (typeof value !== "string" || !UUID.test(value)) {
+    throw new HttpError(400, "invalid_input", "A valid business ID is required.");
+  }
+  return value.toLowerCase();
+}
+function integer(value: unknown, label: string, fallback: number, minimum: number, maximum: number): number {
+  if (value === undefined) return fallback;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < minimum || value > maximum) {
+    throw new HttpError(400, "invalid_input", `${label} must be a whole number between ${minimum} and ${maximum}.`);
+  }
+  return value;
+}
+function listFilters(input: ObjectValue) {
+  onlyKeys(input, ["action", "offset", "limit", "active", "search"], "Request");
+  const active = input.active ?? null;
+  if (active !== null && typeof active !== "boolean") {
+    throw new HttpError(400, "invalid_input", "Active must be true, false, or null.");
+  }
+  if (input.search !== undefined && typeof input.search !== "string") {
+    throw new HttpError(400, "invalid_input", "Search must be text.");
+  }
+  return {
+    offset: integer(input.offset, "Offset", 0, 0, 100_000),
+    limit: integer(input.limit, "Limit", 50, 1, 100), active,
+    search: field(input.search, "Search", 120) ?? "",
+  };
+}
+function detailFilters(input: ObjectValue) {
+  onlyKeys(input, ["action", "business_id", "offset", "limit"], "Request");
+  return {
+    business: businessId(input.business_id),
+    offset: integer(input.offset, "Offset", 0, 0, 100_000),
+    limit: integer(input.limit, "Limit", 25, 1, 100),
+  };
+}
 function sessionId(token: string, actor: string): string {
   try {
     const segments = token.split(".");
@@ -157,6 +215,84 @@ async function rpc<T>(client: AdminClient, name: string, params: ObjectValue): P
   const { data, error } = await client.rpc(name, params);
   if (error) throw dbError(error);
   return data as T;
+}
+async function consoleRpc<T>(client: AdminClient, name: string, params: ObjectValue): Promise<T> {
+  const { data, error } = await client.rpc(name, params);
+  if (error) {
+    if (error.code === "42501") throw dbError(error);
+    if (error.code === "22023" || error.code === "23514") {
+      throw new HttpError(400, "invalid_input", "Check the business filters and try again.");
+    }
+    throw new HttpError(503, "admin_data_unavailable", "Administrator business data is unavailable. Try again.");
+  }
+  return data as T;
+}
+function consoleUnavailable(): HttpError {
+  return new HttpError(503, "admin_data_unavailable", "Administrator business data is unavailable. Try again.");
+}
+function consoleObject(value: unknown): ObjectValue {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw consoleUnavailable();
+  return value as ObjectValue;
+}
+function project(value: unknown, keys: string[]): ObjectValue {
+  const source = consoleObject(value);
+  const output: ObjectValue = {};
+  for (const key of keys) {
+    const item = source[key];
+    if (item !== undefined && item !== null && !["string", "number", "boolean"].includes(typeof item)) throw consoleUnavailable();
+    if (item !== undefined) output[key] = item;
+  }
+  return output;
+}
+function validCount(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+}
+function enrollment(value: unknown): ObjectValue {
+  const source = consoleObject(value);
+  const output = project(source, ENROLLMENT_FIELDS);
+  if (typeof source.business_id !== "string" || !UUID.test(source.business_id) ||
+    typeof source.name !== "string" || typeof source.slug !== "string" ||
+    !(source.industry === null || typeof source.industry === "string") ||
+    typeof source.active !== "boolean" || typeof source.created_at !== "string" ||
+    !(source.owner_email === null || typeof source.owner_email === "string") ||
+    !validCount(source.service_count) || !validCount(source.lead_count) ||
+    !(source.request_id === null || typeof source.request_id === "string" && UUID.test(source.request_id)) ||
+    typeof source.setup_available !== "boolean" || typeof source.owner_setup_required !== "boolean" || !Array.isArray(source.owners)) {
+    throw consoleUnavailable();
+  }
+  output.owners = source.owners.map((value) => {
+    const owner = project(value, ["user_id", "email", "confirmed", "has_password"]);
+    if (typeof owner.user_id !== "string" || !UUID.test(owner.user_id) || typeof owner.email !== "string" ||
+      typeof owner.confirmed !== "boolean" || typeof owner.has_password !== "boolean") throw consoleUnavailable();
+    return owner;
+  });
+  return output;
+}
+function scopedRows(value: unknown, business: string, keys: string[]): ObjectValue[] {
+  if (!Array.isArray(value)) throw consoleUnavailable();
+  return value.map((item) => {
+    const row = project(item, keys);
+    if (row.business_id !== business) throw consoleUnavailable();
+    return row;
+  });
+}
+function businessList(value: BusinessList, limit: number) {
+  const source = consoleObject(value);
+  const counts = project(source.counts, ["active", "inactive", "total"]);
+  if (!Array.isArray(source.businesses) || source.businesses.length > limit || !validCount(source.total) ||
+    !validCount(counts.active) || !validCount(counts.inactive) || !validCount(counts.total)) throw consoleUnavailable();
+  return { businesses: source.businesses.map(enrollment), total: source.total, counts };
+}
+function businessDetails(value: BusinessDetails, business: string, limit: number) {
+  const source = consoleObject(value);
+  const summary = enrollment(source.business);
+  if (summary.business_id !== business || !validCount(source.total_leads)) throw consoleUnavailable();
+  const profile = source.profile === null ? null : project(source.profile, PROFILE_FIELDS);
+  if (profile && profile.business_id !== business) throw consoleUnavailable();
+  const services = scopedRows(source.services, business, SERVICE_FIELDS);
+  const leads = scopedRows(source.leads, business, LEAD_FIELDS);
+  if (leads.length > limit) throw consoleUnavailable();
+  return { business: summary, profile, services, leads, total_leads: source.total_leads };
 }
 function result(record: ProvisionRecord) {
   return {
@@ -197,17 +333,25 @@ async function ownerForRecord(client: AdminClient, actor: string, record: Provis
   }
   return owner;
 }
-async function finish(client: AdminClient, actor: string, record: ProvisionRecord, pendingToken?: string) {
+async function setupAllowed(client: AdminClient, actor: string, request: string) {
+  const allowed = await rpc<boolean>(client, "flowos_onboarding_setup_allowed", { p_actor: actor, p_request: request });
+  if (allowed !== true) throw new HttpError(409, "owner_access_changed", "The owner's business access has changed. Review access before issuing a setup link.");
+}
+async function finish(client: AdminClient, actor: string, request: string, record: ProvisionRecord, pendingToken?: string) {
   const output: ReturnType<typeof result> & { setup_url?: string; setup_error?: string } = result(record);
   try {
     const owner = await ownerForRecord(client, actor, record);
     const type = setupType(owner, record);
+    output.owner_setup_required = type !== null;
     if (type) {
+      await setupAllowed(client, actor, request);
       const token = type === "invite" && pendingToken ? pendingToken : (await generateSetup(client, record.owner_email, owner.id, type)).token;
       output.setup_url = setupUrl(record, token, type);
     }
-  } catch {
-    output.setup_error = "Business created. Owner setup link is unavailable; use Generate setup link to retry.";
+  } catch (error) {
+    output.setup_error = error instanceof HttpError && ["owner_changed", "owner_access_changed"].includes(error.code)
+      ? "Business created. Owner access has changed; review their current business access before retrying setup."
+      : "Business created. Owner setup link is unavailable; use Generate setup link to retry.";
   }
   return output;
 }
@@ -267,6 +411,22 @@ export function createHandler({ client }: HandlerDependencies) {
       if (allowed !== true) throw new HttpError(403, "admin_required", "Administrator access is required, with a current signed-in session.");
       if (req.method === "GET") return respond(200, { success: true, is_admin: true });
       const input = object(await readJson(req), "Request");
+      if (input.action === "list_businesses") {
+        const filters = listFilters(input);
+        const data = await consoleRpc<BusinessList>(client, "flowos_admin_businesses", {
+          p_actor: user.id, p_offset: filters.offset, p_limit: filters.limit,
+          p_active: filters.active, p_search: filters.search,
+        });
+        return respond(200, { success: true, ...businessList(data, filters.limit) });
+      }
+      if (input.action === "business_details") {
+        const filters = detailFilters(input);
+        const data = await consoleRpc<BusinessDetails | null>(client, "flowos_admin_business_details", {
+          p_actor: user.id, p_business: filters.business, p_offset: filters.offset, p_limit: filters.limit,
+        });
+        if (data === null) throw new HttpError(404, "business_not_found", "This business could not be found.");
+        return respond(200, { success: true, ...businessDetails(data, filters.business, filters.limit) });
+      }
       if (!["provision", "setup_link"].includes(String(input.action))) throw new HttpError(400, "invalid_input", "Choose a supported administrator action.");
       const id = requestId(input.request_id);
       const payload = input.action === "provision" ? validatePayload(input) : null;
@@ -277,12 +437,13 @@ export function createHandler({ client }: HandlerDependencies) {
         const owner = await ownerForRecord(client, user.id, existing);
         const type = setupType(owner, existing);
         if (!type) throw new HttpError(409, "owner_already_active", "This owner account is already active. They can sign in at the dashboard.");
+        await setupAllowed(client, user.id, id);
         const generated = await generateSetup(client, owner.email, owner.id, type);
         return respond(200, { ...result(existing), setup_url: setupUrl(existing, generated.token, type) });
       }
       if (existing) {
         if (stableJson(existing.payload) !== stableJson(payload)) throw new HttpError(409, "request_changed", "This request ID was already used with different details. Restore them or start a new setup.");
-        return respond(200, await finish(client, user.id, existing));
+        return respond(200, await finish(client, user.id, id, existing));
       }
       let owner = await rpc<Owner | null>(client, "flowos_onboarding_owner", { p_actor: user.id, p_email: payload!.owner_email });
       let ownerExisting = !!owner;
@@ -306,7 +467,7 @@ export function createHandler({ client }: HandlerDependencies) {
       });
       // The atomic database function decides the winning record under its lock.
       // Discard a pre-generated token if another call won with a different user.
-      return respond(200, await finish(client, user.id, record, record.owner_user_id === owner.id ? pendingToken : undefined));
+      return respond(200, await finish(client, user.id, id, record, record.owner_user_id === owner.id ? pendingToken : undefined));
     } catch (error) {
       const failure = error instanceof HttpError ? error : new HttpError(503, "onboarding_unavailable", "Administrator setup is unavailable. Retry with the same request ID.");
       return respond(failure.status, { success: false, code: failure.code, error: failure.message });
