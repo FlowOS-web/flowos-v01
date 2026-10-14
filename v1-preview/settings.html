@@ -39,9 +39,9 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="dashboard.html">Flow<span>OS</span></a>
+    <a class="brand" data-dashboard-link href="dashboard.html">Flow<span>OS</span></a>
     <div class="top-actions">
-      <a class="btn" href="dashboard.html">Dashboard</a>
+      <a class="btn" data-dashboard-link href="dashboard.html">Dashboard</a>
       <button id="logoutButton" class="btn">Sign Out</button>
     </div>
   </header>
@@ -118,7 +118,7 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
   <script>
     const SUPABASE_URL = "https://mxyikhxpzijrdrgowmxr.supabase.co";
     const SUPABASE_KEY = "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
@@ -128,6 +128,13 @@
     let role = null;
     let slug = null;
     let services = [];
+    const requestedBusinessId = new URLSearchParams(location.search).get("business_id");
+    const validBusinessId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    function dashboardUrl(){
+      const targetBusinessId = businessId || requestedBusinessId;
+      return targetBusinessId && validBusinessId.test(targetBusinessId) ? "dashboard.html?business_id=" + encodeURIComponent(targetBusinessId) : "dashboard.html";
+    }
 
     const loading = document.getElementById("loading");
     const errorBox = document.getElementById("errorBox");
@@ -165,15 +172,19 @@
       try{
         const { data:{session}, error:sessionError } = await supabaseClient.auth.getSession();
         if(sessionError) throw sessionError;
-        if(!session){ location.href = "dashboard.html"; return; }
+        if(!session){ location.href = dashboardUrl(); return; }
 
-        const { data:membership, error:membershipError } = await supabaseClient
-          .from("business_users").select("business_id, role").limit(1).maybeSingle();
+        if(requestedBusinessId !== null && !validBusinessId.test(requestedBusinessId)) throw new Error("The business link is invalid.");
+
+        let membershipQuery = supabaseClient.from("business_users").select("business_id, role").eq("user_id", session.user.id);
+        if(requestedBusinessId) membershipQuery = membershipQuery.eq("business_id", requestedBusinessId);
+        const { data:membership, error:membershipError } = await membershipQuery.order("business_id",{ascending:true}).limit(1).maybeSingle();
         if(membershipError) throw membershipError;
-        if(!membership) throw new Error("This account is not connected to a FlowOS business.");
+        if(!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a FlowOS business.");
 
         businessId = membership.business_id;
         role = membership.role;
+        document.querySelectorAll("[data-dashboard-link]").forEach(link => link.href = dashboardUrl());
 
         const [{data:business,error:businessError},{data:profile,error:profileError},{data:serviceRows,error:serviceError}] = await Promise.all([
           supabaseClient.from("businesses").select("id,name,industry,owner_email,slug").eq("id",businessId).single(),
@@ -336,7 +347,7 @@
 
     document.getElementById("logoutButton").addEventListener("click", async () => {
       await supabaseClient.auth.signOut();
-      location.href = "dashboard.html";
+      location.href = dashboardUrl();
     });
 
     initialize();
