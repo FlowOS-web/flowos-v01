@@ -417,8 +417,10 @@
       <div
         id="successMessage"
         class="message success"
+        role="status"
+        aria-live="polite"
       >
-        Your request has been received. The business will follow up with you.
+        Your request has been saved. The business will follow up with you.
       </div>
 
 
@@ -1349,6 +1351,21 @@
         SUCCESS
         ==========================================
         */
+
+        let confirmationMessage =
+          "Your request has been saved. The business will follow up with you.";
+
+        if (email && data.customer_confirmation_sent === true) {
+          confirmationMessage =
+            "Your request has been saved. A confirmation email was sent; check your inbox and spam folder. The business will follow up with you.";
+        }
+        else if (email && data.customer_confirmation_sent === false) {
+          confirmationMessage =
+            "Your request has been saved, but we could not send the confirmation email. The business can still view your request. You do not need to submit it again.";
+        }
+
+        successMessage.textContent =
+          confirmationMessage;
 
         leadForm.reset();
 
