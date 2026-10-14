@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FlowOS — Lead Operations for Service Businesses</title>
+  <meta name="description" content="FlowOS helps service businesses capture, organize, follow up with, and convert more incoming leads.">
+  <style>
+    *{box-sizing:border-box}
+    :root{
+      --bg:#090b10;--panel:#121722;--panel2:#171d29;--border:#263040;
+      --text:#f7f8fb;--muted:#9ca7b8;--accent:#6fa7ff;--accent2:#8d7cff;
+      --green:#62d59b;--shadow:0 24px 80px rgba(0,0,0,.38)
+    }
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;background:
+        radial-gradient(circle at 15% 0%,rgba(78,119,255,.14),transparent 34rem),
+        radial-gradient(circle at 95% 18%,rgba(141,124,255,.12),transparent 30rem),
+        var(--bg);
+      color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+    }
+    a{color:inherit;text-decoration:none}
+    .shell{max-width:1180px;margin:auto;padding:0 24px}
+    nav{display:flex;align-items:center;justify-content:space-between;min-height:76px;gap:24px}
+    .brand{font-weight:900;font-size:22px;letter-spacing:-.03em}.brand span{color:#9ca7b8}
+    .navlinks{display:flex;align-items:center;gap:24px;color:#c9d1dc;font-size:14px}
+    .nav-actions{display:flex;gap:10px;align-items:center}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border-radius:11px;border:1px solid var(--border);font-weight:750;font-size:14px;transition:.18s ease}
+    .btn:hover{transform:translateY(-1px);border-color:#40516a}
+    .btn.primary{background:#f7f8fb;color:#10131a;border-color:#f7f8fb}
+    .hero{padding:82px 0 58px;text-align:center}
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;padding:7px 11px;border:1px solid #2a3545;background:rgba(19,24,34,.72);border-radius:999px;color:#bdc8d7;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+    h1{font-size:clamp(44px,7vw,82px);line-height:.98;letter-spacing:-.055em;max-width:970px;margin:24px auto 22px}
+    .hero p{font-size:clamp(17px,2vw,21px);line-height:1.6;color:var(--muted);max-width:760px;margin:0 auto}
+    .hero-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:30px}
+    .micro{margin-top:14px;color:#768295;font-size:12px}
+    .product-frame{margin:38px auto 0;padding:10px;border-radius:24px;background:linear-gradient(135deg,rgba(111,167,255,.35),rgba(141,124,255,.2),rgba(255,255,255,.04));max-width:1060px;box-shadow:var(--shadow)}
+    .mock{background:#0d1118;border:1px solid #263143;border-radius:18px;overflow:hidden;text-align:left}
+    .mock-top{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #222b39;background:#10151e}
+    .dots{display:flex;gap:6px}.dot{width:9px;height:9px;border-radius:50%;background:#3c4657}
+    .mock-body{padding:22px}
+    .mock-title{font-size:24px;font-weight:850;margin-bottom:16px}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+    .kpi,.lead{background:#151b25;border:1px solid #263040;border-radius:13px;padding:15px}
+    .kpi small,.muted{color:#8f9aac}.kpi strong{display:block;font-size:23px;margin-top:7px}
+    .leadrow{display:grid;grid-template-columns:1.4fr 1fr 1fr .8fr;gap:10px;align-items:center}
+    .pill{justify-self:start;padding:5px 9px;border-radius:999px;background:#153725;color:#8ae0b0;font-size:11px;font-weight:800;text-transform:uppercase}
+    section{padding:82px 0}
+    .section-head{max-width:720px;margin-bottom:34px}
+    .section-head h2{font-size:clamp(32px,5vw,52px);letter-spacing:-.045em;line-height:1.04;margin:0 0 14px}
+    .section-head p{color:var(--muted);font-size:17px;line-height:1.65;margin:0}
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .feature{padding:24px;background:linear-gradient(180deg,rgba(24,30,42,.92),rgba(16,21,30,.92));border:1px solid var(--border);border-radius:18px}
+    .feature .icon{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:#1d2a3f;color:#a7c7ff;font-weight:900;margin-bottom:18px}
+    .feature h3{margin:0 0 9px;font-size:18px}.feature p{margin:0;color:var(--muted);line-height:1.6;font-size:14px}
+    .workflow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .step{padding:22px;border-top:1px solid #344155}
+    .step-num{color:#7faeff;font-weight:900;font-size:13px;margin-bottom:10px}.step h3{margin:0 0 8px;font-size:18px}.step p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
+    .cta{padding:38px;background:linear-gradient(135deg,#182235,#131926);border:1px solid #2b3950;border-radius:24px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+    .cta h2{font-size:clamp(28px,4vw,44px);letter-spacing:-.04em;margin:0 0 10px}.cta p{margin:0;color:var(--muted);line-height:1.6}
+    footer{padding:38px 0 50px;color:#7f8999;font-size:13px;border-top:1px solid #1e2632}
+    .footerrow{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}.footerlinks{display:flex;gap:18px;flex-wrap:wrap}
+    @media(max-width:850px){.navlinks{display:none}.kpis{grid-template-columns:repeat(2,1fr)}.features{grid-template-columns:1fr 1fr}.workflow{grid-template-columns:1fr 1fr}.leadrow{grid-template-columns:1fr 1fr}.cta{align-items:flex-start;flex-direction:column}}
+    @media(max-width:560px){.shell{padding:0 16px}.hero{padding-top:56px}.features,.workflow{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.mock-body{padding:14px}.leadrow{grid-template-columns:1fr}.nav-actions .btn:first-child{display:none}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <a class="brand" href="index.html">Flow<span>OS</span></a>
+      <div class="navlinks">
+        <a href="#features">Features</a>
+        <a href="#workflow">How it works</a>
+        <a href="#pilot">Pilot</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn" href="dashboard.html">Business login</a>
+        <a class="btn primary" href="request.html?b=flowos-demo">View live demo</a>
+      </div>
+    </nav>
+  </div>
+
+  <main>
+    <section class="hero">
+      <div class="shell">
+        <div class="eyebrow">Built for service businesses</div>
+        <h1>Turn incoming leads into booked work.</h1>
+        <p>FlowOS gives local service businesses one clean place to capture inquiries, track follow-up, monitor conversion, and keep revenue opportunities from slipping through the cracks.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="request.html?b=flowos-demo">Try the customer experience</a>
+          <a class="btn" href="dashboard.html">Open business dashboard</a>
+        </div>
+        <div class="micro">Secure lead capture · Business-specific workspaces · Mobile friendly</div>
+
+        <div class="product-frame" aria-label="FlowOS dashboard preview">
+          <div class="mock">
+            <div class="mock-top">
+              <strong>FlowOS · Northstar Home Services</strong>
+              <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </div>
+            <div class="mock-body">
+              <div class="mock-title">Customer Operations</div>
+              <div class="kpis">
+                <div class="kpi"><small>New</small><strong>2</strong></div>
+                <div class="kpi"><small>Booked</small><strong>2</strong></div>
+                <div class="kpi"><small>Conversion</small><strong>42.9%</strong></div>
+                <div class="kpi"><small>Pipeline</small><strong>$3.8k</strong></div>
+                <div class="kpi"><small>Booked value</small><strong>$6.2k</strong></div>
+              </div>
+              <div class="lead">
+                <div class="leadrow">
+                  <div><strong>Megan Carter</strong><div class="muted">HVAC Service · received 18 min ago</div></div>
+                  <div class="muted">Estimate requested</div>
+                  <div class="muted">$1,450 est.</div>
+                  <div class="pill">New</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="shell">
+        <div class="section-head">
+          <h2>A lead system owners can actually use.</h2>
+          <p>No giant CRM learning curve. FlowOS focuses on the daily workflow that matters most: get the inquiry, respond, book it, and know what the pipeline is worth.</p>
+        </div>
+        <div class="features">
+          <article class="feature"><div class="icon">01</div><h3>Secure lead capture</h3><p>Branded service-request pages collect customer details and route them into the correct business workspace.</p></article>
+          <article class="feature"><div class="icon">02</div><h3>Instant notifications</h3><p>Owners receive new-lead notifications while customers get an immediate confirmation that their request was received.</p></article>
+          <article class="feature"><div class="icon">03</div><h3>Simple pipeline</h3><p>Move leads through New, Contacted, Booked, Completed, and Lost without spreadsheets or scattered notes.</p></article>
+          <article class="feature"><div class="icon">04</div><h3>Lead response visibility</h3><p>See exactly when each lead arrived and quickly spot inquiries still waiting for contact.</p></article>
+          <article class="feature"><div class="icon">05</div><h3>Conversion tracking</h3><p>Track booking conversion and follow-through so owners can see whether more inquiries are becoming real jobs.</p></article>
+          <article class="feature"><div class="icon">06</div><h3>Pipeline value</h3><p>Add estimated opportunity value and booked job value to understand the revenue sitting inside the lead pipeline.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="shell">
+        <div class="section-head">
+          <h2>From customer request to booked job.</h2>
+          <p>The core workflow is intentionally simple so a team can start using it without weeks of setup or training.</p>
+        </div>
+        <div class="workflow">
+          <article class="step"><div class="step-num">STEP 1</div><h3>Customer reaches out</h3><p>A customer submits a secure request through the business-specific FlowOS page.</p></article>
+          <article class="step"><div class="step-num">STEP 2</div><h3>Lead is captured</h3><p>The inquiry appears in the correct dashboard and the business receives a notification.</p></article>
+          <article class="step"><div class="step-num">STEP 3</div><h3>Team follows up</h3><p>The lead is moved through the pipeline as the business contacts and qualifies the customer.</p></article>
+          <article class="step"><div class="step-num">STEP 4</div><h3>Owner sees results</h3><p>Booking conversion, pipeline value, and booked job value update as work progresses.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="pilot">
+      <div class="shell">
+        <div class="cta">
+          <div>
+            <h2>Built for a small group of early service-business partners.</h2>
+            <p>FlowOS is currently being prepared for pilot deployments. Early businesses get hands-on setup and direct support while the product is refined around real workflows.</p>
+          </div>
+          <a class="btn primary" href="mailto:hello@flowos.example?subject=FlowOS%20Pilot">Ask about a pilot</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footerrow">
+      <div>© 2026 FlowOS. All rights reserved.</div>
+      <div class="footerlinks">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="dashboard.html">Business login</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
