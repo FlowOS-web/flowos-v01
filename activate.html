@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Activate Your FlowOS Account</title>
+  <script>
+    // Keep the invitation in memory only and remove it before loading any external resource.
+    window.flowosInvitation = (() => {
+      const params = new URLSearchParams(location.hash.slice(1));
+      const invitation = { tokenHash: params.get("token_hash"), type: params.get("type"), businessId: params.get("business_id") };
+      history.replaceState(null, "", location.pathname);
+      return invitation;
+    })();
+  </script>
+  <style>
+    *{box-sizing:border-box}:root{--bg:#0d0f13;--panel:#151820;--border:#2a303b;--text:#f5f7fa;--muted:#969eac}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}.card{max-width:470px;width:100%;padding:30px;background:var(--panel);border:1px solid var(--border);border-radius:18px}.brand{font-size:26px;font-weight:800;margin-bottom:24px}.brand span{color:#99a2b0}h1{font-size:26px;margin:0 0 12px}p{color:var(--muted);line-height:1.55}label{display:block;margin:18px 0 7px;color:#dce0e7;font-size:13px}input,button{font:inherit}input{width:100%;padding:12px 13px;background:#0f1218;color:white;border:1px solid #303643;border-radius:10px}input:focus{outline:2px solid #566275;outline-offset:1px}.btn{width:100%;border:0;border-radius:10px;padding:13px;margin-top:20px;font-weight:700;cursor:pointer;color:#111;background:#f3f4f6}.btn:disabled{opacity:.55;cursor:not-allowed}.feedback{font-size:14px;line-height:1.55;margin-top:16px;overflow-wrap:anywhere;color:#ffb6b6}.feedback.ok{color:#68d9a0}.hidden{display:none!important}.hint{font-size:12px}a{color:#a8c7ff}.foot{margin-top:24px;font-size:13px}
+  </style>
+</head>
+<body>
+  <main class="wrap"><section class="card">
+    <div class="brand">Flow<span>OS</span></div>
+    <h1>Activate your owner account</h1>
+    <p id="intro">Use this private invitation to activate your FlowOS account and choose your password.</p>
+    <button id="verifyButton" class="btn hidden" type="button">Verify invitation and continue</button>
+    <form id="passwordForm" class="hidden">
+      <p id="ownerEmail"></p>
+      <label for="newPassword">Choose a password</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required aria-describedby="passwordHint">
+      <p id="passwordHint" class="hint">Use 12 or more characters with uppercase and lowercase letters, a number, and a symbol.</p>
+      <label for="confirmPassword">Confirm password</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+      <button id="saveButton" class="btn" type="submit">Set password and open dashboard</button>
+    </form>
+    <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+    <p class="foot"><a id="dashboardLink" href="dashboard.html">Already activated? Sign in to your dashboard</a></p>
+  </section></main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+  <script>
+    const supabaseClient = window.supabase.createClient("https://mxyikhxpzijrdrgowmxr.supabase.co", "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09", { auth: { detectSessionInUrl: false } });
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const invitation = window.flowosInvitation;
+    delete window.flowosInvitation;
+    let tokenHash = invitation.tokenHash;
+    const businessId = invitation.businessId;
+    const invitationType = invitation.type;
+    invitation.tokenHash = null;
+    let verifiedOwnerId = null;
+    const $ = id => document.getElementById(id);
+    function feedback(message, ok = false) { $("feedback").textContent = message; $("feedback").classList.toggle("ok", ok); }
+    const validInvitation = ["invite", "recovery"].includes(invitationType) && /^[a-zA-Z0-9_-]{20,256}$/.test(tokenHash || "") && UUID.test(businessId || "");
+    if (validInvitation) {
+      $("verifyButton").classList.remove("hidden");
+      $("dashboardLink").href = "dashboard.html?business_id=" + encodeURIComponent(businessId);
+    } else {
+      tokenHash = null;
+      feedback("This invitation is missing or invalid. Ask your FlowOS administrator for a new private setup link, or sign in if your account is already active.");
+    }
+    $("verifyButton").addEventListener("click", async () => {
+      if (!tokenHash || !validInvitation) return;
+      $("verifyButton").disabled = true;
+      feedback("Verifying your private invitation…", true);
+      try {
+        const { data, error } = await supabaseClient.auth.verifyOtp({ token_hash: tokenHash, type: invitationType });
+        if (error) throw error;
+        tokenHash = null;
+        if (!data?.session || !data.user?.id || data.user.id !== data.session.user.id) throw new Error("No owner session was returned.");
+        const { data: membership, error: membershipError } = await supabaseClient.from("business_users").select("business_id,role").eq("user_id", data.user.id).eq("business_id", businessId).eq("role", "owner").maybeSingle();
+        if (membershipError || membership?.business_id !== businessId) throw new Error("This invitation could not be matched to your business. Contact your FlowOS administrator.");
+        verifiedOwnerId = data.user.id;
+        $("ownerEmail").textContent = "Invitation verified for " + data.user.email + ".";
+        $("intro").textContent = "Choose your password to finish setting up owner access.";
+        $("verifyButton").classList.add("hidden");
+        $("passwordForm").classList.remove("hidden");
+        feedback("", true);
+        $("newPassword").focus();
+      } catch {
+        tokenHash = null;
+        verifiedOwnerId = null;
+        $("verifyButton").classList.add("hidden");
+        feedback("This invitation could not be verified. It may have expired or already been used. Ask your FlowOS administrator for a fresh setup link, or sign in if you have already activated your account.");
+      }
+    });
+    $("passwordForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!verifiedOwnerId) return;
+      const password = $("newPassword").value;
+      if (password !== $("confirmPassword").value) { feedback("The passwords do not match."); return; }
+      if (password.length < 12 || password.length > 128 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9\s]/.test(password)) { feedback("Use 12–128 characters with uppercase and lowercase letters, a number, and a symbol."); return; }
+      $("saveButton").disabled = true;
+      feedback("Saving your password…", true);
+      try {
+        // A previously signed-in browser session is never enough to authorize a password change here.
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+        if (userError || user?.id !== verifiedOwnerId) throw new Error("Your verified invitation session has ended. Ask your administrator for a new setup link.");
+        const { data, error } = await supabaseClient.auth.updateUser({ password });
+        if (error) throw error;
+        if (data.user?.id !== verifiedOwnerId) throw new Error("Your account could not be confirmed.");
+        $("newPassword").value = ""; $("confirmPassword").value = "";
+        verifiedOwnerId = null;
+        location.replace("dashboard.html?business_id=" + encodeURIComponent(businessId));
+      } catch (error) { feedback(error.message || "Your password could not be saved. Please try again."); $("saveButton").disabled = false; }
+    });
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (verifiedOwnerId && (event === "SIGNED_OUT" || (session?.user?.id && session.user.id !== verifiedOwnerId))) {
+        verifiedOwnerId = null; $("passwordForm").classList.add("hidden"); $("newPassword").value = ""; $("confirmPassword").value = "";
+        feedback("Your verified invitation session has ended. Sign in if activation is complete, or ask your administrator for a new link.");
+      }
+    });
+    window.addEventListener("pagehide", () => { tokenHash = null; verifiedOwnerId = null; $("newPassword").value = ""; $("confirmPassword").value = ""; });
+  </script>
+</body>
+</html>

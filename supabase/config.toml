@@ -1,0 +1,11 @@
+project_id = "mxyikhxpzijrdrgowmxr"
+
+[functions.flowos-admin-onboarding]
+verify_jwt = true
+
+[functions.notify-new-lead]
+verify_jwt = true
+
+# Public by design; the function itself validates Turnstile and tenant services.
+[functions.submit-lead]
+verify_jwt = false

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>FlowOS Business Onboarding</title>
+  <style>
+    *{box-sizing:border-box}:root{--bg:#0d0f13;--panel:#151820;--border:#2a303b;--text:#f5f7fa;--muted:#969eac;--ok:#68d9a0}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}a{color:inherit;text-decoration:none}button,input,textarea{font:inherit}
+    .topbar{min-height:72px;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#11141a;border-bottom:1px solid var(--border);gap:14px}.brand{font-size:22px;font-weight:800}.brand span{color:#99a2b0}.top-actions{display:flex;gap:10px;align-items:center}
+    .btn{border:1px solid var(--border);border-radius:9px;padding:10px 14px;background:#191d25;color:white;cursor:pointer;display:inline-block}.btn.primary{background:#f3f4f6;color:#111;border-color:#f3f4f6;font-weight:700}.btn:disabled{opacity:.55;cursor:not-allowed}
+    .container{max-width:1050px;margin:auto;padding:30px 22px 60px}h1{margin:0 0 9px;font-size:30px}h2{margin:0 0 8px;font-size:20px}p{color:var(--muted);line-height:1.55}.subtitle{margin:0 0 26px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:24px}.login{max-width:440px;margin:30px auto}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:block;margin:15px 0 7px;font-size:13px;color:#dce0e7}input,textarea{width:100%;padding:12px 13px;color:white;background:#0f1218;border:1px solid #303643;border-radius:10px}input[type="color"]{height:44px;padding:7px;cursor:pointer}textarea{min-height:148px;resize:vertical}input:focus,textarea:focus{outline:2px solid #566275;outline-offset:1px}.hint{font-size:12px;color:var(--muted);margin:7px 0 0}.feedback{margin-top:16px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}.feedback.ok{color:var(--ok)}.feedback.error{color:#ffb6b6}.hidden{display:none!important}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}.copy-row{display:flex;gap:8px;align-items:center}.copy-row .btn{flex-shrink:0}.notice{padding:14px;border:1px solid #5f4b2a;background:#261f12;border-radius:10px;color:#f2d58c;font-size:14px;line-height:1.5;margin:16px 0}.result{margin-top:20px}.result p{margin:8px 0}.status{color:var(--muted);line-height:1.5}
+    @media(max-width:760px){.grid,.row{grid-template-columns:1fr}.topbar{padding:14px 16px;flex-wrap:wrap}.container{padding:24px 14px 45px}.card{padding:20px}.copy-row{align-items:stretch}.copy-row input{min-width:0}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="dashboard.html">Flow<span>OS</span></a>
+    <div class="top-actions"><a class="btn" href="dashboard.html">Dashboard</a><button id="logoutButton" class="btn hidden" type="button">Sign Out</button></div>
+  </header>
+  <main class="container">
+    <h1>Business onboarding</h1>
+    <p class="subtitle">Create a service business, its customer request page, and owner access in one step.</p>
+    <div id="accessStatus" class="status" role="status">Checking administrator access…</div>
+    <section id="loginSection" class="card login hidden">
+      <h2>Administrator sign in</h2>
+      <p>Use your existing FlowOS platform administrator account.</p>
+      <form id="loginForm">
+        <label for="email">Email</label><input id="email" type="email" autocomplete="username" maxlength="200" required>
+        <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+        <button id="loginButton" class="btn primary" type="submit" style="margin-top:20px">Sign In</button>
+      </form>
+      <div id="loginFeedback" class="feedback" role="alert"></div>
+    </section>
+    <section id="adminContent" class="hidden">
+      <form id="provisionForm">
+        <fieldset id="provisionFields" style="border:0;padding:0;margin:0">
+          <div class="grid">
+            <div class="card">
+              <h2>Business profile</h2>
+              <p>This profile appears on the customer request page.</p>
+              <label for="businessName">Business name</label><input id="businessName" maxlength="120" required>
+              <label for="slug">Request page name</label><input id="slug" minlength="3" maxlength="60" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="northstar-home-services" required aria-describedby="slugHint">
+              <p id="slugHint" class="hint">3–60 lowercase letters, numbers, or single hyphens. Choose a unique name; it becomes the public request link.</p>
+              <label for="industry">Industry</label><input id="industry" maxlength="120" placeholder="Home services">
+              <label for="tagline">Customer-facing tagline</label><textarea id="tagline" maxlength="280" style="min-height:90px"></textarea>
+              <div class="row">
+                <div><label for="contactPhone">Public phone</label><input id="contactPhone" type="tel" maxlength="50"></div>
+                <div><label for="primaryColor">Brand color</label><input id="primaryColor" type="color" value="#6fa7ff"></div>
+              </div>
+              <label for="websiteUrl">Website</label><input id="websiteUrl" type="url" maxlength="300" placeholder="https://example.com">
+              <label for="logoUrl">Logo image URL</label><input id="logoUrl" type="url" maxlength="500" placeholder="https://example.com/logo.png">
+            </div>
+            <div class="card">
+              <h2>Owner and services</h2>
+              <p>The owner can view leads and manage this business’s profile and services.</p>
+              <label for="ownerEmail">Owner sign-in email</label><input id="ownerEmail" type="email" autocomplete="off" maxlength="200" required>
+              <p class="hint">An existing account keeps its password. A new owner receives a private setup link for choosing their password.</p>
+              <label for="notificationEmail">Lead notification email</label><input id="notificationEmail" type="email" maxlength="200" placeholder="Defaults to owner email">
+              <label for="services">Initial services</label><textarea id="services" maxlength="2500" required placeholder="Plumbing repair&#10;Drain cleaning&#10;Water heater service" aria-describedby="servicesHint"></textarea>
+              <p id="servicesHint" class="hint">One service per line. Add 1–20 distinct services, up to 120 characters each. All start enabled.</p>
+              <div class="notice">Only platform administrators can create businesses here. Check the owner’s email before provisioning access.</div>
+            </div>
+          </div>
+          <div class="actions"><button id="provisionButton" class="btn primary" type="submit">Create business and owner access</button><button id="newBusinessButton" class="btn" type="button">Clear for another business</button></div>
+        </fieldset>
+      </form>
+      <div id="provisionFeedback" class="feedback" role="status" aria-live="polite"></div>
+      <section id="resultSection" class="card result hidden" aria-label="Provisioned business">
+        <h2>Business is ready</h2>
+        <p id="ownerStatus"></p>
+        <label for="requestLink">Public customer request link</label><div class="copy-row"><input id="requestLink" readonly><button class="btn" type="button" data-copy="requestLink">Copy</button></div>
+        <div class="actions"><a id="requestPage" class="btn" target="_blank" rel="noopener noreferrer">Open request page</a><a id="dashboardLink" class="btn" target="_blank" rel="noopener noreferrer">Owner dashboard</a><a id="settingsLink" class="btn" target="_blank" rel="noopener noreferrer">Business settings</a></div>
+        <div id="setupSection" class="hidden">
+          <div class="notice">Private one-time owner setup link. Share it only with <strong id="setupOwner"></strong> through a trusted channel. Anyone with this link can activate that owner account. It expires and is cleared when you leave this page.</div>
+          <label for="setupLink">Private owner setup link</label><div class="copy-row"><input id="setupLink" readonly autocomplete="off"><button class="btn" type="button" data-copy="setupLink">Copy</button></div>
+        </div>
+        <button id="regenerateButton" class="btn hidden" type="button" style="margin-top:18px">Generate a new owner setup link</button>
+        <div id="resultFeedback" class="feedback" role="status" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+  <script>
+    const supabaseClient = window.supabase.createClient("https://mxyikhxpzijrdrgowmxr.supabase.co", "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09");
+    const PENDING_KEY = "flowos:onboarding:pending:v1";
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const $ = id => document.getElementById(id);
+    let pending = null;
+    let resultRequestId = null;
+    let adminUserId = null;
+    let accessEpoch = 0;
+    let busy = false;
+    function feedback(id, message, ok = false) {
+      $(id).textContent = message;
+      $(id).classList.toggle("ok", ok);
+      $(id).classList.toggle("error", Boolean(message) && !ok);
+    }
+    function clearResult() {
+      $("setupLink").value = "";
+      $("setupSection").classList.add("hidden");
+      $("regenerateButton").classList.add("hidden");
+      $("resultSection").classList.add("hidden");
+      resultRequestId = null;
+      feedback("resultFeedback", "");
+    }
+    function clearPending() {
+      pending = null;
+      try { sessionStorage.removeItem(PENDING_KEY); } catch {}
+    }
+    function normalizeUrl(value) {
+      if (!value.trim()) return null;
+      const url = new URL(value.trim());
+      if (!["http:", "https:"].includes(url.protocol)) throw new Error("Website and logo URLs must use http or https.");
+      return url.toString();
+    }
+    function payload() {
+      const ownerEmail = $("ownerEmail").value.trim().toLowerCase();
+      const name = $("businessName").value.trim();
+      const slug = $("slug").value.trim();
+      const services = $("services").value.split(/\r?\n/).map(name => name.trim()).filter(Boolean);
+      if (!name || name.length > 120) throw new Error("Enter a business name up to 120 characters.");
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 3 || slug.length > 60) throw new Error("Choose a request page name with 3–60 lowercase letters, numbers, or single hyphens.");
+      if (!services.length || services.length > 20 || services.some(name => name.length > 120)) throw new Error("Add 1–20 services, each up to 120 characters.");
+      if (new Set(services.map(name => name.toLowerCase())).size !== services.length) throw new Error("Each service name must be distinct.");
+      return { business: { name, slug, industry: $("industry").value.trim() || null, tagline: $("tagline").value.trim() || null, contact_phone: $("contactPhone").value.trim() || null, website_url: normalizeUrl($("websiteUrl").value), logo_url: normalizeUrl($("logoUrl").value), primary_color: $("primaryColor").value, notification_email: $("notificationEmail").value.trim().toLowerCase() || ownerEmail }, owner_email: ownerEmail, services };
+    }
+    function restorePending() {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null");
+        if (!saved || !UUID.test(saved.request_id) || typeof saved.canonical !== "string" || saved.canonical.length > 9000) return;
+        if (saved.admin_user_id && saved.admin_user_id !== adminUserId) { clearPending(); return; }
+        const data = JSON.parse(saved.canonical);
+        if (!data.business || !Array.isArray(data.services)) return;
+        const fields = { businessName: "name", slug: "slug", industry: "industry", tagline: "tagline", contactPhone: "contact_phone", websiteUrl: "website_url", logoUrl: "logo_url", primaryColor: "primary_color", notificationEmail: "notification_email" };
+        for (const [id, key] of Object.entries(fields)) if (typeof data.business[key] === "string" || data.business[key] === null) $(id).value = data.business[key] || (id === "primaryColor" ? "#6fa7ff" : "");
+        $("ownerEmail").value = typeof data.owner_email === "string" ? data.owner_email : "";
+        $("services").value = data.services.filter(name => typeof name === "string").join("\n");
+        pending = saved;
+        feedback("provisionFeedback", "Your last submission is restored. Submit unchanged to safely retry it.", true);
+      } catch { clearPending(); }
+    }
+    async function invoke(options) {
+      const { data, error } = await supabaseClient.functions.invoke("flowos-admin-onboarding", options);
+      if (error) {
+        let message = "Unable to complete onboarding. Check your administrator access and try again.";
+        try { const detail = await error.context?.json(); if (typeof detail?.error === "string") message = detail.error.slice(0, 300); } catch {}
+        throw new Error(message);
+      }
+      if (data?.error) throw new Error(String(data.error).slice(0, 300));
+      return data;
+    }
+    function previewLink(page, parameters) {
+      const url = new URL(page, location.href);
+      for (const [key, value] of Object.entries(parameters)) url.searchParams.set(key, value);
+      return url.href;
+    }
+    function showSetupLink(value, ownerEmail, businessId) {
+      $("setupLink").value = "";
+      $("setupSection").classList.add("hidden");
+      if (!value) return;
+      const url = new URL(value);
+      const params = new URLSearchParams(url.hash.slice(1));
+      if (url.origin !== "https://flowos-web.github.io" || url.pathname !== "/flowos-v01/v1-preview/activate.html" || url.search || !["invite", "recovery"].includes(params.get("type")) || !/^[a-zA-Z0-9_-]{20,256}$/.test(params.get("token_hash") || "") || params.get("business_id") !== businessId) throw new Error("Business created, but the owner setup link could not be displayed. Generate a new setup link.");
+      $("setupLink").value = url.href;
+      $("setupOwner").textContent = ownerEmail;
+      $("setupSection").classList.remove("hidden");
+    }
+    function renderResult(data, requestId) {
+      if (!data?.success || !UUID.test(data.business_id || "") || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.slug || "") || typeof data.owner_email !== "string") throw new Error("The onboarding response could not be verified. Retry the same submission.");
+      resultRequestId = requestId;
+      $("resultSection").classList.remove("hidden");
+      $("requestLink").value = previewLink("request.html", { b: data.slug });
+      $("requestPage").href = $("requestLink").value;
+      $("dashboardLink").href = previewLink("dashboard.html", { business_id: data.business_id });
+      $("settingsLink").href = previewLink("settings.html", { business_id: data.business_id });
+      const requiresSetup = data.owner_existing === false || data.owner_setup_required === true || Boolean(data.setup_url || data.setup_error);
+      $("ownerStatus").textContent = requiresSetup ? "Owner access is ready for " + data.owner_email + ". Share the private setup link below so they can choose their password." : data.owner_email + " already has a FlowOS account. Share the dashboard link; they can sign in with their existing password.";
+      $("regenerateButton").classList.toggle("hidden", !requiresSetup);
+      showSetupLink(data.setup_url, data.owner_email, data.business_id);
+      feedback("resultFeedback", data.setup_error ? "Business and membership were created. " + String(data.setup_error).slice(0, 300) + " Use the button above to retry owner setup." : "", false);
+    }
+    async function checkAccess() {
+      const epoch = ++accessEpoch;
+      adminUserId = null;
+      clearResult();
+      $("adminContent").classList.add("hidden");
+      $("loginSection").classList.add("hidden");
+      $("accessStatus").textContent = "Checking administrator access…";
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        if (epoch !== accessEpoch) return;
+        $("logoutButton").classList.toggle("hidden", !session);
+        if (!session) { $("accessStatus").textContent = "Administrator sign-in is required."; $("loginSection").classList.remove("hidden"); return; }
+        const data = await invoke({ method: "GET" });
+        if (epoch !== accessEpoch) return;
+        if (data?.is_admin !== true) throw new Error("This account does not have platform administrator access.");
+        adminUserId = session.user.id;
+        $("accessStatus").textContent = "Signed in as " + session.user.email + ". Platform administrator access confirmed.";
+        $("adminContent").classList.remove("hidden");
+        restorePending();
+      } catch (error) {
+        if (epoch !== accessEpoch) return;
+        $("accessStatus").textContent = error.message || "Administrator access could not be checked. Sign out and try again.";
+        $("accessStatus").setAttribute("role", "alert");
+      }
+    }
+    $("loginForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      $("loginButton").disabled = true;
+      feedback("loginFeedback", "");
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
+        if (error) throw error;
+        $("password").value = "";
+        await checkAccess();
+      } catch (error) { feedback("loginFeedback", error.message || "Unable to sign in."); }
+      finally { $("loginButton").disabled = false; }
+    });
+    $("provisionForm").addEventListener("input", () => { if (!busy) { clearPending(); clearResult(); feedback("provisionFeedback", ""); } });
+    $("provisionForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!adminUserId || busy) return;
+      const epoch = accessEpoch;
+      busy = true;
+      $("provisionFields").disabled = true;
+      clearResult();
+      feedback("provisionFeedback", "Creating business and owner access…", true);
+      try {
+        const body = payload();
+        const canonical = JSON.stringify(body);
+        if (!pending || pending.canonical !== canonical) pending = { request_id: crypto.randomUUID(), canonical, admin_user_id: adminUserId };
+        if (pending.admin_user_id && pending.admin_user_id !== adminUserId) pending = { request_id: crypto.randomUUID(), canonical, admin_user_id: adminUserId };
+        try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(pending)); } catch {}
+        const data = await invoke({ body: { action: "provision", request_id: pending.request_id, ...body } });
+        if (epoch !== accessEpoch) return;
+        renderResult(data, pending.request_id);
+        feedback("provisionFeedback", "Business created. Share the public request link and owner access below.", true);
+      } catch (error) { if (epoch === accessEpoch) feedback("provisionFeedback", (error.message || "Unable to create business.") + " Keep the form unchanged to retry the same request."); }
+      finally { busy = false; $("provisionFields").disabled = false; }
+    });
+    $("regenerateButton").addEventListener("click", async () => {
+      if (!adminUserId || !resultRequestId || busy) return;
+      const epoch = accessEpoch;
+      busy = true;
+      $("regenerateButton").disabled = true;
+      $("provisionFields").disabled = true;
+      $("setupLink").value = "";
+      $("setupSection").classList.add("hidden");
+      feedback("resultFeedback", "Generating a private owner setup link…", true);
+      try {
+        const data = await invoke({ body: { action: "setup_link", request_id: resultRequestId } });
+        if (epoch !== accessEpoch) return;
+        renderResult(data, resultRequestId);
+        feedback("resultFeedback", data.setup_url ? "New setup link is ready. Previously generated links may no longer work." : "The owner already has a confirmed account. They can sign in with their existing password.", true);
+      } catch (error) { if (epoch === accessEpoch) feedback("resultFeedback", error.message || "Unable to generate owner setup link."); }
+      finally { busy = false; $("regenerateButton").disabled = false; $("provisionFields").disabled = false; }
+    });
+    $("newBusinessButton").addEventListener("click", () => { clearPending(); clearResult(); $("provisionForm").reset(); feedback("provisionFeedback", ""); $("businessName").focus(); });
+    document.querySelectorAll("[data-copy]").forEach(button => button.addEventListener("click", async () => {
+      const input = $(button.dataset.copy);
+      if (!input.value) return;
+      try { await navigator.clipboard.writeText(input.value); feedback("resultFeedback", button.dataset.copy === "setupLink" ? "Private setup link copied. Share only with the owner." : "Public request link copied.", true); }
+      catch { input.focus(); input.select(); feedback("resultFeedback", "Select and copy the link above.", true); }
+    }));
+    $("logoutButton").addEventListener("click", async () => {
+      accessEpoch++;
+      adminUserId = null;
+      clearResult();
+      clearPending();
+      $("provisionForm").reset();
+      $("adminContent").classList.add("hidden");
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) $("accessStatus").textContent = "Sign out could not complete. Please try again.";
+      else await checkAccess();
+    });
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || (adminUserId && session?.user?.id && session.user.id !== adminUserId)) {
+        accessEpoch++; adminUserId = null; clearResult(); clearPending(); $("provisionForm").reset();
+        $("adminContent").classList.add("hidden"); $("loginSection").classList.remove("hidden"); $("logoutButton").classList.add("hidden");
+        $("accessStatus").textContent = "Administrator sign-in is required.";
+      }
+    });
+    window.addEventListener("pagehide", () => { $("setupLink").value = ""; });
+    checkAccess();
+  </script>
+</body>
+</html>
