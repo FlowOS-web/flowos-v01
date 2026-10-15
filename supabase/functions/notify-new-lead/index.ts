@@ -5,7 +5,7 @@ const RESEND_API_KEY =
 
 const FROM_EMAIL =
   Deno.env.get("FROM_EMAIL") ||
-  "FlowOS <onboarding@resend.dev>";
+  "Gatebrook <onboarding@resend.dev>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -393,7 +393,7 @@ const handler =
             margin-bottom:
               5px;
           ">
-            New FlowOS Lead
+            New Gatebrook Lead
           </h2>
 
           <p style="
@@ -545,7 +545,7 @@ const handler =
               #777;
           ">
             This lead was captured
-            automatically by FlowOS.
+            automatically by Gatebrook.
           </p>
 
         </div>
@@ -600,7 +600,7 @@ const handler =
       The customer cannot choose
       arbitrary message content.
       The email template is controlled
-      entirely by FlowOS.
+      entirely by Gatebrook.
       */
 
       let customerConfirmationSent =
@@ -693,7 +693,7 @@ const handler =
               margin-top:
                 28px;
             ">
-              Powered by FlowOS
+              Powered by Gatebrook
             </p>
 
           </div>
