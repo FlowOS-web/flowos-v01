@@ -15,7 +15,7 @@ const RESEND_API_KEY =
 
 const FROM_EMAIL =
   Deno.env.get("FROM_EMAIL") ||
-  "FlowOS <onboarding@resend.dev>";
+  "Gatebrook <onboarding@resend.dev>";
 
 // Keep existing request links working while the custom domain becomes primary.
 const ALLOWED_HOSTNAMES = new Set([
@@ -835,7 +835,7 @@ const handler =
           ">
 
             <h2>
-              New FlowOS Lead
+              New Gatebrook Lead
             </h2>
 
             <p>
@@ -939,7 +939,7 @@ const handler =
               font-size:12px;
             ">
               Captured automatically
-              by FlowOS.
+              by Gatebrook.
             </p>
 
           </div>
@@ -1074,7 +1074,7 @@ const handler =
               font-size:12px;
               margin-top:28px;
             ">
-              Powered by FlowOS
+              Powered by Gatebrook
             </p>
 
           </div>
