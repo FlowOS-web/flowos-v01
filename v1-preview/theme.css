@@ -1,0 +1,198 @@
+/* Gatebrook appearance: shared between public, owner, and admin pages. */
+:root[data-gb-theme="light"]{
+  color-scheme:light;
+  --bg:#f3f6fa;
+  --panel:#ffffff;
+  --panel2:#edf2f8;
+  --panel-2:#edf2f8;
+  --border:#d5deeb;
+  --text:#172335;
+  --muted:#536176;
+  --ok:#126c43;
+  --green:#13744b;
+  --yellow:#8c6313;
+  --red:#a53b48;
+  --blue:#2d60be;
+  --shadow:0 22px 58px rgba(23,39,65,.11);
+}
+
+.gb-theme-toggle{
+  position:fixed;
+  z-index:9999;
+  inset:auto 20px 20px auto;
+  display:inline-flex !important;
+  width:auto !important;
+  min-width:123px;
+  height:46px;
+  min-height:46px;
+  margin:0 !important;
+  padding:0 15px !important;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  border:1px solid #435066 !important;
+  border-radius:999px !important;
+  box-shadow:0 12px 32px rgba(0,0,0,.24);
+  background:#222a39 !important;
+  color:#f2f5fd !important;
+  font:600 13px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+  text-transform:none;
+  letter-spacing:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.gb-theme-toggle:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.gb-theme-toggle:focus-visible{outline:3px solid #78a4ed;outline-offset:3px}
+.gb-theme-toggle svg{width:19px;height:19px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gb-theme-toggle .gb-icon-moon{display:none}
+:root[data-gb-theme="light"] .gb-theme-toggle{
+  color:#172b47 !important;
+  background:#fff !important;
+  border-color:#b8c6da !important;
+  box-shadow:0 8px 26px rgba(28,54,87,.16);
+}
+:root[data-gb-theme="light"] .gb-theme-toggle .gb-icon-sun{display:none}
+:root[data-gb-theme="light"] .gb-theme-toggle .gb-icon-moon{display:block}
+@media(max-width:560px){
+  .gb-theme-toggle{inset:auto 14px 14px auto;min-width:46px;width:46px !important;height:46px;padding:0 !important}
+  .gb-theme-toggle .gb-theme-label{display:none}
+}
+
+:root[data-gb-theme="light"] body{background:var(--bg);color:var(--text)}
+:root[data-gb-theme="light"] .brand span,
+:root[data-gb-theme="light"] .logo span,
+:root[data-gb-theme="light"] .flowos strong{color:#48617e}
+:root[data-gb-theme="light"] .topbar{background:#fff;border-bottom-color:var(--border)}
+:root[data-gb-theme="light"] .topbar .brand span{color:#4767a5}
+:root[data-gb-theme="light"] label{color:#33445e}
+:root[data-gb-theme="light"] input:not([type="color"]):not([type="checkbox"]),
+:root[data-gb-theme="light"] textarea,
+:root[data-gb-theme="light"] select{
+  background:#fff;
+  color:#172335;
+  border-color:#c4cfe0;
+}
+:root[data-gb-theme="light"] input::placeholder,
+:root[data-gb-theme="light"] textarea::placeholder{color:#77849a;opacity:1}
+:root[data-gb-theme="light"] input:focus-visible,
+:root[data-gb-theme="light"] textarea:focus-visible,
+:root[data-gb-theme="light"] select:focus-visible{outline-color:#537ed4}
+:root[data-gb-theme="light"] .login-card,
+:root[data-gb-theme="light"] .card,
+:root[data-gb-theme="light"] .lead-card,
+:root[data-gb-theme="light"] .stat-card{background:#fff;border-color:var(--border)}
+:root[data-gb-theme="light"] .primary-button,
+:root[data-gb-theme="light"] .btn.primary,
+:root[data-gb-theme="light"] button[type="submit"]:not(.gb-theme-toggle):not(.action-button){
+  background:#254c89;
+  border-color:#254c89;
+  color:white;
+}
+:root[data-gb-theme="light"] .btn:not(.primary):not(.text),
+:root[data-gb-theme="light"] .logout-button,
+:root[data-gb-theme="light"] .refresh-button,
+:root[data-gb-theme="light"] .action-button{
+  background:#f0f4fa;
+  border-color:#ced8e6;
+  color:#253954;
+}
+:root[data-gb-theme="light"] .btn:hover:not(:disabled),
+:root[data-gb-theme="light"] .logout-button:hover,
+:root[data-gb-theme="light"] .refresh-button:hover,
+:root[data-gb-theme="light"] .action-button:hover{background:#e5ecf6}
+:root[data-gb-theme="light"] .btn.text{color:#4f6180}
+:root[data-gb-theme="light"] .login-error,
+:root[data-gb-theme="light"] .dashboard-error,
+:root[data-gb-theme="light"] .error{
+  background:#fff1f1;
+  border-color:#efc5c7;
+  color:#8c2e36;
+}
+:root[data-gb-theme="light"] .feedback.error{color:#a42b38}
+:root[data-gb-theme="light"] .feedback.ok,
+:root[data-gb-theme="light"] .value-feedback.success{color:#0d7043}
+:root[data-gb-theme="light"] .value-feedback.error{color:#ab303b}
+:root[data-gb-theme="light"] .owner-only-note,
+:root[data-gb-theme="light"] .notice{background:#fff8e9;border-color:#e9cba0;color:#805b17}
+:root[data-gb-theme="light"] .toggle,
+:root[data-gb-theme="light"] .field-value,
+:root[data-gb-theme="light"] .lead-notes,
+:root[data-gb-theme="light"] .vehicle{color:#33435b}
+
+/* Marketing homepage */
+:root[data-gb-theme="light"] body:has(.hero){
+  background:radial-gradient(circle at 14% 0%,rgba(87,125,221,.10),transparent 34rem),
+    radial-gradient(circle at 90% 15%,rgba(143,116,225,.10),transparent 28rem),var(--bg);
+}
+:root[data-gb-theme="light"] .navlinks{color:#485974}
+:root[data-gb-theme="light"] .btn.primary{background:#233e69;border-color:#233e69;color:#fff}
+:root[data-gb-theme="light"] .eyebrow{background:#e9effb;border-color:#cfdcf2;color:#345a97}
+:root[data-gb-theme="light"] .micro{color:#64748b}
+:root[data-gb-theme="light"] .product-frame{background:linear-gradient(135deg,#d0dcf7,#e4e1f6,#eaf1fa)}
+:root[data-gb-theme="light"] .mock{background:#fff;border-color:#d6dfeb}
+:root[data-gb-theme="light"] .mock-top{background:#f4f7fc;border-color:#d6dfeb}
+:root[data-gb-theme="light"] .dots .dot{background:#a4b3c9}
+:root[data-gb-theme="light"] .kpi,
+:root[data-gb-theme="light"] .lead{background:#f7f9fc;border-color:#dae3ef}
+:root[data-gb-theme="light"] .kpi small,
+:root[data-gb-theme="light"] .muted{color:#617087}
+:root[data-gb-theme="light"] .pill{background:#e1f5e9;color:#176640}
+:root[data-gb-theme="light"] .feature{background:linear-gradient(180deg,#fff,#f9fbfe);border-color:var(--border)}
+:root[data-gb-theme="light"] .feature .icon{background:#e6edfc;color:#315fa3}
+:root[data-gb-theme="light"] .step{border-top-color:#c6d3e5}
+:root[data-gb-theme="light"] .step-num{color:#325c9d}
+:root[data-gb-theme="light"] .cta{background:linear-gradient(135deg,#e6edfb,#f6f8fc);border-color:#ccd8ea}
+:root[data-gb-theme="light"] footer{color:#637186;border-color:#d5deeb}
+
+/* Owner dashboard */
+:root[data-gb-theme="light"] .filter-button{background:#eff3f9;color:#3c4a60;border-color:#d2dcea}
+:root[data-gb-theme="light"] .filter-button.active{background:#253e68;border-color:#253e68;color:#fff}
+:root[data-gb-theme="light"] .notes{background:#f5f8fc;border-color:#dbe3ee;color:#33455e}
+:root[data-gb-theme="light"] .lead-age{color:#46617f}
+:root[data-gb-theme="light"] .lead-age.awaiting-contact,
+:root[data-gb-theme="light"] .value-tracking-notice{color:#8f6219}
+:root[data-gb-theme="light"] .status-new{background:#e5f0fc;color:#1d5281}
+:root[data-gb-theme="light"] .status-contacted{background:#fff1cf;color:#805b0d}
+:root[data-gb-theme="light"] .status-booked{background:#def5e7;color:#166039}
+:root[data-gb-theme="light"] .status-completed{background:#ede7ff;color:#593f9d}
+:root[data-gb-theme="light"] .status-lost{background:#fde7e7;color:#903d42}
+
+/* Business settings */
+:root[data-gb-theme="light"] .service-row{border-bottom-color:#dae2eb}
+:root[data-gb-theme="light"] .btn.danger{color:#972d38;border-color:#df9b9e}
+
+/* Admin console */
+:root[data-gb-theme="light"] .summary-card{background:linear-gradient(120deg,#edf2fa,#fff);border-color:var(--border)}
+:root[data-gb-theme="light"] .summary-card:first-child{border-color:#afc9e8}
+:root[data-gb-theme="light"] .enrollment,
+:root[data-gb-theme="light"] .leads-list .lead{background:#fff;border-color:var(--border)}
+:root[data-gb-theme="light"] .console-nav .selected{background:#dfebfb;border-color:#a8c2e6;color:#234e88}
+:root[data-gb-theme="light"] .tag{color:#3e526b;border-color:#c6d3e2}
+:root[data-gb-theme="light"] .tag.active{color:#17683f;border-color:#a0d3b5;background:#e8f7ee}
+:root[data-gb-theme="light"] .tag.pending{color:#805819;border-color:#ecd39d;background:#fff7e6}
+:root[data-gb-theme="light"] .list-message{border-color:#c6d1e0}
+:root[data-gb-theme="light"] .lead-notes{color:#40536c}
+:root[data-gb-theme="light"] .btn.primary:hover:not(:disabled){background:#1b396a;color:white}
+
+/* Public request form */
+:root[data-gb-theme="light"] .industry{color:#52657f}
+:root[data-gb-theme="light"] .security-note,
+:root[data-gb-theme="light"] .footer{color:#64748b}
+:root[data-gb-theme="light"] .success{background:#e3f5e9;border-color:#a8d8b7;color:#145a36}
+:root[data-gb-theme="light"] .wrap .card button[type="submit"]{background:#254c89;color:#fff}
+:root[data-gb-theme="light"] .business-logo{background:#fff}
+
+/* Owner activation */
+:root[data-gb-theme="light"] .foot a,
+:root[data-gb-theme="light"] .card a{color:#27549b}
+
+/* Privacy and terms pages (static stylesheet versions) */
+:root[data-gb-theme="light"] body:has(.wrap .note){
+  background:#f4f7fb;color:#172335;
+}
+:root[data-gb-theme="light"] body:has(.wrap .note) p,
+:root[data-gb-theme="light"] body:has(.wrap .note) li{color:#536176}
+:root[data-gb-theme="light"] body:has(.wrap .note) a{color:#27549b}
+:root[data-gb-theme="light"] body:has(.wrap .note) .note{
+  background:#e9f0fc;border-color:#c8d6ec;color:#344b69
+}
