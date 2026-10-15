@@ -20,7 +20,7 @@
     const phases = [
       { status: "New inquiry", name: "A new customer request", detail: "Service requested · moments ago", note: "01 / Capture", progress: "33%", values: ["02", "01", "04"] },
       { status: "Contacted", name: "A conversation in progress", detail: "Follow-up recorded · ready to quote", note: "02 / Organize", progress: "66%", values: ["02", "03", "04"] },
-      { status: "Booked", name: "A job added to the schedule", detail: "Opportunity advanced · booked", note: "03 / Convert", progress: "100%", values: ["02", "04", "04"] }
+      { status: "Booked", name: "A request moved to booked", detail: "Opportunity advanced · booked", note: "03 / Convert", progress: "100%", values: ["02", "04", "04"] }
     ];
 
     let active = -1;
