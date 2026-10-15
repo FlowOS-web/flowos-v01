@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FlowOS Settings</title>
+  <title>Gatebrook Settings</title>
   <style>
     *{box-sizing:border-box}
     :root{--bg:#0d0f13;--panel:#151820;--panel2:#1a1e27;--border:#2a303b;--text:#f5f7fa;--muted:#969eac;--accent:#6fa7ff;--danger:#d76464;--ok:#68d9a0}
@@ -39,7 +39,7 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" data-dashboard-link href="dashboard.html">Flow<span>OS</span></a>
+    <a class="brand" data-dashboard-link href="dashboard.html">Gate<span>brook</span></a>
     <div class="top-actions">
       <a class="btn" data-dashboard-link href="dashboard.html">Dashboard</a>
       <button id="logoutButton" class="btn">Sign Out</button>
@@ -48,7 +48,7 @@
 
   <main class="container">
     <h1>Business Settings</h1>
-    <div class="subtitle">Manage the customer-facing profile, notification email, and services for your FlowOS workspace.</div>
+    <div class="subtitle">Manage the customer-facing profile, notification email, and services for your Gatebrook workspace.</div>
 
     <div id="loading">Loading settings...</div>
     <div id="errorBox" class="feedback error hidden"></div>
@@ -180,7 +180,7 @@
         if(requestedBusinessId) membershipQuery = membershipQuery.eq("business_id", requestedBusinessId);
         const { data:membership, error:membershipError } = await membershipQuery.order("business_id",{ascending:true}).limit(1).maybeSingle();
         if(membershipError) throw membershipError;
-        if(!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a FlowOS business.");
+        if(!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a Gatebrook business.");
 
         businessId = membership.business_id;
         role = membership.role;

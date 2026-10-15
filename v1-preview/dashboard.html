@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>FlowOS Dashboard</title>
+  <title>Gatebrook Dashboard</title>
 
   <style>
     * {
@@ -534,7 +534,7 @@
     <div class="login-card">
 
       <div class="logo">
-        Flow<span>OS</span>
+        Gate<span>brook</span>
       </div>
 
       <p class="login-subtitle">
@@ -600,7 +600,7 @@
     <header class="topbar">
 
       <div class="brand">
-        Flow<span>OS</span>
+        Gate<span>brook</span>
       </div>
 
       <div class="top-right">
@@ -1064,7 +1064,7 @@
       const { data: membership, error: membershipError } = await membershipQuery.order("business_id", { ascending: true }).limit(1).maybeSingle();
       if (epoch !== dashboardEpoch) return;
       if (membershipError) throw membershipError;
-      if (!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a FlowOS business.");
+      if (!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a Gatebrook business.");
       const { data: business, error: businessError } = await supabaseClient
         .from("businesses").select("id, name, industry").eq("id", membership.business_id).single();
       if (epoch !== dashboardEpoch) return;
