@@ -127,3 +127,21 @@
   .gb-home a.gb-link-button,.gb-home a.gb-nav-cta,.gb-home .gb-logo,
   .gb-home .gb-demo,.gb-home .gb-principle,.gb-home .gb-story-step{transition:none}
 }
+
+/* Featured headline phrases: trade muted gray for the existing evergreen accent. */
+.gb-home .gb-hero-title .gb-title-row:nth-child(3),
+.gb-home .gb-manifesto h2 em,
+.gb-home .gb-system-heading span,
+.gb-home .gb-principles-lead span {
+  color: #85a593;
+  text-shadow: 0 0 9px rgba(75,147,99,.28), 0 0 20px rgba(44,111,72,.16);
+}
+
+/* The same headline contrast and forest-green accent on the light theme. */
+:root[data-gb-theme="light"] .gb-home .gb-hero-title .gb-title-row:nth-child(3),
+:root[data-gb-theme="light"] .gb-home .gb-manifesto h2 em,
+:root[data-gb-theme="light"] .gb-home .gb-system-heading span,
+:root[data-gb-theme="light"] .gb-home .gb-principles-lead span {
+  color: #2c6244;
+  text-shadow: 0 0 8px rgba(57,119,73,.12);
+}
