@@ -52,10 +52,9 @@
       const revealed = document.querySelectorAll(".gb-reveal");
       const observer = new IntersectionObserver(entries => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
+          // Replay reveals whenever a section re-enters the viewport.
+          // Once it leaves, reset the class so scrolling back can animate it again.
+          entry.target.classList.toggle("is-visible", entry.isIntersecting);
         }
       }, { threshold: .08, rootMargin: "0px 0px -5% 0px" });
       revealed.forEach(el => observer.observe(el));
