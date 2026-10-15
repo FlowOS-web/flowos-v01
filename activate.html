@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>Activate Your FlowOS Account</title>
+  <title>Activate Your Gatebrook Account</title>
   <script>
     // Keep the invitation in memory only and remove it before loading any external resource.
     window.flowosInvitation = (() => {
@@ -20,9 +20,9 @@
 </head>
 <body>
   <main class="wrap"><section class="card">
-    <div class="brand">Flow<span>OS</span></div>
+    <div class="brand">Gate<span>brook</span></div>
     <h1>Activate your owner account</h1>
-    <p id="intro">Use this private invitation to activate your FlowOS account and choose your password.</p>
+    <p id="intro">Use this private invitation to activate your Gatebrook account and choose your password.</p>
     <button id="verifyButton" class="btn hidden" type="button">Verify invitation and continue</button>
     <form id="passwordForm" class="hidden">
       <p id="ownerEmail"></p>
@@ -53,7 +53,7 @@
       $("dashboardLink").href = "dashboard.html?business_id=" + encodeURIComponent(businessId);
     } else {
       tokenHash = null;
-      feedback("This invitation is missing or invalid. Ask your FlowOS administrator for a new private setup link, or sign in if your account is already active.");
+      feedback("This invitation is missing or invalid. Ask your Gatebrook administrator for a new private setup link, or sign in if your account is already active.");
     }
     $("verifyButton").addEventListener("click", async () => {
       if (!tokenHash || !validInvitation) return;
@@ -65,7 +65,7 @@
         tokenHash = null;
         if (!data?.session || !data.user?.id || data.user.id !== data.session.user.id) throw new Error("No owner session was returned.");
         const { data: membership, error: membershipError } = await supabaseClient.from("business_users").select("business_id,role").eq("user_id", data.user.id).eq("business_id", businessId).eq("role", "owner").maybeSingle();
-        if (membershipError || membership?.business_id !== businessId) throw new Error("This invitation could not be matched to your business. Contact your FlowOS administrator.");
+        if (membershipError || membership?.business_id !== businessId) throw new Error("This invitation could not be matched to your business. Contact your Gatebrook administrator.");
         verifiedOwnerId = data.user.id;
         $("ownerEmail").textContent = "Invitation verified for " + data.user.email + ".";
         $("intro").textContent = "Choose your password to finish setting up owner access.";
@@ -77,7 +77,7 @@
         tokenHash = null;
         verifiedOwnerId = null;
         $("verifyButton").classList.add("hidden");
-        feedback("This invitation could not be verified. It may have expired or already been used. Ask your FlowOS administrator for a fresh setup link, or sign in if you have already activated your account.");
+        feedback("This invitation could not be verified. It may have expired or already been used. Ask your Gatebrook administrator for a fresh setup link, or sign in if you have already activated your account.");
       }
     });
     $("passwordForm").addEventListener("submit", async event => {
