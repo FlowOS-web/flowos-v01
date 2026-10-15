@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FlowOS Settings</title>
+  <style>
+    *{box-sizing:border-box}
+    :root{--bg:#0d0f13;--panel:#151820;--panel2:#1a1e27;--border:#2a303b;--text:#f5f7fa;--muted:#969eac;--accent:#6fa7ff;--danger:#d76464;--ok:#68d9a0}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+    a{color:inherit;text-decoration:none}
+    button,input,textarea{font:inherit}
+    .topbar{min-height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:#11141a;border-bottom:1px solid var(--border)}
+    .brand{font-size:22px;font-weight:800}.brand span{color:#99a2b0}
+    .top-actions{display:flex;gap:10px;align-items:center}
+    .btn{border:1px solid var(--border);border-radius:9px;padding:9px 13px;background:#191d25;color:white;cursor:pointer}
+    .btn.primary{background:#f3f4f6;color:#111;border-color:#f3f4f6;font-weight:700}
+    .btn.danger{border-color:#653737;color:#ffc2c2}
+    .container{max-width:1050px;margin:auto;padding:30px 22px 60px}
+    h1{margin:0 0 7px;font-size:30px}.subtitle{color:var(--muted);margin-bottom:26px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px}
+    .card h2{margin:0 0 5px;font-size:20px}.card p{color:var(--muted);margin:0 0 20px;line-height:1.55;font-size:14px}
+    label{display:block;margin:14px 0 7px;color:#dce0e7;font-size:13px}
+    input,textarea{width:100%;padding:12px 13px;color:white;background:#0f1218;border:1px solid #303643;border-radius:10px}
+    textarea{min-height:90px;resize:vertical}
+    input:focus,textarea:focus{outline:2px solid #566275;outline-offset:1px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .service-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #242a33}
+    .service-row:last-child{border-bottom:0}
+    .service-row input{margin:0}
+    .toggle{display:flex;align-items:center;gap:8px;color:#cbd0d8;font-size:13px}.toggle input{width:auto}
+    .feedback{margin-top:14px;font-size:13px;color:var(--muted)}.feedback.ok{color:var(--ok)}.feedback.error{color:#ffb6b6}
+    .hidden{display:none!important}
+    .owner-only-note{padding:14px;border:1px solid #5f4b2a;background:#261f12;border-radius:10px;color:#f2d58c;margin-bottom:18px}
+    .request-link{display:flex;gap:8px;align-items:center}.request-link input{margin:0}
+    @media(max-width:760px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.service-row{grid-template-columns:1fr}.topbar{padding:0 16px}.container{padding:22px 14px 45px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" data-dashboard-link href="dashboard.html">Flow<span>OS</span></a>
+    <div class="top-actions">
+      <a class="btn" data-dashboard-link href="dashboard.html">Dashboard</a>
+      <button id="logoutButton" class="btn">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Business Settings</h1>
+    <div class="subtitle">Manage the customer-facing profile, notification email, and services for your FlowOS workspace.</div>
+
+    <div id="loading">Loading settings...</div>
+    <div id="errorBox" class="feedback error hidden"></div>
+    <div id="ownerOnly" class="owner-only-note hidden">Only the business owner can change these settings.</div>
+
+    <section id="settingsContent" class="grid hidden">
+      <div class="card">
+        <h2>Business profile</h2>
+        <p>This information powers your customer request experience.</p>
+
+        <form id="profileForm">
+          <label for="businessName">Business name</label>
+          <input id="businessName" maxlength="120" required>
+
+          <label for="industry">Industry</label>
+          <input id="industry" maxlength="120">
+
+          <label for="tagline">Customer-facing tagline</label>
+          <textarea id="tagline" maxlength="280"></textarea>
+
+          <div class="row">
+            <div>
+              <label for="contactPhone">Public phone</label>
+              <input id="contactPhone" maxlength="50">
+            </div>
+            <div>
+              <label for="websiteUrl">Website</label>
+              <input id="websiteUrl" type="url" maxlength="300" placeholder="https://example.com">
+            </div>
+          </div>
+
+          <label for="logoUrl">Logo image URL</label>
+          <input id="logoUrl" type="url" maxlength="500" placeholder="https://...">
+
+          <label for="primaryColor">Brand color</label>
+          <input id="primaryColor" type="color" value="#6fa7ff">
+
+          <label for="ownerEmail">Lead notification email</label>
+          <input id="ownerEmail" type="email" maxlength="200">
+
+          <button class="btn primary" type="submit" style="margin-top:18px">Save profile</button>
+          <div id="profileFeedback" class="feedback"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Customer request link</h2>
+        <p>Use this link from the business website, social profiles, or anywhere customers request service.</p>
+        <div class="request-link">
+          <input id="requestLink" readonly>
+          <button id="copyLinkButton" type="button" class="btn">Copy</button>
+        </div>
+
+        <h2 style="margin-top:28px">Services</h2>
+        <p>Add, rename, enable, disable, or remove the services customers can choose from.</p>
+
+        <form id="newServiceForm">
+          <div class="request-link">
+            <input id="newServiceName" maxlength="120" placeholder="New service name" required>
+            <button class="btn primary" type="submit">Add</button>
+          </div>
+        </form>
+
+        <div id="serviceList" style="margin-top:14px"></div>
+        <div id="serviceFeedback" class="feedback"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+  <script>
+    const SUPABASE_URL = "https://mxyikhxpzijrdrgowmxr.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let businessId = null;
+    let role = null;
+    let slug = null;
+    let services = [];
+    const requestedBusinessId = new URLSearchParams(location.search).get("business_id");
+    const validBusinessId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    function dashboardUrl(){
+      const targetBusinessId = businessId || requestedBusinessId;
+      return targetBusinessId && validBusinessId.test(targetBusinessId) ? "dashboard.html?business_id=" + encodeURIComponent(targetBusinessId) : "dashboard.html";
+    }
+
+    const loading = document.getElementById("loading");
+    const errorBox = document.getElementById("errorBox");
+    const settingsContent = document.getElementById("settingsContent");
+    const ownerOnly = document.getElementById("ownerOnly");
+    const profileForm = document.getElementById("profileForm");
+    const profileFeedback = document.getElementById("profileFeedback");
+    const serviceFeedback = document.getElementById("serviceFeedback");
+    const serviceList = document.getElementById("serviceList");
+
+    function showError(message){
+      errorBox.textContent = message;
+      errorBox.classList.remove("hidden");
+    }
+
+    function setFeedback(el, message, ok=false){
+      el.textContent = message;
+      el.classList.toggle("ok", ok);
+      el.classList.toggle("error", !ok && Boolean(message));
+    }
+
+    function escapeHtml(value){
+      return String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    function normalizeUrl(value){
+      const v = String(value || "").trim();
+      if(!v) return null;
+      const u = new URL(v);
+      if(!["http:","https:"].includes(u.protocol)) throw new Error("Website and logo URLs must use http or https.");
+      return u.toString();
+    }
+
+    async function initialize(){
+      try{
+        const { data:{session}, error:sessionError } = await supabaseClient.auth.getSession();
+        if(sessionError) throw sessionError;
+        if(!session){ location.href = dashboardUrl(); return; }
+
+        if(requestedBusinessId !== null && !validBusinessId.test(requestedBusinessId)) throw new Error("The business link is invalid.");
+
+        let membershipQuery = supabaseClient.from("business_users").select("business_id, role").eq("user_id", session.user.id);
+        if(requestedBusinessId) membershipQuery = membershipQuery.eq("business_id", requestedBusinessId);
+        const { data:membership, error:membershipError } = await membershipQuery.order("business_id",{ascending:true}).limit(1).maybeSingle();
+        if(membershipError) throw membershipError;
+        if(!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a FlowOS business.");
+
+        businessId = membership.business_id;
+        role = membership.role;
+        document.querySelectorAll("[data-dashboard-link]").forEach(link => link.href = dashboardUrl());
+
+        const [{data:business,error:businessError},{data:profile,error:profileError},{data:serviceRows,error:serviceError}] = await Promise.all([
+          supabaseClient.from("businesses").select("id,name,industry,owner_email,slug").eq("id",businessId).single(),
+          supabaseClient.from("business_public_profiles").select("business_id,slug,display_name,industry,tagline,logo_url,primary_color,contact_phone,website_url").eq("business_id",businessId).single(),
+          supabaseClient.from("business_services").select("id,name,active,sort_order,business_id").eq("business_id",businessId).order("sort_order",{ascending:true}).order("name",{ascending:true})
+        ]);
+        if(businessError) throw businessError;
+        if(profileError) throw profileError;
+        if(serviceError) throw serviceError;
+        if(serviceRows.some(s => s.business_id !== businessId)) throw new Error("Unable to load service settings.");
+
+        slug = profile.slug || business.slug;
+        services = serviceRows || [];
+
+        document.getElementById("businessName").value = business.name || "";
+        document.getElementById("industry").value = profile.industry || business.industry || "";
+        document.getElementById("tagline").value = profile.tagline || "";
+        document.getElementById("contactPhone").value = profile.contact_phone || "";
+        document.getElementById("websiteUrl").value = profile.website_url || "";
+        document.getElementById("logoUrl").value = profile.logo_url || "";
+        document.getElementById("primaryColor").value = /^#[0-9A-Fa-f]{6}$/.test(profile.primary_color || "") ? profile.primary_color : "#6fa7ff";
+        document.getElementById("ownerEmail").value = business.owner_email || "";
+        document.getElementById("requestLink").value = new URL("request.html?b=" + encodeURIComponent(slug), location.href).href;
+
+        if(role !== "owner"){
+          ownerOnly.classList.remove("hidden");
+          profileForm.querySelectorAll("input,textarea,button").forEach(el => el.disabled = true);
+          document.getElementById("newServiceForm").querySelectorAll("input,button").forEach(el => el.disabled = true);
+        }
+
+        renderServices();
+        loading.classList.add("hidden");
+        settingsContent.classList.remove("hidden");
+      }catch(error){
+        loading.classList.add("hidden");
+        showError(error.message || "Unable to load business settings.");
+      }
+    }
+
+    function renderServices(){
+      serviceList.innerHTML = "";
+      if(!services.length){
+        serviceList.innerHTML = '<div class="feedback">No services yet.</div>';
+        return;
+      }
+      services.forEach(service => {
+        const row = document.createElement("div");
+        row.className = "service-row";
+        row.dataset.id = service.id;
+        row.innerHTML = `
+          <input class="service-name" maxlength="120" value="${escapeHtml(service.name)}" ${role !== "owner" ? "disabled" : ""}>
+          <label class="toggle"><input class="service-active" type="checkbox" ${service.active ? "checked" : ""} ${role !== "owner" ? "disabled" : ""}> Active</label>
+          <div>
+            <button type="button" class="btn service-save" ${role !== "owner" ? "disabled" : ""}>Save</button>
+            <button type="button" class="btn danger service-delete" ${role !== "owner" ? "disabled" : ""}>Delete</button>
+          </div>`;
+        serviceList.appendChild(row);
+      });
+
+      serviceList.querySelectorAll(".service-save").forEach(button => {
+        button.addEventListener("click", async () => {
+          const row = button.closest(".service-row");
+          const id = row.dataset.id;
+          const name = row.querySelector(".service-name").value.trim();
+          const active = row.querySelector(".service-active").checked;
+          if(!name){ setFeedback(serviceFeedback,"Service name cannot be blank."); return; }
+          button.disabled = true;
+          try{
+            const {data,error} = await supabaseClient.from("business_services")
+              .update({name,active}).eq("id",id).eq("business_id",businessId)
+              .select("id,name,active,sort_order,business_id").maybeSingle();
+            if(error) throw error;
+            if(!data || data.business_id !== businessId) throw new Error("Service was not updated.");
+            services = services.map(s => s.id === id ? data : s);
+            setFeedback(serviceFeedback,"Service saved.",true);
+          }catch(error){ setFeedback(serviceFeedback,error.message || "Unable to save service."); }
+          finally{ button.disabled = false; }
+        });
+      });
+
+      serviceList.querySelectorAll(".service-delete").forEach(button => {
+        button.addEventListener("click", async () => {
+          const row = button.closest(".service-row");
+          const id = row.dataset.id;
+          const service = services.find(s => s.id === id);
+          if(!service || !confirm('Remove "' + service.name + '" from customer choices?')) return;
+          button.disabled = true;
+          try{
+            const {error} = await supabaseClient.from("business_services")
+              .delete().eq("id",id).eq("business_id",businessId);
+            if(error) throw error;
+            services = services.filter(s => s.id !== id);
+            renderServices();
+            setFeedback(serviceFeedback,"Service removed.",true);
+          }catch(error){ setFeedback(serviceFeedback,error.message || "Unable to remove service."); button.disabled = false; }
+        });
+      });
+    }
+
+    profileForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      if(role !== "owner") return;
+      const saveButton = profileForm.querySelector('button[type="submit"]');
+      saveButton.disabled = true;
+      setFeedback(profileFeedback,"");
+      try{
+        const name = document.getElementById("businessName").value.trim();
+        const industry = document.getElementById("industry").value.trim() || null;
+        const tagline = document.getElementById("tagline").value.trim() || null;
+        const contactPhone = document.getElementById("contactPhone").value.trim() || null;
+        const websiteUrl = normalizeUrl(document.getElementById("websiteUrl").value);
+        const logoUrl = normalizeUrl(document.getElementById("logoUrl").value);
+        const primaryColor = document.getElementById("primaryColor").value;
+        const ownerEmail = document.getElementById("ownerEmail").value.trim() || null;
+        if(!name) throw new Error("Business name is required.");
+
+        const [{error:businessError},{error:profileError}] = await Promise.all([
+          supabaseClient.from("businesses").update({name,industry,owner_email:ownerEmail}).eq("id",businessId),
+          supabaseClient.from("business_public_profiles").update({
+            display_name:name,industry,tagline,contact_phone:contactPhone,website_url:websiteUrl,logo_url:logoUrl,primary_color:primaryColor
+          }).eq("business_id",businessId)
+        ]);
+        if(businessError) throw businessError;
+        if(profileError) throw profileError;
+        setFeedback(profileFeedback,"Business profile saved.",true);
+      }catch(error){
+        setFeedback(profileFeedback,error.message || "Unable to save profile.");
+      }finally{
+        saveButton.disabled = false;
+      }
+    });
+
+    document.getElementById("newServiceForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if(role !== "owner") return;
+      const name = document.getElementById("newServiceName").value.trim();
+      if(!name) return;
+      setFeedback(serviceFeedback,"");
+      try{
+        const nextSort = services.reduce((max,s) => Math.max(max,Number(s.sort_order)||0),0) + 1;
+        const {data,error} = await supabaseClient.from("business_services")
+          .insert({business_id:businessId,name,active:true,sort_order:nextSort})
+          .select("id,name,active,sort_order,business_id").single();
+        if(error) throw error;
+        services.push(data);
+        document.getElementById("newServiceName").value = "";
+        renderServices();
+        setFeedback(serviceFeedback,"Service added.",true);
+      }catch(error){ setFeedback(serviceFeedback,error.message || "Unable to add service."); }
+    });
+
+    document.getElementById("copyLinkButton").addEventListener("click", async () => {
+      try{
+        await navigator.clipboard.writeText(document.getElementById("requestLink").value);
+        setFeedback(serviceFeedback,"Request link copied.",true);
+      }catch{
+        document.getElementById("requestLink").select();
+      }
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+      location.href = dashboardUrl();
+    });
+
+    initialize();
+  </script>
+</body>
+</html>

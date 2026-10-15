@@ -1,0 +1,1443 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>FlowOS Service Request</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0d0f13;
+      --panel: #171a21;
+      --border: #2a303b;
+      --text: #f5f7fa;
+      --muted: #9ca4b1;
+      --input: #101318;
+      --accent: #6fa7ff;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: auto;
+      padding: 32px 18px 60px;
+    }
+
+    .flowos {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 25px;
+    }
+
+    .flowos strong {
+      color: white;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 35px;
+    }
+
+    .industry {
+      color: #7f8897;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .tagline {
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .business-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      margin-bottom: 25px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .business-meta a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .business-logo {
+      display: none;
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      background: white;
+      padding: 6px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: #e1e5eb;
+      font-size: 13px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 13px;
+
+      background: var(--input);
+      color: white;
+
+      border: 1px solid #303643;
+      border-radius: 10px;
+
+      font-size: 15px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px;
+
+      border: 0;
+      border-radius: 10px;
+
+      background: #f2f3f5;
+      color: #111;
+
+      font-size: 15px;
+      font-weight: 700;
+
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+
+    .success {
+      background: #12251b;
+      border: 1px solid #28563b;
+      color: #d8ffe6;
+    }
+
+    .error {
+      background: #2d1616;
+      border: 1px solid #663434;
+      color: #ffdddd;
+    }
+
+    .error-details {
+      margin-top: 7px;
+      font-size: 12px;
+      opacity: .85;
+      word-break: break-word;
+    }
+
+    .loading {
+      color: var(--muted);
+      padding: 30px 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer {
+      margin-top: 14px;
+      color: #747d8c;
+      font-size: 11px;
+    }
+
+    .security-area {
+      margin-top: 4px;
+      padding-top: 8px;
+    }
+
+    .security-note {
+      margin-top: 7px;
+      color: #747d8c;
+      font-size: 11px;
+    }
+
+    @media (max-width: 620px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
+
+      h1 {
+        font-size: 29px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="flowos">
+    Powered by <strong>FlowOS</strong>
+  </div>
+
+
+  <div
+    id="loading"
+    class="loading"
+  >
+    Loading business...
+  </div>
+
+
+  <div
+    id="businessContent"
+    class="hidden"
+  >
+
+    <img
+      id="businessLogo"
+      class="business-logo"
+      alt=""
+    >
+
+    <div
+      id="industry"
+      class="industry"
+    ></div>
+
+
+    <h1 id="businessName">
+      Service Request
+    </h1>
+
+
+    <div
+      id="tagline"
+      class="tagline"
+    ></div>
+
+    <div
+      id="businessMeta"
+      class="business-meta"
+    ></div>
+
+
+    <div class="card">
+
+      <form id="leadForm">
+
+        <div class="grid">
+
+
+          <div>
+            <label for="customer_name">
+              Name *
+            </label>
+
+            <input
+              id="customer_name"
+              type="text"
+              required
+              autocomplete="name"
+              maxlength="120"
+              placeholder="John Smith"
+            >
+          </div>
+
+
+          <div>
+            <label for="phone">
+              Phone
+            </label>
+
+            <input
+              id="phone"
+              type="tel"
+              autocomplete="tel"
+              maxlength="50"
+              placeholder="7635551234"
+            >
+          </div>
+
+
+          <div>
+            <label for="email">
+              Email
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              autocomplete="email"
+              maxlength="200"
+              placeholder="john@example.com"
+            >
+          </div>
+
+
+          <div>
+            <label for="service">
+              Service *
+            </label>
+
+            <select
+              id="service"
+              required
+            >
+              <option value="">
+                Loading services...
+              </option>
+            </select>
+          </div>
+
+
+          <div>
+            <label for="preferred_date">
+              Preferred Date
+            </label>
+
+            <input
+              id="preferred_date"
+              type="date"
+            >
+          </div>
+
+
+          <div>
+            <label for="service_location">
+              Service Address / Location
+            </label>
+
+            <input
+              id="service_location"
+              type="text"
+              maxlength="300"
+              placeholder="Address or service location"
+            >
+          </div>
+
+
+          <div class="full">
+            <label for="notes">
+              Tell us what you need
+            </label>
+
+            <textarea
+              id="notes"
+              maxlength="2000"
+              placeholder="Describe the job, problem, project, or anything the business should know."
+            ></textarea>
+          </div>
+
+
+          <div class="full security-area">
+
+            <div id="turnstile-container"></div>
+
+            <div class="security-note">
+              Protected against automated spam.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <button
+          id="submitButton"
+          type="submit"
+        >
+          Submit Request
+        </button>
+
+      </form>
+
+
+      <div
+        id="successMessage"
+        class="message success"
+        role="status"
+        aria-live="polite"
+      >
+        Your request has been saved. The business will follow up with you.
+      </div>
+
+
+      <div
+        id="errorMessage"
+        class="message error"
+      >
+
+        <strong>
+          Something went wrong.
+        </strong>
+
+        <div
+          id="errorDetails"
+          class="error-details"
+        ></div>
+
+      </div>
+
+
+      <div class="footer">
+        Secure request powered by FlowOS.
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="businessError"
+    class="message error"
+  >
+
+    <strong>
+      Business unavailable.
+    </strong>
+
+    <div
+      id="businessErrorDetails"
+      class="error-details"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- Supabase -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+
+<!-- Cloudflare Turnstile -->
+
+<script
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+  async
+  defer
+></script>
+
+
+<script>
+
+  /*
+  ==================================================
+  CONFIG
+  ==================================================
+  */
+
+  const SUPABASE_URL =
+    "https://mxyikhxpzijrdrgowmxr.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
+
+  const TURNSTILE_SITE_KEY =
+    "0x4AAAAAAFUPcb4u7Lm-Iclg";
+
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+
+  /*
+  ==================================================
+  STATE
+  ==================================================
+  */
+
+  let BUSINESS_ID = null;
+
+  let BUSINESS_SLUG = null;
+
+  let turnstileToken = null;
+
+  let turnstileWidgetId = null;
+
+
+  /*
+  ==================================================
+  ELEMENTS
+  ==================================================
+  */
+
+  const loading =
+    document.getElementById(
+      "loading"
+    );
+
+  const businessContent =
+    document.getElementById(
+      "businessContent"
+    );
+
+  const businessError =
+    document.getElementById(
+      "businessError"
+    );
+
+  const businessErrorDetails =
+    document.getElementById(
+      "businessErrorDetails"
+    );
+
+  const businessName =
+    document.getElementById(
+      "businessName"
+    );
+
+  const industry =
+    document.getElementById(
+      "industry"
+    );
+
+  const tagline =
+    document.getElementById(
+      "tagline"
+    );
+
+  const serviceSelect =
+    document.getElementById(
+      "service"
+    );
+
+  const leadForm =
+    document.getElementById(
+      "leadForm"
+    );
+
+  const submitButton =
+    document.getElementById(
+      "submitButton"
+    );
+
+  const successMessage =
+    document.getElementById(
+      "successMessage"
+    );
+
+  const errorMessage =
+    document.getElementById(
+      "errorMessage"
+    );
+
+  const errorDetails =
+    document.getElementById(
+      "errorDetails"
+    );
+
+
+  /*
+  ==================================================
+  DATE
+  ==================================================
+  */
+
+  document
+    .getElementById(
+      "preferred_date"
+    )
+    .min =
+      new Date()
+        .toISOString()
+        .split("T")[0];
+
+
+  /*
+  ==================================================
+  BUSINESS SLUG
+  ==================================================
+  */
+
+  function getBusinessSlug() {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    return (
+      params.get("b") ||
+      "flowos-demo"
+    );
+
+  }
+
+
+  /*
+  ==================================================
+  TURNSTILE
+  ==================================================
+  */
+
+  function startTurnstile() {
+
+    if (
+      !window.turnstile
+    ) {
+
+      setTimeout(
+        startTurnstile,
+        200
+      );
+
+      return;
+
+    }
+
+
+    if (
+      turnstileWidgetId !== null
+    ) {
+
+      return;
+
+    }
+
+
+    turnstileWidgetId =
+      window.turnstile.render(
+        "#turnstile-container",
+        {
+
+          sitekey:
+            TURNSTILE_SITE_KEY,
+
+          theme:
+            "dark",
+
+          callback:
+            function(token) {
+
+              turnstileToken =
+                token;
+
+            },
+
+          "expired-callback":
+            function() {
+
+              turnstileToken =
+                null;
+
+            },
+
+          "error-callback":
+            function() {
+
+              turnstileToken =
+                null;
+
+            }
+
+        }
+      );
+
+  }
+
+
+  function resetTurnstile() {
+
+    turnstileToken =
+      null;
+
+
+    if (
+      window.turnstile &&
+      turnstileWidgetId !== null
+    ) {
+
+      window.turnstile.reset(
+        turnstileWidgetId
+      );
+
+    }
+
+  }
+
+
+  /*
+  ==================================================
+  LOAD BUSINESS
+  ==================================================
+  */
+
+  async function loadBusiness() {
+
+    try {
+
+      BUSINESS_SLUG =
+        getBusinessSlug();
+
+
+      const {
+        data: profile,
+        error: profileError
+      } =
+        await supabaseClient
+
+          .from(
+            "business_public_profiles"
+          )
+
+          .select(
+            "business_id, slug, display_name, industry, tagline, logo_url, primary_color, contact_phone, website_url"
+          )
+
+          .eq(
+            "slug",
+            BUSINESS_SLUG
+          )
+
+          .eq(
+            "active",
+            true
+          )
+
+          .maybeSingle();
+
+
+      if (
+        profileError
+      ) {
+
+        throw profileError;
+
+      }
+
+
+      if (
+        !profile
+      ) {
+
+        throw new Error(
+          "No active business was found for this link."
+        );
+
+      }
+
+
+      BUSINESS_ID =
+        profile.business_id;
+
+
+      businessName.textContent =
+        profile.display_name;
+
+
+      document.title =
+        `${profile.display_name} | Service Request`;
+
+
+      industry.textContent =
+        profile.industry || "";
+
+
+      tagline.textContent =
+        profile.tagline ||
+        "Submit your request and we will get back to you.";
+
+
+      if (
+        /^#[0-9A-Fa-f]{6}$/.test(
+          profile.primary_color || ""
+        )
+      ) {
+
+        document.documentElement.style.setProperty(
+          "--accent",
+          profile.primary_color
+        );
+
+      }
+
+
+      const logo =
+        document.getElementById(
+          "businessLogo"
+        );
+
+
+      if (
+        profile.logo_url
+      ) {
+
+        logo.src =
+          profile.logo_url;
+
+        logo.alt =
+          profile.display_name + " logo";
+
+        logo.style.display =
+          "block";
+
+      }
+
+
+      const meta =
+        document.getElementById(
+          "businessMeta"
+        );
+
+
+      const metaParts = [];
+
+
+      if (
+        profile.contact_phone
+      ) {
+
+        const phone =
+          document.createElement(
+            "a"
+          );
+
+        phone.href =
+          "tel:" +
+          profile.contact_phone
+            .replace(
+              /[^+0-9]/g,
+              ""
+            );
+
+        phone.textContent =
+          profile.contact_phone;
+
+        metaParts.push(
+          phone
+        );
+
+      }
+
+
+      if (
+        profile.website_url
+      ) {
+
+        const website =
+          document.createElement(
+            "a"
+          );
+
+        website.href =
+          profile.website_url;
+
+        website.target =
+          "_blank";
+
+        website.rel =
+          "noopener noreferrer";
+
+        website.textContent =
+          "Visit website";
+
+        metaParts.push(
+          website
+        );
+
+      }
+
+
+      for (
+        const item
+        of metaParts
+      ) {
+
+        meta.appendChild(
+          item
+        );
+
+      }
+
+
+      await loadServices();
+
+
+      loading.classList.add(
+        "hidden"
+      );
+
+
+      businessContent.classList.remove(
+        "hidden"
+      );
+
+
+      startTurnstile();
+
+    }
+
+    catch(error) {
+
+      console.error(
+        "Business loading error:",
+        error
+      );
+
+
+      loading.classList.add(
+        "hidden"
+      );
+
+
+      businessError.style.display =
+        "block";
+
+
+      businessErrorDetails.textContent =
+        error.message;
+
+    }
+
+  }
+
+
+  /*
+  ==================================================
+  LOAD SERVICES
+  ==================================================
+  */
+
+  async function loadServices() {
+
+    const {
+      data: services,
+      error
+    } =
+      await supabaseClient
+
+        .from(
+          "business_services"
+        )
+
+        .select(
+          "id, name, sort_order"
+        )
+
+        .eq(
+          "business_id",
+          BUSINESS_ID
+        )
+
+        .eq(
+          "active",
+          true
+        )
+
+        .order(
+          "sort_order",
+          {
+            ascending: true
+          }
+        );
+
+
+    if (
+      error
+    ) {
+
+      throw error;
+
+    }
+
+
+    serviceSelect.innerHTML =
+      `
+        <option value="">
+          Select a service
+        </option>
+      `;
+
+
+    for (
+      const service
+      of services || []
+    ) {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        service.name;
+
+
+      option.textContent =
+        service.name;
+
+
+      serviceSelect.appendChild(
+        option
+      );
+
+    }
+
+
+    if (
+      !services ||
+      services.length === 0
+    ) {
+
+      serviceSelect.innerHTML =
+        `
+          <option value="General Inquiry">
+            General Inquiry
+          </option>
+        `;
+
+    }
+
+  }
+
+
+  /*
+  ==================================================
+  FORM SUBMISSION
+  ==================================================
+  */
+
+  leadForm.addEventListener(
+    "submit",
+
+    async function(event) {
+
+      event.preventDefault();
+
+
+      successMessage.style.display =
+        "none";
+
+
+      errorMessage.style.display =
+        "none";
+
+
+      errorDetails.textContent =
+        "";
+
+
+      /*
+      --------------------------------------------
+      READ FORM
+      --------------------------------------------
+      */
+
+      const customerName =
+        document
+          .getElementById(
+            "customer_name"
+          )
+          .value
+          .trim();
+
+
+      const phone =
+        document
+          .getElementById(
+            "phone"
+          )
+          .value
+          .trim();
+
+
+      const email =
+        document
+          .getElementById(
+            "email"
+          )
+          .value
+          .trim();
+
+
+      const service =
+        document
+          .getElementById(
+            "service"
+          )
+          .value;
+
+
+      const preferredDate =
+        document
+          .getElementById(
+            "preferred_date"
+          )
+          .value;
+
+
+      const serviceLocation =
+        document
+          .getElementById(
+            "service_location"
+          )
+          .value
+          .trim();
+
+
+      const notes =
+        document
+          .getElementById(
+            "notes"
+          )
+          .value
+          .trim();
+
+
+      /*
+      --------------------------------------------
+      CLIENT VALIDATION
+      --------------------------------------------
+      */
+
+      if (
+        !phone &&
+        !email
+      ) {
+
+        errorMessage.style.display =
+          "block";
+
+
+        errorDetails.textContent =
+          "Please enter either a phone number or email address.";
+
+
+        return;
+
+      }
+
+
+      if (
+        !BUSINESS_ID
+      ) {
+
+        errorMessage.style.display =
+          "block";
+
+
+        errorDetails.textContent =
+          "Business information has not loaded.";
+
+
+        return;
+
+      }
+
+
+      if (
+        !turnstileToken
+      ) {
+
+        errorMessage.style.display =
+          "block";
+
+
+        errorDetails.textContent =
+          "Please complete the security check.";
+
+
+        return;
+
+      }
+
+
+      /*
+      --------------------------------------------
+      PAYLOAD
+      --------------------------------------------
+      */
+
+      const payload = {
+
+        business_id:
+          BUSINESS_ID,
+
+        customer_name:
+          customerName,
+
+        phone:
+          phone || null,
+
+        email:
+          email || null,
+
+        service:
+          service,
+
+        preferred_date:
+          preferredDate || null,
+
+        service_location:
+          serviceLocation || null,
+
+        notes:
+          notes || null,
+
+        turnstile_token:
+          turnstileToken
+
+      };
+
+
+      submitButton.disabled =
+        true;
+
+
+      submitButton.textContent =
+        "Submitting...";
+
+
+      try {
+
+        /*
+        ==========================================
+        SECURE SERVER SUBMISSION
+        ==========================================
+        */
+
+        const {
+          data,
+          error
+        } =
+          await supabaseClient
+            .functions
+            .invoke(
+              "submit-lead",
+              {
+                body:
+                  payload
+              }
+            );
+
+
+        if (
+          error
+        ) {
+
+          let message =
+            error.message ||
+            "Submission failed.";
+
+
+          /*
+          Try to read the real server response.
+          */
+
+          if (
+            error.context &&
+            typeof error.context.json
+              === "function"
+          ) {
+
+            try {
+
+              const serverError =
+                await error.context.json();
+
+
+              if (
+                serverError &&
+                serverError.error
+              ) {
+
+                message =
+                  serverError.error;
+
+              }
+
+            }
+
+            catch {
+            }
+
+          }
+
+
+          throw new Error(
+            message
+          );
+
+        }
+
+
+        if (
+          !data ||
+          !data.success
+        ) {
+
+          throw new Error(
+            data?.error ||
+            "Submission failed."
+          );
+
+        }
+
+
+        /*
+        ==========================================
+        SUCCESS
+        ==========================================
+        */
+
+        let confirmationMessage =
+          "Your request has been saved. The business will follow up with you.";
+
+        if (email && data.customer_confirmation_sent === true) {
+          confirmationMessage =
+            "Your request has been saved. A confirmation email was sent; check your inbox and spam folder. The business will follow up with you.";
+        }
+        else if (email && data.customer_confirmation_sent === false) {
+          confirmationMessage =
+            "Your request has been saved, but we could not send the confirmation email. The business can still view your request. You do not need to submit it again.";
+        }
+
+        successMessage.textContent =
+          confirmationMessage;
+
+        leadForm.reset();
+
+
+        successMessage.style.display =
+          "block";
+
+
+        successMessage.scrollIntoView({
+          behavior:
+            "smooth",
+
+          block:
+            "center"
+        });
+
+
+        resetTurnstile();
+
+      }
+
+      catch(error) {
+
+        console.error(
+          "Submission error:",
+          error
+        );
+
+
+        errorMessage.style.display =
+          "block";
+
+
+        errorDetails.textContent =
+          error.message;
+
+
+        /*
+        Turnstile tokens are one-use.
+        Reset after a failed request too.
+        */
+
+        resetTurnstile();
+
+      }
+
+      finally {
+
+        submitButton.disabled =
+          false;
+
+
+        submitButton.textContent =
+          "Submit Request";
+
+      }
+
+    }
+
+  );
+
+
+  /*
+  ==================================================
+  START
+  ==================================================
+  */
+
+  loadBusiness();
+
+</script>
+
+</body>
+
+</html>

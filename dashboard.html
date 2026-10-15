@@ -583,6 +583,8 @@
         role="alert"
       ></div>
 
+      <a data-admin-link href="admin.html" class="hidden" style="display:inline-block;color:#a8c7ff;margin-top:18px">Admin console</a>
+
     </div>
 
   </section>
@@ -609,6 +611,17 @@
         >
           Loading business...
         </div>
+
+        <a
+          id="settingsLink"
+          href="settings.html"
+          class="logout-button"
+          style="text-decoration:none;display:inline-block"
+        >
+          Settings
+        </a>
+
+        <a data-admin-link href="admin.html" class="logout-button hidden" style="text-decoration:none;display:inline-block">Admin console</a>
 
         <button
           id="logoutButton"
@@ -836,7 +849,7 @@
   <!-- SUPABASE -->
 
   <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"
   ></script>
 
 
@@ -865,6 +878,8 @@
     let dashboardEpoch = 0;
     let loadSequence = 0;
     let currentSessionUserId = null;
+    const requestedBusinessId = new URLSearchParams(location.search).get("business_id");
+    const validBusinessId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     const pendingLeadIds = new Set();
     const leadValueDrafts = new Map();
     const validStatuses = new Set(["new", "contacted", "booked", "completed", "lost"]);
@@ -991,6 +1006,7 @@
         if (error) throw error;
         currentSessionUserId = data.user.id;
         document.getElementById("password").value = "";
+        checkAdministratorAccess();
         await startDashboard();
       } catch (error) {
         loginError.textContent = error.message || "Unable to sign in. Please try again.";
@@ -1004,6 +1020,7 @@
     document.getElementById("logoutButton").addEventListener("click", async function() {
       resetDashboardState();
       currentSessionUserId = null;
+      document.querySelectorAll("[data-admin-link]").forEach(link => link.classList.add("hidden"));
       dashboardSection.classList.add("hidden");
       loginSection.classList.remove("hidden");
       try {
@@ -1020,18 +1037,34 @@
       if (event === "SIGNED_OUT" || (currentSessionUserId && session?.user?.id && session.user.id !== currentSessionUserId)) {
         resetDashboardState();
         currentSessionUserId = null;
+        document.querySelectorAll("[data-admin-link]").forEach(link => link.classList.add("hidden"));
         dashboardSection.classList.add("hidden");
         loginSection.classList.remove("hidden");
       }
     });
 
+    async function checkAdministratorAccess() {
+      const userId = currentSessionUserId;
+      document.querySelectorAll("[data-admin-link]").forEach(link => link.classList.add("hidden"));
+      if (!userId) return;
+      try {
+        const { data, error } = await supabaseClient.functions.invoke("flowos-admin-onboarding", { method: "GET" });
+        if (!error && data?.is_admin === true && userId === currentSessionUserId) {
+          document.querySelectorAll("[data-admin-link]").forEach(link => link.classList.remove("hidden"));
+        }
+      } catch {}
+    }
+
     async function getBusiness(epoch = dashboardEpoch) {
       // Membership RLS remains the authority for the business this account can access.
-      const { data: membership, error: membershipError } = await supabaseClient
-        .from("business_users").select("business_id, role").limit(1).maybeSingle();
+      if (requestedBusinessId !== null && !validBusinessId.test(requestedBusinessId)) throw new Error("The business link is invalid.");
+      if (!currentSessionUserId) throw new Error("Please sign in to open this business.");
+      let membershipQuery = supabaseClient.from("business_users").select("business_id, role").eq("user_id", currentSessionUserId);
+      if (requestedBusinessId) membershipQuery = membershipQuery.eq("business_id", requestedBusinessId);
+      const { data: membership, error: membershipError } = await membershipQuery.order("business_id", { ascending: true }).limit(1).maybeSingle();
       if (epoch !== dashboardEpoch) return;
       if (membershipError) throw membershipError;
-      if (!membership) throw new Error("This account is not connected to a FlowOS business.");
+      if (!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a FlowOS business.");
       const { data: business, error: businessError } = await supabaseClient
         .from("businesses").select("id, name, industry").eq("id", membership.business_id).single();
       if (epoch !== dashboardEpoch) return;
@@ -1039,6 +1072,7 @@
       if (!business || business.id !== membership.business_id) throw new Error("Business unavailable.");
       currentBusinessId = membership.business_id;
       businessName.textContent = business.name;
+      document.getElementById("settingsLink").href = "settings.html?business_id=" + encodeURIComponent(currentBusinessId);
     }
 
     async function loadLeads() {
@@ -1363,6 +1397,7 @@
         if (error) throw error;
         if (session) {
           currentSessionUserId = session.user.id;
+          checkAdministratorAccess();
           await startDashboard();
         }
       } catch (error) {
