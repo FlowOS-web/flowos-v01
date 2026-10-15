@@ -1,0 +1,129 @@
+/* Gatebrook homepage typography and atmosphere. Marketing site only. */
+.gb-home{font-family:"Instrument Sans","Inter","Helvetica Neue",Arial,sans-serif;font-optical-sizing:auto}
+.gb-hero-title{font-family:inherit;font-weight:500;letter-spacing:-.065em;line-height:.94;font-feature-settings:"ss01" on}
+.gb-manifesto h2,.gb-system-heading,.gb-principles-lead,.gb-finale h2{font-family:inherit;font-weight:490;letter-spacing:-.058em}
+.gb-wordmark{font-weight:650;letter-spacing:.23em}
+.gb-story-step .gb-step-title,.gb-principle h3{font-weight:520}
+
+/* Small, scattered green pools, fading into near-black instead of neon. */
+.gb-home .gb-hero::before{
+  inset:0 -16% -13%;
+  background:
+    radial-gradient(ellipse 29% 33% at 80% 47%,rgba(42,95,68,.26),transparent 76%),
+    radial-gradient(ellipse 17% 19% at 54% 64%,rgba(50,95,66,.15),transparent 78%),
+    radial-gradient(ellipse 28% 25% at 15% 83%,rgba(23,75,48,.12),transparent 76%),
+    radial-gradient(ellipse 19% 26% at 98% 88%,rgba(42,89,60,.12),transparent 80%),
+    radial-gradient(ellipse 38% 44% at 79% 50%,rgba(85,95,91,.10),transparent 78%);
+}
+.gb-home .gb-hero-sculpture{opacity:.43}
+.gb-home .gb-hero-sculpture .gb-arc{stroke:#5c8871;filter:drop-shadow(0 0 7px rgba(63,141,89,.46))}
+.gb-home .gb-manifesto{
+  background:radial-gradient(ellipse 30% 28% at 87% 29%,rgba(38,83,57,.13),transparent 79%),
+  radial-gradient(ellipse 20% 23% at 8% 78%,rgba(29,78,55,.10),transparent 80%);
+}
+.gb-home .gb-system{
+  background:radial-gradient(ellipse 20% 30% at 3% 37%,rgba(33,81,58,.13),transparent 79%),
+  radial-gradient(ellipse 24% 33% at 96% 77%,rgba(42,86,62,.13),transparent 79%);
+}
+.gb-home .gb-principles{
+  background:radial-gradient(ellipse 30% 31% at 75% 16%,rgba(34,77,53,.13),transparent 78%),
+  radial-gradient(ellipse 26% 24% at 9% 81%,rgba(36,87,60,.10),transparent 79%);
+}
+
+/* Explicit text/background contrast. This outranks .gb-home a {color:inherit}.
+   Works in both themes and the pale finale. */
+.gb-home a.gb-link-button.gb-link-button--solid{
+  background:var(--gb-ink);border-color:var(--gb-ink);color:var(--gb-night);
+}
+.gb-home a.gb-link-button.gb-link-button--solid:hover,
+.gb-home a.gb-link-button.gb-link-button--solid:focus-visible{
+  background:var(--gb-mid);border-color:var(--gb-sub);color:var(--gb-ink);
+}
+.gb-home .gb-finale a.gb-link-button.gb-link-button--solid{
+  background:var(--gb-end-ink);border-color:var(--gb-end-ink);color:var(--gb-paper);
+}
+.gb-home .gb-finale a.gb-link-button.gb-link-button--solid:hover,
+.gb-home .gb-finale a.gb-link-button.gb-link-button--solid:focus-visible{
+  background:transparent;color:var(--gb-end-ink);
+}
+.gb-home .gb-finale a.gb-link-button:not(.gb-link-button--solid){color:var(--gb-end-ink)}
+.gb-home .gb-finale a.gb-link-button:not(.gb-link-button--solid):hover,
+.gb-home .gb-finale a.gb-link-button:not(.gb-link-button--solid):focus-visible{
+  background:var(--gb-end-ink);color:var(--gb-paper);
+}
+
+/* Green lettering and thin indicators get a restrained halo. */
+.gb-home .gb-step-number,.gb-home .gb-principle-number{
+  color:#85a593;text-shadow:0 0 9px rgba(75,147,99,.32),0 0 24px rgba(44,111,72,.20);
+}
+.gb-home .gb-overline::before{
+  background:#476c54;box-shadow:0 0 9px rgba(54,122,78,.47);
+}
+.gb-home .gb-demo-progress::after{background:#648a73;box-shadow:0 0 9px rgba(57,130,77,.42)}
+.gb-home .gb-progress{
+  background:#547861;
+  box-shadow:0 0 6px 1px rgba(80,150,100,.55),0 0 17px rgba(39,110,67,.40);
+}
+
+/* A gentle forest-green bloom on pointer and keyboard interaction. */
+.gb-home a.gb-link-button,.gb-home a.gb-nav-cta,.gb-home .gb-logo,
+.gb-home .gb-demo,.gb-home .gb-principle,.gb-home .gb-story-step{
+  transition:border-color .25s ease,box-shadow .25s ease,
+  background-color .25s ease,color .25s ease,transform .25s ease;
+}
+.gb-home a.gb-link-button:hover,.gb-home a.gb-link-button:focus-visible,
+.gb-home a.gb-nav-cta:hover,.gb-home a.gb-nav-cta:focus-visible{
+  box-shadow:0 0 0 1px rgba(74,125,86,.31),0 0 24px rgba(33,105,59,.29);
+}
+.gb-home .gb-logo:hover,.gb-home .gb-ident:focus-visible .gb-logo{
+  border-color:rgba(101,157,115,.65);box-shadow:0 0 17px rgba(38,103,62,.29);
+}
+.gb-home .gb-principle:hover{
+  border-top-color:rgba(111,155,121,.66);box-shadow:0 -8px 22px -23px rgba(49,122,68,.55);
+}
+.gb-home .gb-story-step:hover,.gb-home .gb-story-step:focus-visible,
+.gb-home .gb-story-step[aria-pressed="true"]{
+  border-top-color:rgba(90,150,103,.58);box-shadow:0 -13px 24px -24px rgba(51,123,76,.53);
+}
+.gb-home .gb-demo{
+  box-shadow:0 45px 100px rgba(0,0,0,.17),0 0 54px -32px rgba(39,95,65,.35);
+}
+.gb-home .gb-demo:hover{
+  box-shadow:0 45px 100px rgba(0,0,0,.17),0 0 66px -21px rgba(48,111,75,.37);
+}
+.gb-home .gb-footer-right a:hover{color:#3f7960;text-shadow:0 0 11px rgba(48,113,65,.24)}
+
+/* Reverse palette: softer ambient light, dark green that remains readable. */
+:root[data-gb-theme="light"] .gb-home .gb-hero::before{
+  background:radial-gradient(ellipse 29% 33% at 80% 47%,rgba(45,94,64,.15),transparent 76%),
+  radial-gradient(ellipse 18% 20% at 54% 64%,rgba(57,108,73,.10),transparent 78%),
+  radial-gradient(ellipse 26% 24% at 15% 83%,rgba(38,93,60,.07),transparent 78%);
+}
+:root[data-gb-theme="light"] .gb-home .gb-manifesto{
+  background:radial-gradient(ellipse 30% 28% at 87% 29%,rgba(40,100,67,.085),transparent 78%);
+}
+:root[data-gb-theme="light"] .gb-home .gb-system{
+  background:radial-gradient(ellipse 23% 32% at 3% 37%,rgba(34,91,56,.085),transparent 79%),
+  radial-gradient(ellipse 24% 34% at 96% 77%,rgba(37,100,64,.095),transparent 79%);
+}
+:root[data-gb-theme="light"] .gb-home .gb-principles{
+  background:radial-gradient(ellipse 28% 30% at 75% 16%,rgba(39,93,56,.10),transparent 78%);
+}
+:root[data-gb-theme="light"] .gb-home .gb-step-number,
+:root[data-gb-theme="light"] .gb-home .gb-principle-number{
+  color:#2c6244;text-shadow:0 0 10px rgba(57,119,73,.13);
+}
+:root[data-gb-theme="light"] .gb-home .gb-overline::before{
+  background:#2b6241;box-shadow:0 0 7px rgba(44,107,63,.2);
+}
+:root[data-gb-theme="light"] .gb-home .gb-progress{
+  background:#2b6241;
+  box-shadow:0 0 8px rgba(33,91,56,.36),0 0 16px rgba(43,105,61,.20);
+}
+:root[data-gb-theme="light"] .gb-home .gb-demo{
+  box-shadow:0 36px 84px rgba(12,37,29,.10),0 0 30px -20px rgba(36,103,63,.13);
+}
+@media(prefers-reduced-motion:reduce){
+  .gb-home a.gb-link-button,.gb-home a.gb-nav-cta,.gb-home .gb-logo,
+  .gb-home .gb-demo,.gb-home .gb-principle,.gb-home .gb-story-step{transition:none}
+}
