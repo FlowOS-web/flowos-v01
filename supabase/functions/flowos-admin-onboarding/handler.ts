@@ -1,6 +1,7 @@
 // This module has no runtime imports so its security decisions can be tested offline.
-export const PREVIEW_URL = "https://flowos-web.github.io/flowos-v01/v1-preview";
-export const ALLOWED_ORIGIN = "https://flowos-web.github.io";
+export const PUBLIC_SITE_URL = "https://gatebrook.work";
+export const LEGACY_ORIGIN = "https://flowos-web.github.io";
+const ALLOWED_ORIGINS = new Set([PUBLIC_SITE_URL, LEGACY_ORIGIN]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const RESERVED_SLUGS = new Set([
   "activate", "admin", "api", "auth", "dashboard", "flowos", "index", "login", "logout",
@@ -299,14 +300,14 @@ function result(record: ProvisionRecord) {
     success: true, business_id: record.business_id, slug: record.slug,
     owner_email: record.owner_email, owner_user_id: record.owner_user_id,
     owner_existing: record.owner_existing, owner_setup_required: record.owner_setup_required,
-    request_url: `${PREVIEW_URL}/request.html?b=${encodeURIComponent(record.slug)}`,
-    dashboard_url: `${PREVIEW_URL}/dashboard.html?business_id=${encodeURIComponent(record.business_id)}`,
-    settings_url: `${PREVIEW_URL}/settings.html?business_id=${encodeURIComponent(record.business_id)}`,
+    request_url: `${PUBLIC_SITE_URL}/request.html?b=${encodeURIComponent(record.slug)}`,
+    dashboard_url: `${PUBLIC_SITE_URL}/dashboard.html?business_id=${encodeURIComponent(record.business_id)}`,
+    settings_url: `${PUBLIC_SITE_URL}/settings.html?business_id=${encodeURIComponent(record.business_id)}`,
   };
 }
 function setupUrl(record: ProvisionRecord, token: string, type: "invite" | "recovery" = "invite"): string {
   const fragment = new URLSearchParams({ token_hash: token, type, business_id: record.business_id });
-  return `${PREVIEW_URL}/activate.html#${fragment}`;
+  return `${PUBLIC_SITE_URL}/activate.html#${fragment}`;
 }
 async function generateSetup(client: AdminClient, ownerEmail: string, expectedUser?: string, type: "invite" | "recovery" = "invite") {
   const { data, error } = await client.auth.admin.generateLink({ type, email: ownerEmail });
@@ -389,13 +390,13 @@ export function createHandler({ client }: HandlerDependencies) {
       "Content-Type": "application/json", "Cache-Control": "no-store", "Pragma": "no-cache",
       "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff", "Vary": "Origin",
     };
-    if (origin === ALLOWED_ORIGIN) {
-      headers["Access-Control-Allow-Origin"] = ALLOWED_ORIGIN;
+    if (origin && ALLOWED_ORIGINS.has(origin)) {
+      headers["Access-Control-Allow-Origin"] = origin;
       headers["Access-Control-Allow-Headers"] = "authorization, apikey, x-client-info, content-type";
       headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
     }
     const respond = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers });
-    if (origin && origin !== ALLOWED_ORIGIN) return respond(403, { success: false, code: "origin_denied", error: "This origin is not allowed." });
+    if (origin && !ALLOWED_ORIGINS.has(origin)) return respond(403, { success: false, code: "origin_denied", error: "This origin is not allowed." });
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers });
     if (!["GET", "POST"].includes(req.method)) return respond(405, { success: false, code: "method_not_allowed", error: "Use GET or POST." });
     try {
