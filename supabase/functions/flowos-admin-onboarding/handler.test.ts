@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ALLOWED_ORIGIN, PREVIEW_URL, createHandler, validatePayload, type AdminClient, type ProvisionRecord } from "./handler.ts";
+import { LEGACY_ORIGIN, PUBLIC_SITE_URL, createHandler, validatePayload, type AdminClient, type ProvisionRecord } from "./handler.ts";
 
 const ACTOR = "11111111-1111-4111-8111-111111111111";
 const SESSION = "22222222-2222-4222-8222-222222222222";
@@ -87,7 +87,7 @@ function mock(options: MockOptions = {}) {
 function request(body: unknown = input(), opts: { token?: string | null; origin?: string | null; method?: string; contentType?: string } = {}) {
   const headers: Record<string, string> = { "content-type": opts.contentType ?? "application/json" };
   if (opts.token !== null) headers.authorization = `Bearer ${opts.token ?? jwt()}`;
-  if (opts.origin !== null) headers.origin = opts.origin ?? ALLOWED_ORIGIN;
+  if (opts.origin !== null) headers.origin = opts.origin ?? PUBLIC_SITE_URL;
   return new Request("https://example.supabase.co/functions/v1/flowos-admin-onboarding", {
     method: opts.method ?? "POST", headers, body: ["OPTIONS", "GET"].includes(opts.method ?? "") ? undefined : JSON.stringify(body),
   });
@@ -134,19 +134,40 @@ test("missing, wrong-role, or mismatched-sub JWT sessions fail closed", async ()
   }
 });
 test("unapproved origins and preflights are rejected without authentication calls", async () => {
-  for (const method of ["POST", "OPTIONS"]) {
-    const { response, calls } = await run({}, input(), { origin: "https://attacker.example", method });
-    assert.equal(response.status, 403);
-    assert.equal(response.headers.get("access-control-allow-origin"), null);
-    assert.deepEqual(calls, []);
+  for (const origin of ["https://attacker.example", "http://gatebrook.work", "https://gatebrook.work:444", "https://gatebrook.work.attacker.example", "https://sub.gatebrook.work", "https://flowos-web.github.io.attacker.example", "null"]) {
+    for (const method of ["POST", "OPTIONS"]) {
+      const { response, calls } = await run({}, input(), { origin, method });
+      assert.equal(response.status, 403);
+      assert.equal(response.headers.get("access-control-allow-origin"), null);
+      assert.deepEqual(calls, []);
+    }
   }
 });
 test("approved preflight is allowed and response caching is disabled", async () => {
-  const { response, calls } = await run({}, input(), { method: "OPTIONS", token: null });
-  assert.equal(response.status, 204);
-  assert.equal(response.headers.get("access-control-allow-origin"), ALLOWED_ORIGIN);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.deepEqual(calls, []);
+  for (const origin of [PUBLIC_SITE_URL, LEGACY_ORIGIN]) {
+    const { response, calls } = await run({}, input(), { origin, method: "OPTIONS", token: null });
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get("access-control-allow-origin"), origin);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.equal(response.headers.get("vary"), "Origin");
+    assert.deepEqual(calls, []);
+  }
+});
+
+test("both site origins still require a verified administrator and emit canonical root links", async () => {
+  for (const origin of [PUBLIC_SITE_URL, LEGACY_ORIGIN]) {
+    const denied = await run({ authorized: false }, input(), { origin });
+    assert.equal(denied.response.status, 403);
+    assert.equal(mutations(denied.calls).length, 0);
+    const { response, json } = await run({}, input(), { origin });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("access-control-allow-origin"), origin);
+    assert.equal(json.request_url, "https://gatebrook.work/request.html?b=new-service");
+    assert.equal(json.dashboard_url, `https://gatebrook.work/dashboard.html?business_id=${BUSINESS}`);
+    assert.equal(json.settings_url, `https://gatebrook.work/settings.html?business_id=${BUSINESS}`);
+    assert.equal(new URL(json.setup_url).origin, "https://gatebrook.work");
+    assert.equal(new URL(json.setup_url).pathname, "/activate.html");
+  }
 });
 test("GET reports administrator status only after real user and live session authorization", async () => {
   const { response, json, calls } = await run({}, input(), { method: "GET" });
@@ -164,9 +185,9 @@ test("input normalization matches persisted payload and creates one initial invi
   const { response, json, calls } = await run();
   assert.equal(response.status, 200);
   assert.equal(json.success, true);
-  assert.equal(json.request_url, `${PREVIEW_URL}/request.html?b=new-service`);
-  assert.equal(json.dashboard_url, `${PREVIEW_URL}/dashboard.html?business_id=${BUSINESS}`);
-  assert.equal(json.setup_url, `${PREVIEW_URL}/activate.html#token_hash=${HASH}&type=invite&business_id=${BUSINESS}`);
+  assert.equal(json.request_url, `${PUBLIC_SITE_URL}/request.html?b=new-service`);
+  assert.equal(json.dashboard_url, `${PUBLIC_SITE_URL}/dashboard.html?business_id=${BUSINESS}`);
+  assert.equal(json.setup_url, `${PUBLIC_SITE_URL}/activate.html#token_hash=${HASH}&type=invite&business_id=${BUSINESS}`);
   assert.deepEqual(calls.find(({ name }) => name === "generateLink")!.params, { type: "invite", email: EMAIL });
   const params = calls.find(({ name }) => name === "flowos_onboarding_provision")!.params as Record<string, unknown>;
   assert.deepEqual(params, { p_actor: ACTOR, p_request: REQUEST, p_owner: OWNER, p_owner_existing: false, p_payload: canonical() });
@@ -235,7 +256,7 @@ test("setup_link never produces sign-in or password-reset tokens for a confirmed
 test("interrupted first-password activation can recover only the recorded passwordless owner", async () => {
   const { response, json, calls } = await run({ existing: record({ owner_setup_required: true }), owner: { id: OWNER, email: EMAIL, confirmed: true, has_password: false } }, { action: "setup_link", request_id: REQUEST });
   assert.equal(response.status, 200);
-  assert.equal(json.setup_url, `${PREVIEW_URL}/activate.html#token_hash=${HASH}&type=recovery&business_id=${BUSINESS}`);
+  assert.equal(json.setup_url, `${PUBLIC_SITE_URL}/activate.html#token_hash=${HASH}&type=recovery&business_id=${BUSINESS}`);
   assert.deepEqual(calls.find(({ name }) => name === "generateLink")!.params, { type: "recovery", email: EMAIL });
 });
 test("confirmed passwordless account that was active before provisioning never receives a recovery token", async () => {

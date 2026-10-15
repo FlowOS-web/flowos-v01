@@ -1,6 +1,6 @@
 # FlowOS sellable-v1 onboarding
 
-Open the dedicated [Admin console](https://flowos-web.github.io/flowos-v01/v1-preview/admin.html) and sign in with a platform administrator account. Owning a business alone does not grant this privilege.
+After the [Gatebrook domain cutover](DOMAIN-SETUP.md), open the dedicated [Admin console](https://gatebrook.work/admin.html) and sign in with a platform administrator account. The [existing preview console](https://flowos-web.github.io/flowos-v01/v1-preview/admin.html) is retained. Owning a business alone does not grant this privilege.
 
 Enrollments is the default view. It shows every active business, including businesses created before self-service onboarding. Search by business name or request-page name, filter active/inactive/all, and select View business to inspect its profile, services, owner access, and customer requests directly as an administrator. These views do not require the owner's password or add the administrator to the business's owner memberships. Business detail URLs can be bookmarked with `?business_id=<uuid>`.
 
@@ -29,21 +29,23 @@ on conflict (user_id) do update set active=true;
 
 To revoke provisioning access, set that allowlist row's `active` to false. This does not change the account's business memberships. Never grant admin access from a public page, signup form, or user metadata.
 
-The original tenant policies remain in place. Public profiles and active service choices remain readable; leads and private business settings stay tenant-scoped. The console's enrollment and lead reads go through the authenticated server endpoint and service-only RPCs from `supabase/schema/admin_console.sql` (remote migration `dedicated_admin_business_console`). Ordinary browser clients, including administrators, cannot call those privileged RPCs directly. Owner setup generation also checks the business's current active state, current owner membership, and current Auth account state on the server. Direct client lead insertion remains denied. `submit-lead` is unchanged and continues to require Turnstile, an active business, and a service belonging to that business. Its own notification delivery is unchanged. The unused standalone `notify-new-lead` endpoint now requires server service-role authorization so public keys cannot send unsolicited notification emails.
+The original tenant policies remain in place. Public profiles and active service choices remain readable; leads and private business settings stay tenant-scoped. The console's enrollment and lead reads go through the authenticated server endpoint and service-only RPCs from `supabase/schema/admin_console.sql` (remote migration `dedicated_admin_business_console`). Ordinary browser clients, including administrators, cannot call those privileged RPCs directly. Owner setup generation also checks the business's current active state, current owner membership, and current Auth account state on the server. Direct client lead insertion remains denied. `submit-lead` continues to require Turnstile, an active business, and a service belonging to that business. Its verified-token hostname allowlist accepts only `gatebrook.work` and `flowos-web.github.io`; its notification delivery is unchanged. The unused standalone `notify-new-lead` endpoint requires server service-role authorization so public keys cannot send unsolicited notification emails.
 
 Auth invitation creation and tenant SQL cannot share one transaction. If Auth creates an unconfirmed account and SQL then fails, the setup token is withheld. A retry reuses that account. The server does not automatically delete an account that another request could already be using.
 
-Source changes live on `sellable-v1`. Publishing copies changed HTML files only into `main/v1-preview/`; production root pages are preserved. Function configuration is in `supabase/config.toml`; both administrator provisioning and the standalone notification endpoint require JWT verification. The public submission endpoint continues to authenticate its requests with Turnstile.
+The sellable-v1 build has been merged into `main`. Production pages live at the repository root, and the existing `v1-preview/` pages remain available. The domain compatibility release updates both admin pages so either can verify canonical Gatebrook and legacy setup links. Onboarding accepts only the exact HTTPS Gatebrook and GitHub browser origins and emits canonical Gatebrook root links. Function configuration is in `supabase/config.toml`; both administrator provisioning and the standalone notification endpoint require JWT verification. The public submission endpoint continues to authenticate its requests with Turnstile. Follow `DOMAIN-SETUP.md` for the external settings and release order; preparing source does not configure the domain.
 
 ## Lead email setup
 
 Customer requests are saved before notification emails are attempted. A saved request remains available in the owner dashboard and Admin console even if email sending fails. The request page checks `customer_confirmation_sent` and reports a confirmation-email failure without asking the customer to submit again. A successful send flag means the email provider accepted the message; it does not guarantee inbox delivery.
 
-The current Resend test sender is restricted to the email associated with the Resend account. Runtime logs confirmed a `403 validation_error` for other recipients. To enable notifications to customer and business addresses:
+Production request notifications now use `Gatebrook <requests@notifications.gatebrook.work>`. The sending subdomain is verified in Resend, its three DNS records are configured in Porkbun, and `FROM_EMAIL` is saved in Supabase. A controlled demo request confirmed both customer and business notifications: Resend reported both delivered, and the user confirmed both arrived. This configures request notifications; it does not configure Supabase Auth mail or a receiving support inbox. Email template text still uses the FlowOS working name.
+
+To configure or change the sending domain:
 
 1. Add a domain you own in [Resend Domains](https://resend.com/domains), and add the DNS records Resend provides to your domain's DNS host.
 2. Wait for the domain's sending status to be verified.
-3. Set the Supabase Edge Function secret `FROM_EMAIL` to a sender on that verified domain, such as `FlowOS <requests@notifications.example.com>` using your actual verified domain. Keep `RESEND_API_KEY` private. Changing an owner's notification address does not configure the sender.
+3. Set the Supabase Edge Function secret `FROM_EMAIL` to a sender on the exact domain verified in Resend. The current value is `Gatebrook <requests@notifications.gatebrook.work>`. Keep `RESEND_API_KEY` private. Changing an owner's notification address does not configure the sender. No sender code change or function redeployment is needed for this setting; it does not configure Supabase Auth's separate mail transport.
 4. Send an explicitly authorized test request and check both provider acceptance and the receiving inbox. Previously failed notifications are not automatically resent.
 
 Domain verification is included in [Resend's Free plan](https://resend.com/pricing). A domain must be owned and its DNS editable; Gmail addresses and the shared GitHub Pages hostname cannot be verified as FlowOS domains. See [Resend's testing-sender restriction](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain) and [domain setup](https://resend.com/docs/add-a-domain).
@@ -51,6 +53,7 @@ Domain verification is included in [Resend's Free plan](https://resend.com/prici
 ## Verification
 
 - `node --test supabase/functions/flowos-admin-onboarding/handler.test.ts`: offline authentication, authorization, validation, retries, existing-owner protection, and interrupted-setup recovery tests.
+- `node --test tests/admin-domain.test.cjs tests/submit-lead-domain.test.cjs`: offline execution of the real setup-link validators and submission handler with fixture-only DOM, database and network adapters. Covers trusted and lookalike domains, exact activation paths, token verification, inactive businesses and unavailable services.
 - `tests/onboarding-rls.sql`: real database provisioning and isolation checks, all rolled back. It dynamically uses two existing test-capable accounts and calls no email API.
 - `tests/admin-console-rls.sql`: real database checks for administrator enrollment reads, filters, pagination, scoped lead access, owner recovery eligibility, and unchanged tenant/browser permissions, all rolled back.
 - Browser checks cover signed-out/nonadmin access, retries, tenant links, explicit invite/recovery verification, password authorization, and desktop/mobile layout.

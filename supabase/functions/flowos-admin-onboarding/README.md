@@ -2,7 +2,7 @@
 
 Deploy this function with JWT verification enabled. The browser sends the signed-in user's access token and public anon API key. The service role is read from Edge Function secrets; it never reaches a page or response. The function checks that token with Auth `getUser`, then checks platform administrator membership and the live `auth.sessions` row through `flowos_admin_authorize`. User-editable metadata grants no authority.
 
-Only `https://flowos-web.github.io` is accepted as a browser origin. Server callers with no Origin header still need the same real administrator user and live session. Every response disables caching.
+Only `https://gatebrook.work` and the legacy `https://flowos-web.github.io` are accepted as browser origins. CORS echoes only an exact allowlisted origin; subdomains, other ports, lookalikes and HTTP origins are denied. Server callers with no Origin header still need the same real administrator user and live session. Every response disables caching.
 
 ## Requests
 
@@ -18,7 +18,7 @@ Only `https://flowos-web.github.io` is accepted as a browser origin. Server call
 
 Confirmed existing owners receive membership and dashboard access; their credentials are untouched and no sign-in, password reset or recovery tokens are generated. New owners are created with an Auth invite link, without a password supplied by the administrator. Existing unconfirmed owners can be invited again. Auth generates a new confirmation token, which may replace an earlier invite. Setup links are one-time secrets: privately give the owner the displayed activation URL. Generating a link does not send an email. Tokens and passwords are never persisted in the provisioning database or logged by this function.
 
-The activation URL uses `#token_hash=...&type=invite&business_id=...` (or `type=recovery` for the restricted interrupted-activation case) at the fixed preview activation page. The hash is exchanged by that page with `verifyOtp`; it does not depend on the project's redirect allowlist and is not placed in the initial GitHub Pages request URL.
+Generated request, dashboard, settings and activation URLs use the fixed canonical root `https://gatebrook.work`. The activation URL uses `#token_hash=...&type=invite&business_id=...` (or `type=recovery` for the restricted interrupted-activation case). Both root and preview admin pages accept only explicit Gatebrook or legacy GitHub activation-page origin/path pairs, with the same token/type/business checks. Keep the preview activation page available for previously shared links. The hash is exchanged by that page with `verifyOtp`; it does not depend on the project's redirect allowlist and is not placed in the initial Pages request URL. See the repository's `DOMAIN-SETUP.md` before deploying the canonical URL change.
 
 Auth account creation and the tenant database transaction cannot share one transaction. If Auth succeeds and tenant provisioning fails, an unconfirmed account may remain without a tenant. The function withholds its setup link and leaves that account alone: deleting it could destroy an account another concurrent request is using. Retry using the same request ID and owner email; exact lookup reuses it safely. If tenant creation succeeds but link generation fails, the response still returns the business/request/dashboard links and a `setup_error`; retry `setup_link` without creating another business.
 

@@ -354,7 +354,13 @@
       const inputId = prefix ? "detailSetupLink" : "setupLink", sectionId = prefix ? "detailSetupSection" : "setupSection", ownerId = prefix ? "detailSetupOwner" : "setupOwner";
       $(inputId).value = ""; $(sectionId).classList.add("hidden"); if (!value) return;
       const url = new URL(value), params = new URLSearchParams(url.hash.slice(1));
-      if (url.origin !== "https://flowos-web.github.io" || url.pathname !== "/flowos-v01/v1-preview/activate.html" || url.search || !["invite", "recovery"].includes(params.get("type")) || !/^[a-zA-Z0-9_-]{20,256}$/.test(params.get("token_hash") || "") || params.get("business_id") !== businessId) throw new Error("The owner setup link could not be verified. Generate a new setup link.");
+      const allowedPages = new Set([
+        "https://gatebrook.work/activate.html",
+        "https://gatebrook.work/v1-preview/activate.html",
+        "https://flowos-web.github.io/flowos-v01/activate.html",
+        "https://flowos-web.github.io/flowos-v01/v1-preview/activate.html",
+      ]);
+      if (!allowedPages.has(url.origin + url.pathname) || url.username || url.password || url.search || !["invite", "recovery"].includes(params.get("type")) || !/^[a-zA-Z0-9_-]{20,256}$/.test(params.get("token_hash") || "") || params.get("business_id") !== businessId) throw new Error("The owner setup link could not be verified. Generate a new setup link.");
       $(inputId).value = url.href; $(ownerId).textContent = ownerEmail; $(sectionId).classList.remove("hidden");
     }
     function renderResult(data, requestId) {
