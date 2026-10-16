@@ -150,3 +150,8 @@
   .gb-dashboard-page .gb-mark,
   .gb-admin-page .gb-mark{transition:none}
 }
+/* Keep the wordmark neutral in light mode despite legacy shared blue span styles. */
+:root[data-gb-theme="light"] .gb-brand-settings-page .brand span.gb-wordmark,
+:root[data-gb-theme="light"] .gb-brand-activate-page .brand span.gb-wordmark {
+  color:var(--text);
+}
