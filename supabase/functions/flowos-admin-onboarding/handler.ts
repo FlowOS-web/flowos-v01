@@ -17,7 +17,7 @@ type Owner = { id: string; email: string; confirmed: boolean; has_password: bool
 type LinkData = { user: AuthUser | null; properties: { hashed_token?: string; verification_type?: string } | null };
 export type Business = {
   name: string; slug: string; industry: string | null; tagline: string | null;
-  contact_phone: string | null; website_url: string | null; logo_url: string | null;
+  contact_phone: string | null; public_email: string | null; website_url: string | null; logo_url: string | null;
   primary_color: string; notification_email: string | null;
 };
 export type Payload = { business: Business; owner_email: string; services: string[] };
@@ -43,7 +43,7 @@ type BusinessDetails = {
 const ENROLLMENT_FIELDS = ["business_id", "name", "slug", "industry", "active", "created_at", "owner_email",
   "service_count", "lead_count", "request_id", "setup_available", "owner_setup_required"];
 const PROFILE_FIELDS = ["business_id", "slug", "display_name", "industry", "tagline", "active", "logo_url",
-  "primary_color", "contact_phone", "website_url"];
+  "primary_color", "contact_phone", "public_email", "website_url"];
 const SERVICE_FIELDS = ["id", "business_id", "name", "active", "sort_order"];
 const LEAD_FIELDS = ["id", "business_id", "created_at", "customer_name", "phone", "email", "vehicle",
   "vehicle_type", "service", "service_location", "preferred_date", "notes", "status", "source", "estimated_value", "booked_revenue"];
@@ -111,7 +111,7 @@ function safeUrl(value: unknown, label: string, max: number): string | null {
 export function validatePayload(input: ObjectValue): Payload {
   onlyKeys(input, ["action", "request_id", "business", "owner_email", "services"], "Request");
   const business = object(input.business, "Business");
-  onlyKeys(business, ["name", "slug", "industry", "tagline", "contact_phone", "website_url", "logo_url", "primary_color", "notification_email"], "Business");
+  onlyKeys(business, ["name", "slug", "industry", "tagline", "contact_phone", "public_email", "website_url", "logo_url", "primary_color", "notification_email"], "Business");
   const slug = field(business.slug, "Request link name", 60, true)!.toLowerCase();
   if (slug.length < 3 || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) || RESERVED_SLUGS.has(slug)) {
     throw new HttpError(400, "invalid_input", "Choose a request link name of 3–60 letters, numbers, and single hyphens.");
@@ -134,6 +134,7 @@ export function validatePayload(input: ObjectValue): Payload {
       industry: field(business.industry, "Industry", 120),
       tagline: field(business.tagline, "Tagline", 280),
       contact_phone: field(business.contact_phone, "Public phone", 50),
+      public_email: email(business.public_email, "Public contact email"),
       website_url: safeUrl(business.website_url, "Website", 300),
       logo_url: safeUrl(business.logo_url, "Logo", 500), primary_color: color,
       notification_email: email(business.notification_email, "Notification email"),
