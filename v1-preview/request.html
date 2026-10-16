@@ -238,7 +238,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="request-polish.css?v=1">
-<link rel="stylesheet" href="contact-card.css?v=1">
+<link rel="stylesheet" href="contact-card.css?v=2">
 <link rel="stylesheet" href="brand-logo.css?v=1">
 <link rel="icon" type="image/svg+xml" href="brand-mark.svg">
 
@@ -289,30 +289,7 @@
       class="tagline"
     ></div>
 
-    <section id="businessContact" class="gb-contact-panel hidden" aria-labelledby="businessContactTitle">
-      <div class="gb-contact-heading">
-        <div class="gb-contact-symbol" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M2 20h20M9 20v-5h6v5M8 8h2m4 0h2m-8 4h2m4 0h2"/></svg>
-        </div>
-        <div><div class="gb-contact-eyebrow">Business information</div>
-          <h2 id="businessContactTitle" class="gb-contact-title">Contact the business</h2></div>
-      </div>
-      <p class="gb-contact-caption">Have a question before requesting service? Reach out directly using the information provided by this business.</p>
-      <div class="gb-contact-grid">
-        <a id="businessContactPhone" class="gb-contact-link hidden" href="tel:">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16.5v3a2 2 0 0 1-2.2 2A18.5 18.5 0 0 1 2.5 5.2 2 2 0 0 1 4.5 3h3a2 2 0 0 1 2 1.7l.5 2.6a2 2 0 0 1-.6 1.8L7.7 10.7a14 14 0 0 0 5.6 5.6l1.6-1.7a2 2 0 0 1 1.8-.6l2.6.5a2 2 0 0 1 1.7 2Z"/></svg>
-          <span class="gb-contact-link-inner"><span class="gb-contact-label">Call the business</span><span id="businessPhoneValue" class="gb-contact-value"></span></span>
-        </a>
-        <a id="businessContactEmail" class="gb-contact-link hidden" href="mailto:">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-          <span class="gb-contact-link-inner"><span class="gb-contact-label">Email the business</span><span id="businessEmailValue" class="gb-contact-value"></span></span>
-        </a>
-        <a id="businessContactWebsite" class="gb-contact-link hidden" href="#" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
-          <span class="gb-contact-link-inner"><span class="gb-contact-label">Business website</span><span id="businessWebsiteValue" class="gb-contact-value"></span></span>
-        </a>
-      </div>
-    </section>
+
 
 
     <div class="card">
@@ -444,6 +421,33 @@
         </button>
 
       </form>
+
+      <details id="businessContact" class="gb-contact-disclosure hidden">
+        <summary class="gb-contact-trigger" id="businessContactTrigger">
+          <svg class="gb-contact-trigger-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M21 16.5v3a2 2 0 0 1-2.2 2A18.5 18.5 0 0 1 2.5 5.2 2 2 0 0 1 4.5 3h3a2 2 0 0 1 2 1.7l.5 2.6a2 2 0 0 1-.6 1.8L7.7 10.7a14 14 0 0 0 5.6 5.6l1.6-1.7a2 2 0 0 1 1.8-.6l2.6.5a2 2 0 0 1 1.7 2Z"/>
+          </svg>
+          <span>Contact business</span>
+          <svg class="gb-contact-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="gb-contact-panel" role="group" aria-label="Business contact options">
+          <p class="gb-contact-caption">Other ways to reach this business</p>
+          <div class="gb-contact-grid">
+    <a id="businessContactPhone" class="gb-contact-link hidden" href="tel:">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16.5v3a2 2 0 0 1-2.2 2A18.5 18.5 0 0 1 2.5 5.2 2 2 0 0 1 4.5 3h3a2 2 0 0 1 2 1.7l.5 2.6a2 2 0 0 1-.6 1.8L7.7 10.7a14 14 0 0 0 5.6 5.6l1.6-1.7a2 2 0 0 1 1.8-.6l2.6.5a2 2 0 0 1 1.7 2Z"/></svg>
+              <span class="gb-contact-link-inner"><span class="gb-contact-label">Call the business</span><span id="businessPhoneValue" class="gb-contact-value"></span></span>
+            </a>
+            <a id="businessContactEmail" class="gb-contact-link hidden" href="mailto:">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+              <span class="gb-contact-link-inner"><span class="gb-contact-label">Email the business</span><span id="businessEmailValue" class="gb-contact-value"></span></span>
+            </a>
+            <a id="businessContactWebsite" class="gb-contact-link hidden" href="#" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+              <span class="gb-contact-link-inner"><span class="gb-contact-label">Business website</span><span id="businessWebsiteValue" class="gb-contact-value"></span></span>
+            </a>
+          </div>
+        </div>
+      </details>
 
 
       <div
@@ -762,6 +766,7 @@
 
   function showBusinessContact(profile) {
     const panel = document.getElementById("businessContact");
+    panel.open = false; // Native disclosure stays closed unless the customer opens it.
     const phoneLink = document.getElementById("businessContactPhone");
     const emailLink = document.getElementById("businessContactEmail");
     const websiteLink = document.getElementById("businessContactWebsite");
