@@ -121,7 +121,7 @@ body.gb-request-page{
 .gb-request-page select:focus,
 .gb-request-page textarea:focus{
   border-color:#7da18b;
-  outline:2px solid rgba(94,148,104,.32);
+  outline:2px solid var(--accent, #779983);
   outline-offset:1px;
   box-shadow:0 0 19px rgba(40,116,66,.13);
 }
