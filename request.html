@@ -1366,7 +1366,13 @@
         let confirmationMessage =
           "Your request has been saved. The business will follow up with you.";
 
-        if (email && data.customer_confirmation_sent === true) {
+        if (data.duplicate === true) {
+          confirmationMessage = "We already received this exact request. Please do not submit it again; contact the business directly if you need to change any details.";
+        }
+        else if (data.needs_review === true) {
+          confirmationMessage = "Your request has been received and is waiting for the business to review it. You do not need to send it again. The business may follow up after reviewing it.";
+        }
+        else if (email && data.customer_confirmation_sent === true) {
           confirmationMessage =
             "Your request has been saved. A confirmation email was sent; check your inbox and spam folder. The business will follow up with you.";
         }
