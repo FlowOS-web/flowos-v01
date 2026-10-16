@@ -1,0 +1,157 @@
+/* Gatebrook approved identity — traced from the accepted Option D monogram.
+   Bold frame and lower B, forest-green G + upper B, without green upper-right frame.
+   No app logic or customer-branded form behavior is changed. */
+.gb-brand-glyph {
+  --gb-logo-base:#ecf0ed;
+  --gb-logo-green:#258259;
+  --gb-logo-cap:#278660;
+  display:block;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  fill:none;
+  stroke:none;
+  flex:0 0 auto;
+}
+.gb-brand-glyph .gb-logo-frame,
+.gb-brand-glyph .gb-logo-b {
+  fill:var(--gb-logo-base);
+  stroke:none;
+}
+.gb-brand-glyph .gb-logo-g {
+  fill:var(--gb-logo-green);
+  stroke:none;
+}
+.gb-brand-glyph .gb-logo-cap {
+  fill:var(--gb-logo-cap);
+  stroke:none;
+}
+:root[data-gb-theme="light"] .gb-brand-glyph {
+  --gb-logo-base:#101514;
+  --gb-logo-green:#075539;
+  --gb-logo-cap:#0b5b3f;
+}
+
+/* Replace the old nested line icon and surrounding frame, not the whole header. */
+.gb-home .gb-logo,
+.gb-dashboard-page .gb-mark,
+.gb-admin-page .gb-mark,
+.gb-request-page .gb-mark,
+.gb-brand-settings-page .gb-mark,
+.gb-brand-activate-page .gb-mark {
+  width:45px;
+  height:36px;
+  min-width:45px;
+  flex:0 0 45px;
+  padding:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+  overflow:visible;
+}
+.gb-home .gb-logo svg.gb-brand-glyph,
+.gb-dashboard-page .gb-mark svg.gb-brand-glyph,
+.gb-admin-page .gb-mark svg.gb-brand-glyph,
+.gb-request-page .gb-mark svg.gb-brand-glyph,
+.gb-brand-settings-page .gb-mark svg.gb-brand-glyph,
+.gb-brand-activate-page .gb-mark svg.gb-brand-glyph {
+  display:block;
+  width:45px;
+  height:36px;
+  fill:none;
+  stroke:none;
+  stroke-width:0;
+}
+.gb-home .gb-ident:hover .gb-logo,
+.gb-home .gb-ident:focus-visible .gb-logo,
+.gb-dashboard-page .gb-mark:hover,
+.gb-admin-page .brand:hover .gb-mark {
+  border:0;
+  box-shadow:0 0 21px rgba(37,119,67,.16);
+}
+.gb-home .gb-wordmark,
+.gb-dashboard-page .gb-wordmark,
+.gb-admin-page .gb-wordmark,
+.gb-request-page .gb-powered-label strong,
+.gb-brand-settings-page .gb-wordmark,
+.gb-brand-activate-page .gb-wordmark {
+  font-family:"Instrument Sans","Segoe UI",Arial,sans-serif;
+  font-weight:760;
+  letter-spacing:.19em;
+}
+/* The homepage reverses at its bright final scene. */
+.gb-finale .gb-brand-glyph {
+  --gb-logo-base:#161d1a;
+  --gb-logo-green:#075539;
+  --gb-logo-cap:#0b5b3f;
+}
+:root[data-gb-theme="light"] .gb-finale .gb-brand-glyph {
+  --gb-logo-base:#f3f5f1;
+  --gb-logo-green:#258259;
+  --gb-logo-cap:#278660;
+}
+.gb-footer-brand{display:flex;align-items:center;gap:16px}
+.gb-footer-brand .gb-logo{width:44px;height:35px;min-width:44px;flex-basis:44px}
+.gb-footer-brand .gb-logo svg.gb-brand-glyph{width:44px;height:35px}
+/* Settings and account activation adopt the logo only, not a new interface theme. */
+.gb-brand-settings-page .brand,
+.gb-brand-activate-page .brand {
+  display:inline-flex;
+  align-items:center;
+  gap:13px;
+  font-family:"Instrument Sans","Segoe UI",Arial,sans-serif;
+  font-weight:760;
+  font-size:16px;
+  letter-spacing:.19em;
+  color:var(--text);
+  text-decoration:none;
+}
+.gb-brand-activate-page .brand {margin-bottom:24px}
+.gb-brand-settings-page .brand .gb-wordmark,
+.gb-brand-activate-page .brand .gb-wordmark {
+  color:var(--text);
+}
+@media(max-width:650px){
+  .gb-home .gb-logo,
+  .gb-dashboard-page .gb-mark,
+  .gb-admin-page .gb-mark,
+  .gb-request-page .gb-mark,
+  .gb-brand-settings-page .gb-mark,
+  .gb-brand-activate-page .gb-mark{
+    width:39px;
+    min-width:39px;
+    flex-basis:39px;
+    height:32px;
+  }
+  .gb-home .gb-logo svg.gb-brand-glyph,
+  .gb-dashboard-page .gb-mark svg.gb-brand-glyph,
+  .gb-admin-page .gb-mark svg.gb-brand-glyph,
+  .gb-request-page .gb-mark svg.gb-brand-glyph,
+  .gb-brand-settings-page .gb-mark svg.gb-brand-glyph,
+  .gb-brand-activate-page .gb-mark svg.gb-brand-glyph{
+    width:39px;height:32px;
+  }
+  .gb-home .gb-wordmark{font-size:12px;letter-spacing:.145em}
+  .gb-admin-page .brand .gb-wordmark{letter-spacing:.12em}
+  .gb-brand-settings-page .brand,
+  .gb-brand-activate-page .brand{font-size:13px;gap:9px;letter-spacing:.12em}
+}
+@media(max-width:390px){
+  .gb-home .gb-wordmark{font-size:11px;letter-spacing:.1em}
+  .gb-footer-brand{gap:10px}
+  .gb-footer-brand .gb-wordmark{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .gb-home .gb-logo,
+  .gb-dashboard-page .gb-mark,
+  .gb-admin-page .gb-mark{transition:none}
+}
+/* Keep the wordmark neutral in light mode despite legacy shared blue span styles. */
+:root[data-gb-theme="light"] .gb-brand-settings-page .brand span.gb-wordmark,
+:root[data-gb-theme="light"] .gb-brand-activate-page .brand span.gb-wordmark {
+  color:var(--text);
+}
