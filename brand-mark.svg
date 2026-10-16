@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 179 143" role="img" aria-labelledby="gb-title">
+  <title id="gb-title">Gatebrook GB emblem</title>
+  <style>
+    .structure{fill:#101514}
+    .green-g{fill:#075539}
+    .green-cap{fill:#0b5b3f}
+    @media(prefers-color-scheme:dark){
+      .structure{fill:#ecf0ed}
+      .green-g{fill:#258259}
+      .green-cap{fill:#278660}
+    }
+  </style>
+  <path class="structure" d="M1 0H178V77L161 64V17H19V124H90V142H1Z"/>
+  <path class="structure" fill-rule="evenodd" d="M103 62H134L178 95V142H102Z M121 80L131 81L157 101L156 125L120 124Z"/>
+  <path class="green-g" d="M32 32V110L90 111V62H72L71 94L50 93V50L89 49L90 33Z"/>
+  <path class="green-cap" d="M103 32V49H126L129 52L147 51L146 32Z"/>
+</svg>
