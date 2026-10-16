@@ -1,0 +1,32 @@
+/* Gatebrook admin: deliberately separated destructive business management. */
+.gb-admin-page .gb-danger-zone{margin-top:22px;border:1px solid rgba(167,85,83,.29);background:linear-gradient(135deg,rgba(35,29,29,.85),rgba(21,24,25,.92))}
+.gb-admin-page .gb-danger-title{color:#f0d3cf;font-weight:725}
+.gb-admin-page .gb-danger-zone p{margin:7px 0 0;max-width:690px;font-size:13px;line-height:1.65}
+.gb-admin-page .gb-danger-layout{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.gb-admin-page .btn.gb-delete-trigger{background:rgba(99,37,36,.15);border:1px solid rgba(197,100,94,.48);color:#f3bdb8}
+.gb-admin-page .btn.gb-delete-trigger:hover:not(:disabled){background:rgba(123,48,44,.27)}
+.gb-admin-page .gb-delete-dialog{box-sizing:border-box;width:min(94vw,520px);max-height:min(88vh,760px);overflow-y:auto;margin:auto;padding:28px;border-radius:16px;border:1px solid rgba(200,102,92,.5);background:#1c2221;color:#f1f4ee;box-shadow:0 28px 110px rgba(0,0,0,.60);font-family:"Instrument Sans",Arial,sans-serif}
+.gb-admin-page .gb-delete-dialog::backdrop{background:rgba(0,0,0,.77);backdrop-filter:blur(5px)}
+.gb-admin-page .gb-delete-dialog h2{margin:0 0 12px;font-size:24px;letter-spacing:-.035em;color:#f4f5ef}
+.gb-admin-page .gb-delete-dialog p{margin:0 0 15px;font-size:14px;line-height:1.7;color:#c9d2ca}
+.gb-admin-page .gb-delete-dialog .gb-delete-list{margin:0 0 17px;padding-left:20px;color:#cbd3cc;font-size:13px;line-height:1.8}
+.gb-admin-page .gb-delete-dialog .gb-delete-phrase{display:inline-block;color:#f2d0ca;padding:2px 5px;border-radius:4px;background:rgba(117,65,58,.23);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;user-select:all}
+.gb-admin-page .gb-delete-dialog label{color:#e2e8df}
+.gb-admin-page .gb-delete-dialog input{background:#121819;color:#f3f4f0;border-color:rgba(201,139,130,.36);margin:6px 0 0}
+.gb-admin-page .gb-delete-dialog input:focus{outline:2px solid #bd857a;outline-offset:2px}
+.gb-admin-page .gb-delete-dialog .gb-delete-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:18px}
+.gb-admin-page .btn.gb-delete-confirm{background:#873d37;border:1px solid #ad615a;color:#fff2ee;font-weight:750}
+.gb-admin-page .btn.gb-delete-confirm:hover:not(:disabled){background:#9b443e}
+.gb-admin-page .gb-delete-dialog .feedback{min-height:18px}
+:root[data-gb-theme="light"] .gb-admin-page .gb-danger-zone{background:linear-gradient(130deg,#fffafa,#fff);border-color:rgba(147,66,59,.27)}
+:root[data-gb-theme="light"] .gb-admin-page .gb-danger-title{color:#77342e}
+:root[data-gb-theme="light"] .gb-admin-page .btn.gb-delete-trigger{background:#fff3f1;color:#873d37;border-color:#cb8b82}
+:root[data-gb-theme="light"] .gb-admin-page .gb-delete-dialog{background:#fff;color:#192a20;border-color:#c48d86}
+:root[data-gb-theme="light"] .gb-admin-page .gb-delete-dialog h2{color:#2b1d1b}
+:root[data-gb-theme="light"] .gb-admin-page .gb-delete-dialog p,
+:root[data-gb-theme="light"] .gb-admin-page .gb-delete-dialog .gb-delete-list{color:#475c4a}
+:root[data-gb-theme="light"] .gb-admin-page .gb-delete-dialog label{color:#273b2c}
+:root[data-gb-theme="light"] .gb-admin-page .gb-delete-dialog .gb-delete-phrase{color:#742d27;background:#fff1ee}
+:root[data-gb-theme="light"] .gb-admin-page .gb-delete-dialog input{background:#fff;color:#1d2920;border-color:#b8938d}
+@media(max-width:550px){.gb-admin-page .gb-delete-dialog{padding:20px}.gb-admin-page .gb-danger-layout{align-items:flex-start}.gb-admin-page .gb-delete-dialog .gb-delete-actions .btn{flex:1}}
+@media(prefers-reduced-motion:reduce){.gb-admin-page .gb-delete-dialog::backdrop{backdrop-filter:none}}

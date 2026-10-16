@@ -429,6 +429,38 @@ export function createHandler({ client }: HandlerDependencies) {
         if (data === null) throw new HttpError(404, "business_not_found", "This business could not be found.");
         return respond(200, { success: true, ...businessDetails(data, filters.business, filters.limit) });
       }
+      if (input.action === "delete_business") {
+        // Do not accept actor IDs from the client: the actor and session above
+        // have already been independently verified against live Supabase Auth.
+        onlyKeys(input, ["action", "business_id", "confirmation"], "Request");
+        const target = businessId(input.business_id);
+        if (typeof input.confirmation !== "string" || input.confirmation.length > 100) {
+          throw new HttpError(400, "invalid_input", "Type the required business deletion confirmation.");
+        }
+        const { data: removed, error: removeError } = await client.rpc(
+          "flowos_admin_delete_business", {
+            p_actor: user.id,
+            p_business: target,
+            p_confirmation: input.confirmation,
+          },
+        );
+        if (removeError) {
+          if (removeError.code === "42501") throw new HttpError(403, "admin_required", "Administrator access is required.");
+          if (removeError.code === "P0002") throw new HttpError(404, "business_not_found", "This business no longer exists. Refresh enrollments.");
+          if (removeError.code === "22023") throw new HttpError(400, "invalid_confirmation", "The confirmation did not match. Reopen the business and try again.");
+          throw new HttpError(503, "delete_unavailable", "The business could not be deleted. No successful deletion was confirmed; refresh to check its status.");
+        }
+        if (!removed || removed.deleted !== true || removed.business_id !== target ||
+            typeof removed.slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(removed.slug)) {
+          throw new HttpError(503, "delete_unavailable", "Unable to verify deletion. Refresh enrollments before retrying.");
+        }
+        return respond(200, {
+          success: true,
+          deleted: true,
+          business_id: target,
+          slug: removed.slug,
+        });
+      }
       if (!["provision", "setup_link"].includes(String(input.action))) throw new HttpError(400, "invalid_input", "Choose a supported administrator action.");
       const id = requestId(input.request_id);
       const payload = input.action === "provision" ? validatePayload(input) : null;
