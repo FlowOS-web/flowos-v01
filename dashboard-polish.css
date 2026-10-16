@@ -271,13 +271,13 @@
   to{opacity:1;transform:translate3d(0,0,0)}
 }
 .gb-dashboard-page .dashboard:not(.hidden) .stat-card{
-  animation:gb-card-enter .48s cubic-bezier(.22,.7,.23,1) both;
+  animation:gb-card-enter .48s cubic-bezier(.22,.7,.23,1) backwards;
 }
 .gb-dashboard-page .dashboard:not(.hidden) .stat-card:nth-child(2){animation-delay:.045s}
 .gb-dashboard-page .dashboard:not(.hidden) .stat-card:nth-child(3){animation-delay:.09s}
 .gb-dashboard-page .dashboard:not(.hidden) .stat-card:nth-child(4){animation-delay:.135s}
 .gb-dashboard-page .dashboard:not(.hidden) .stat-card:nth-child(5){animation-delay:.18s}
-.gb-dashboard-page .dashboard:not(.hidden) .lead-card{animation:gb-card-enter .38s ease-out both}
+.gb-dashboard-page .dashboard:not(.hidden) .lead-card{animation:gb-card-enter .38s ease-out backwards}
 .gb-dashboard-page .dashboard:not(.hidden) .lead-card:nth-child(2){animation-delay:.035s}
 .gb-dashboard-page .dashboard:not(.hidden) .lead-card:nth-child(3){animation-delay:.07s}
 
@@ -424,4 +424,29 @@
   .gb-dashboard-page .gb-mark,.gb-dashboard-page .primary-button{
     transition:none;transform:none;
   }
+}
+
+
+/* Contrast and interaction refinements for light-theme browser defaults. */
+.gb-dashboard-page .login-card [data-admin-link]{color:#a4ceb4;text-decoration:underline;text-underline-offset:3px}
+.gb-dashboard-page .loading,
+.gb-dashboard-page .empty-state{
+  color:#e1e9e3;
+  background:rgba(13,18,18,.85);
+  border:1px solid rgba(202,214,204,.22);
+  border-radius:13px;
+  padding:26px;
+}
+:root[data-gb-theme="light"] .gb-dashboard-page .loading,
+:root[data-gb-theme="light"] .gb-dashboard-page .empty-state{
+  background:rgba(255,255,253,.96);
+  color:#35463b;
+  border-color:#c9d4ca;
+}
+:root[data-gb-theme="light"] .gb-dashboard-page .login-card [data-admin-link]{color:#24633e}
+:root[data-gb-theme="light"] body.gb-dashboard-page button.primary-button[type="submit"]{
+  background:#244632;color:#fff;border:1px solid #244632;
+}
+:root[data-gb-theme="light"] body.gb-dashboard-page button.primary-button[type="submit"]:hover{
+  background:#315e42;box-shadow:0 0 18px rgba(56,110,70,.16);
 }
