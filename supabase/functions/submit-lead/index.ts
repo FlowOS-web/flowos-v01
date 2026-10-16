@@ -728,89 +728,93 @@ const handler =
 
       /*
       ==========================================
-      SAVE LEAD
+      ATOMIC REQUEST PROTECTION + SAVE
       ==========================================
+      The DB function serializes each business's submissions, enforces
+      cooldowns and limits, and saves accepted or review-held requests in
+      a single transaction. The client cannot invoke it without service_role.
+      No IP address is used to block people on a shared connection.
       */
+      const hashKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+        Deno.env.get("RATE_LIMIT_HASH_KEY");
+      if (!hashKey) {
+        console.error("Request hash key is unavailable.");
+        return Response.json({ error: "Request protection is temporarily unavailable. Please try again later." }, { status: 503 });
+      }
+      const normalize = (v: string) => v.trim().toLowerCase().replace(/\s+/g, " ");
+      const contactIdentity = customerEmail
+        ? "email:" + normalize(customerEmail)
+        : "phone:" + phone.replace(/[^\d+]/g, "");
+      async function privateHash(value: string) {
+        const data = new TextEncoder().encode(hashKey + "|" + businessId + "|" + value);
+        const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", data));
+        return Array.from(bytes, x => x.toString(16).padStart(2, "0")).join("");
+      }
+      const contactHash = await privateHash(contactIdentity);
+      const fingerprint = await privateHash(JSON.stringify({
+        contact: contactIdentity,
+        customerName: normalize(customerName),
+        phone: phone.replace(/[^\d+]/g, ""),
+        email: normalize(customerEmail),
+        service: normalize(service),
+        preferredDate,
+        serviceLocation: normalize(serviceLocation),
+        notes: normalize(notes)
+      }));
 
-      const {
-        data: savedLead,
-        error: insertError
-      } =
-        await ctx.supabaseAdmin
-
-          .from(
-            "leads"
-          )
-
-          .insert({
-
-            business_id:
-              businessId,
-
-            customer_name:
-              customerName,
-
-            phone:
-              phone || null,
-
-            email:
-              customerEmail || null,
-
-            vehicle:
-              null,
-
-            vehicle_type:
-              null,
-
-            service:
-              service,
-
-            preferred_date:
-              preferredDate || null,
-
-            service_location:
-              serviceLocation || null,
-
-            notes:
-              notes || null,
-
-            status:
-              "new",
-
-            source:
-              "website",
-
-          })
-
-          .select(
-            "id"
-          )
-
-          .single();
-
-
-      if (
-        insertError
-      ) {
-
-        console.error(
-          "Lead insert failed:",
-          insertError
-        );
-
-
-        return Response.json(
-          {
-            error:
-              "Your request could not be saved. Please try again."
-          },
-          {
-            status: 500
-          }
-        );
-
+      const { data: intake, error: intakeError } = await ctx.supabaseAdmin.rpc(
+        "gatebrook_receive_request", {
+          p_business_id: businessId,
+          p_contact_hash: contactHash,
+          p_fingerprint: fingerprint,
+          p_customer_name: customerName,
+          p_phone: phone,
+          p_email: customerEmail,
+          p_service: service,
+          p_preferred_date: preferredDate || null,
+          p_service_location: serviceLocation,
+          p_notes: notes
+        }
+      );
+      if (intakeError || !intake?.disposition) {
+        console.error("Protected request intake failed:", intakeError);
+        return Response.json({ error: "Your request could not be saved. Please try again later." }, { status: 503 });
       }
 
+      if (intake.disposition === "cooldown" || intake.disposition === "limited") {
+        const retrySeconds = Math.min(Math.max(Number(intake.retry_seconds) || 60, 1), 3600);
+        return Response.json({
+          error: intake.disposition === "cooldown"
+            ? "Please wait about a minute before sending another request. Your previous request is already recorded."
+            : "Too many recent requests. Please contact the business directly or try again later.",
+          retry_after_seconds: retrySeconds
+        }, { status: 429, headers: { "Retry-After": String(retrySeconds) } });
+      }
+
+      if (intake.disposition === "duplicate") {
+        return Response.json({
+          success: true,
+          duplicate: true,
+          owner_notification_sent: false,
+          customer_confirmation_sent: false
+        }, { status: 200 });
+      }
+
+      if (intake.disposition === "pending") {
+        // No individual owner or customer email for review-held requests.
+        return Response.json({
+          success: true,
+          needs_review: true,
+          owner_notification_sent: false,
+          customer_confirmation_sent: false
+        }, { status: 200 });
+      }
+
+      if (intake.disposition !== "accepted" || !validUuid(String(intake.lead_id ?? ""))) {
+        console.error("Unexpected protected request disposition:", intake.disposition);
+        return Response.json({ error: "Unable to verify the saved request. Contact the business before retrying." }, { status: 503 });
+      }
+      const savedLead = { id: intake.lead_id };
 
       /*
       ==========================================
