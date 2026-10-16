@@ -1,4 +1,5 @@
 import { withSupabase } from "npm:@supabase/server@1";
+import { renderBrandedEmail, renderBrandedEmailText, type BrandedEmailSpec } from "./email-brand.ts";
 
 const RESEND_API_KEY =
   Deno.env.get("RESEND_API_KEY");
@@ -45,10 +46,12 @@ async function sendEmail({
   to,
   subject,
   html,
+  text,
 }: {
   to: string;
   subject: string;
   html: string;
+  text: string;
 }) {
 
   const response =
@@ -70,6 +73,7 @@ async function sendEmail({
           to: [to],
           subject,
           html,
+          text,
         }),
       }
     );
@@ -374,183 +378,27 @@ const handler =
       ==========================================
       */
 
-      const ownerHtml = `
-        <div style="
-          font-family:
-            Arial,
-            sans-serif;
-          max-width:
-            620px;
-          margin:
-            0 auto;
-          line-height:
-            1.55;
-          color:
-            #171717;
-        ">
-
-          <h2 style="
-            margin-bottom:
-              5px;
-          ">
-            New Gatebrook Lead
-          </h2>
-
-          <p style="
-            color:
-              #666;
-            margin-top:
-              0;
-          ">
-            ${escapeHtml(
-              businessName
-            )}
-          </p>
-
-          <hr style="
-            border:
-              0;
-            border-top:
-              1px solid #ddd;
-            margin:
-              22px 0;
-          ">
-
-
-          <p>
-            <strong>
-              Customer
-            </strong><br>
-
-            ${escapeHtml(
-              customerName
-            )}
-          </p>
-
-
-          <p>
-            <strong>
-              Phone
-            </strong><br>
-
-            ${escapeHtml(
-              phone ||
-              "Not provided"
-            )}
-          </p>
-
-
-          <p>
-            <strong>
-              Email
-            </strong><br>
-
-            ${escapeHtml(
-              customerEmail ||
-              "Not provided"
-            )}
-          </p>
-
-
-          <p>
-            <strong>
-              Service
-            </strong><br>
-
-            ${escapeHtml(
-              service
-            )}
-          </p>
-
-
-          <p>
-            <strong>
-              Preferred Date
-            </strong><br>
-
-            ${escapeHtml(
-              preferredDate ||
-              "Not provided"
-            )}
-          </p>
-
-
-          <p>
-            <strong>
-              Service Location
-            </strong><br>
-
-            ${escapeHtml(
-              serviceLocation ||
-              "Not provided"
-            )}
-          </p>
-
-
-          ${
-            vehicle
-              ?
-              `
-              <p>
-                <strong>
-                  Vehicle
-                </strong><br>
-
-                ${escapeHtml(
-                  vehicle
-                )}
-
-                ${
-                  vehicleType
-                    ?
-                    ` — ${escapeHtml(
-                      vehicleType
-                    )}`
-                    :
-                    ""
-                }
-              </p>
-              `
-              :
-              ""
-          }
-
-
-          <p>
-            <strong>
-              Notes
-            </strong><br>
-
-            ${escapeHtml(
-              notes ||
-              "None"
-            )}
-          </p>
-
-
-          <hr style="
-            border:
-              0;
-            border-top:
-              1px solid #ddd;
-            margin:
-              22px 0;
-          ">
-
-
-          <p style="
-            font-size:
-              12px;
-            color:
-              #777;
-          ">
-            This lead was captured
-            automatically by Gatebrook.
-          </p>
-
-        </div>
-      `;
-
+      const ownerEmailSpec: BrandedEmailSpec = {
+        eyebrow: "NEW CUSTOMER INQUIRY",
+        title: "A new request.",
+        businessName: businessName,
+        description: "A customer has submitted a service request. Review the details below and follow up from your workspace.",
+        preheader: "New customer request for " + businessName + ": " + service,
+        fields: [
+          { label: "Customer", value: customerName },
+          { label: "Phone", value: phone || "Not provided" },
+          { label: "Email", value: customerEmail || "Not provided" },
+          { label: "Service", value: service },
+          { label: "Preferred date", value: preferredDate || "Not provided" },
+          { label: "Service location", value: serviceLocation || "Not provided" },
+          ...(vehicle ? [{ label: "Vehicle", value: vehicle + (vehicleType ? " — " + vehicleType : "") }] : []),
+          { label: "Notes", value: notes || "None" }
+        ],
+        message: "This request is saved in Gatebrook. Sign in to manage the customer and track the next steps.",
+        action: { label: "OPEN BUSINESS DASHBOARD", url: "https://gatebrook.work/dashboard.html" }
+      };
+      const ownerHtml = renderBrandedEmail(ownerEmailSpec);
+      const ownerText = renderBrandedEmailText(ownerEmailSpec);
 
       try {
 
@@ -564,6 +412,7 @@ const handler =
 
           html:
             ownerHtml,
+          text: ownerText,
 
         });
 
@@ -614,91 +463,20 @@ const handler =
         )
       ) {
 
-        const customerHtml = `
-          <div style="
-            font-family:
-              Arial,
-              sans-serif;
-            max-width:
-              620px;
-            margin:
-              0 auto;
-            line-height:
-              1.55;
-            color:
-              #171717;
-          ">
-
-            <h2>
-              Request Received
-            </h2>
-
-            <p>
-              Hi ${escapeHtml(
-                customerName
-              )},
-            </p>
-
-
-            <p>
-              ${escapeHtml(
-                businessName
-              )} received your
-              service request.
-            </p>
-
-
-            <p>
-              <strong>
-                Service:
-              </strong>
-
-              ${escapeHtml(
-                service
-              )}
-            </p>
-
-
-            ${
-              preferredDate
-                ?
-                `
-                <p>
-                  <strong>
-                    Preferred date:
-                  </strong>
-
-                  ${escapeHtml(
-                    preferredDate
-                  )}
-                </p>
-                `
-                :
-                ""
-            }
-
-
-            <p>
-              The business will
-              follow up with you
-              to confirm the details.
-            </p>
-
-
-            <p style="
-              font-size:
-                12px;
-              color:
-                #777;
-              margin-top:
-                28px;
-            ">
-              Powered by Gatebrook
-            </p>
-
-          </div>
-        `;
-
+        const customerEmailSpec: BrandedEmailSpec = {
+          eyebrow: "REQUEST CONFIRMATION",
+          title: "Request received.",
+          businessName: businessName,
+          description: "Hi " + customerName + ", your request has been delivered to " + businessName + ".",
+          preheader: "Your service request was received by " + businessName,
+          fields: [
+            { label: "Service", value: service },
+            ...(preferredDate ? [{ label: "Preferred date", value: preferredDate }] : [])
+          ],
+          message: "The business will follow up to confirm the details. Your request is not yet a confirmed appointment."
+        };
+        const customerHtml = renderBrandedEmail(customerEmailSpec);
+        const customerText = renderBrandedEmailText(customerEmailSpec);
 
         try {
 
@@ -712,6 +490,7 @@ const handler =
 
             html:
               customerHtml,
+          text: customerText,
 
           });
 
