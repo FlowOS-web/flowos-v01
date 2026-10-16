@@ -94,7 +94,7 @@ begin
   ) then raise exception 'Business or service unavailable'; end if;
 
   -- Serializes concurrent requests even if they arrive on different edge nodes.
-  pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_business_id::text, 0));
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_business_id::text, 0));
 
   if exists (
     select 1 from public.gatebrook_request_events e
