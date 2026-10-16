@@ -1,0 +1,37 @@
+/* Gatebrook owner review queue — matches dashboard's graphite / silver / evergreen theme. */
+.gb-dashboard-page .gb-review-tab{display:inline-flex;align-items:center;gap:9px}
+.gb-dashboard-page .gb-review-tab.hidden{display:none!important}
+.gb-dashboard-page .gb-review-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;padding:2px 6px;border:1px solid rgba(118,156,130,.65);border-radius:999px;color:#d9eadd;background:rgba(52,95,64,.26);font-size:11px;font-weight:750}
+.gb-dashboard-page .gb-review-intro{color:#b7c7be;line-height:1.65;margin:0 0 19px}
+.gb-dashboard-page .gb-review-card{border:1px solid rgba(170,188,179,.34);border-radius:16px;background:linear-gradient(145deg,rgba(33,41,39,.98),rgba(22,27,28,.98));padding:24px;margin-bottom:16px;box-shadow:0 12px 33px rgba(0,0,0,.09)}
+.gb-dashboard-page .gb-review-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.gb-dashboard-page .gb-review-name{font-size:19px;font-weight:760;color:#f2f6f0;letter-spacing:-.02em}
+.gb-dashboard-page .gb-review-date{margin-top:7px;color:#b9c4bb;font-size:12px}
+.gb-dashboard-page .gb-review-flag{display:inline-flex;padding:7px 10px;border-radius:999px;color:#c9dec9;background:rgba(58,97,68,.30);border:1px solid rgba(109,158,112,.42);font-weight:740;font-size:11px;letter-spacing:.045em}
+.gb-dashboard-page .gb-review-reason{margin:16px 0;padding:12px 15px;border-left:3px solid #80a98b;background:rgba(73,103,80,.13);color:#c6d6c8;line-height:1.55;font-size:13px}
+.gb-dashboard-page .gb-review-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.gb-dashboard-page .gb-review-field{min-width:0}
+.gb-dashboard-page .gb-review-label{color:#a5b7ad;text-transform:uppercase;letter-spacing:.085em;font-size:10px;font-weight:780;margin-bottom:5px}
+.gb-dashboard-page .gb-review-value{overflow-wrap:anywhere;color:#e7eee7;white-space:pre-wrap;font-size:14px;line-height:1.6}
+.gb-dashboard-page .gb-review-notes{margin-top:18px;border-top:1px solid rgba(160,175,166,.2);padding-top:16px}
+.gb-dashboard-page .gb-review-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:21px}
+.gb-dashboard-page .gb-review-action{padding:11px 16px;border-radius:8px;font-size:12px;font-weight:780;letter-spacing:.04em;cursor:pointer;transition:background .18s ease,box-shadow .18s ease,border-color .18s ease}
+.gb-dashboard-page .gb-review-approve{background:#29523a;border:1px solid #578066;color:#f7fcf5}
+.gb-dashboard-page .gb-review-approve:hover:not(:disabled){background:#356748;box-shadow:0 0 18px rgba(45,119,77,.18)}
+.gb-dashboard-page .gb-review-dismiss{background:transparent;color:#d4ddd4;border:1px solid rgba(184,199,187,.45)}
+.gb-dashboard-page .gb-review-dismiss:hover:not(:disabled){background:rgba(255,255,255,.07)}
+.gb-dashboard-page .gb-review-action:disabled{cursor:wait;opacity:.55}
+.gb-dashboard-page .gb-review-action:focus-visible{outline:2px solid #99c2a5;outline-offset:3px}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-card{background:linear-gradient(145deg,#fff,#f3f5f0);border-color:rgba(60,95,69,.24);box-shadow:0 13px 35px rgba(30,60,38,.06)}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-intro,
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-date,
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-label{color:#516156}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-name,
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-value{color:#152019}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-reason{color:#365442;background:rgba(51,109,70,.07)}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-dismiss{border-color:rgba(38,66,48,.38);color:#274232}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-dismiss:hover:not(:disabled){background:rgba(48,89,58,.06)}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-flag{color:#24452e;background:#e5efe6;border-color:#a1c2a6}
+:root[data-gb-theme="light"] .gb-dashboard-page .gb-review-count{color:#224b31;background:#e2efe5}
+@media(max-width:600px){.gb-dashboard-page .gb-review-card{padding:17px}.gb-dashboard-page .gb-review-fields{grid-template-columns:1fr}.gb-dashboard-page .gb-review-action{flex:1}}
+@media(prefers-reduced-motion:reduce){.gb-dashboard-page .gb-review-action{transition:none}}
