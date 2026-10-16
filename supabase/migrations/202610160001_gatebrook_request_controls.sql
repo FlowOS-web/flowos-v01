@@ -76,7 +76,7 @@ declare
   v_reason text;
   v_disposition text;
 begin
-  if p_business_id is null
+  if p_business_id is null or p_contact_hash is null or p_fingerprint is null
      or p_contact_hash !~ '^[a-f0-9]{64}$'
      or p_fingerprint !~ '^[a-f0-9]{64}$'
      or length(trim(coalesce(p_customer_name,''))) < 2
@@ -186,7 +186,8 @@ declare
   v_review public.gatebrook_request_reviews%rowtype;
   v_lead_id uuid;
 begin
-  if p_decision not in ('approve','dismiss') then
+  if p_business_id is null or p_review_id is null or p_decision is null
+    or p_decision not in ('approve','dismiss') then
     raise exception 'Invalid review decision';
   end if;
   if auth.uid() is null or not exists (
