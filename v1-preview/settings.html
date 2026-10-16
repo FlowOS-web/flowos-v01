@@ -89,13 +89,17 @@
             </div>
           </div>
 
+          <label for="publicEmail">Public contact email (optional)</label>
+          <input id="publicEmail" type="email" maxlength="200" placeholder="hello@yourbusiness.com" autocomplete="off" aria-describedby="publicEmailHint">
+          <p id="publicEmailHint" style="font-size:12px;color:var(--muted);margin:7px 0 12px">Shown to customers on your request page. This is separate from your private lead notification email.</p>
+
           <label for="logoUrl">Logo image URL</label>
           <input id="logoUrl" type="url" maxlength="500" placeholder="https://...">
 
           <label for="primaryColor">Brand color</label>
           <input id="primaryColor" type="color" value="#6fa7ff">
 
-          <label for="ownerEmail">Lead notification email</label>
+          <label for="ownerEmail">Lead notification email (private)</label>
           <input id="ownerEmail" type="email" maxlength="200">
 
           <button class="btn primary" type="submit" style="margin-top:18px">Save profile</button>
@@ -197,7 +201,7 @@
 
         const [{data:business,error:businessError},{data:profile,error:profileError},{data:serviceRows,error:serviceError}] = await Promise.all([
           supabaseClient.from("businesses").select("id,name,industry,owner_email,slug").eq("id",businessId).single(),
-          supabaseClient.from("business_public_profiles").select("business_id,slug,display_name,industry,tagline,logo_url,primary_color,contact_phone,website_url").eq("business_id",businessId).single(),
+          supabaseClient.from("business_public_profiles").select("business_id,slug,display_name,industry,tagline,logo_url,primary_color,contact_phone,public_email,website_url").eq("business_id",businessId).single(),
           supabaseClient.from("business_services").select("id,name,active,sort_order,business_id").eq("business_id",businessId).order("sort_order",{ascending:true}).order("name",{ascending:true})
         ]);
         if(businessError) throw businessError;
@@ -212,6 +216,7 @@
         document.getElementById("industry").value = profile.industry || business.industry || "";
         document.getElementById("tagline").value = profile.tagline || "";
         document.getElementById("contactPhone").value = profile.contact_phone || "";
+        document.getElementById("publicEmail").value = profile.public_email || "";
         document.getElementById("websiteUrl").value = profile.website_url || "";
         document.getElementById("logoUrl").value = profile.logo_url || "";
         document.getElementById("primaryColor").value = /^#[0-9A-Fa-f]{6}$/.test(profile.primary_color || "") ? profile.primary_color : "#6fa7ff";
@@ -304,6 +309,7 @@
         const industry = document.getElementById("industry").value.trim() || null;
         const tagline = document.getElementById("tagline").value.trim() || null;
         const contactPhone = document.getElementById("contactPhone").value.trim() || null;
+        const publicEmail = document.getElementById("publicEmail").value.trim().toLowerCase() || null;
         const websiteUrl = normalizeUrl(document.getElementById("websiteUrl").value);
         const logoUrl = normalizeUrl(document.getElementById("logoUrl").value);
         const primaryColor = document.getElementById("primaryColor").value;
@@ -313,7 +319,7 @@
         const [{error:businessError},{error:profileError}] = await Promise.all([
           supabaseClient.from("businesses").update({name,industry,owner_email:ownerEmail}).eq("id",businessId),
           supabaseClient.from("business_public_profiles").update({
-            display_name:name,industry,tagline,contact_phone:contactPhone,website_url:websiteUrl,logo_url:logoUrl,primary_color:primaryColor
+            display_name:name,industry,tagline,contact_phone:contactPhone,public_email:publicEmail,website_url:websiteUrl,logo_url:logoUrl,primary_color:primaryColor
           }).eq("business_id",businessId)
         ]);
         if(businessError) throw businessError;
