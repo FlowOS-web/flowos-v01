@@ -23,6 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin-polish.css?v=1">
+<link rel="stylesheet" href="admin-delete.css?v=1">
 <link rel="stylesheet" href="brand-logo.css?v=1">
 <link rel="icon" type="image/svg+xml" href="brand-mark.svg">
 
@@ -95,6 +96,15 @@
             <div id="detailLeads" class="leads-list"></div>
             <div class="pagination"><span id="leadRange" class="range"></span><button id="leadPrevious" class="btn" type="button" disabled>Previous</button><button id="leadNext" class="btn" type="button" disabled>Next</button></div>
           </div>
+          <section class="card gb-danger-zone" aria-labelledby="businessDangerTitle">
+            <div class="gb-danger-layout">
+              <div>
+                <h2 class="gb-danger-title" id="businessDangerTitle">Danger zone</h2>
+                <p>Remove this business and its saved data when an enrollment was created for testing or is no longer needed.</p>
+              </div>
+              <button type="button" class="btn gb-delete-trigger" id="deleteBusinessButton">Delete business…</button>
+            </div>
+          </section>
         </div>
       </section>
       <section id="createSection" class="hidden" aria-label="Create a business">
@@ -140,6 +150,26 @@
       </section>
     </section>
   </main>
+    <dialog id="deleteBusinessDialog" class="gb-delete-dialog" aria-labelledby="deleteBusinessHeading" aria-describedby="deleteBusinessExplanation">
+      <form id="deleteBusinessForm">
+        <h2 id="deleteBusinessHeading">Permanently delete this business?</h2>
+        <p id="deleteBusinessExplanation">You are about to delete <strong id="deleteBusinessName"></strong>. This action cannot be undone.</p>
+        <ul class="gb-delete-list">
+          <li>The public request page and services will be removed.</li>
+          <li>Customer leads, pending reviews, and request history will be deleted.</li>
+          <li>Business dashboard access and pending owner setup records will be removed.</li>
+          <li>The owner's sign-in account will <strong>not</strong> be deleted.</li>
+        </ul>
+        <p>To confirm, type <strong id="deleteBusinessPhrase" class="gb-delete-phrase"></strong> exactly.</p>
+        <label for="deleteBusinessConfirmation">Confirmation phrase</label>
+        <input id="deleteBusinessConfirmation" type="text" required autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="deleteBusinessPhrase" maxlength="100">
+        <div id="deleteBusinessFeedback" class="feedback" role="status" aria-live="polite"></div>
+        <div class="gb-delete-actions">
+          <button id="cancelBusinessDeleteButton" type="button" class="btn">Cancel</button>
+          <button id="confirmBusinessDeleteButton" type="submit" class="btn gb-delete-confirm" disabled>Delete permanently</button>
+        </div>
+      </form>
+    </dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
   <script>
     const supabaseClient = window.supabase.createClient("https://mxyikhxpzijrdrgowmxr.supabase.co", "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09");
