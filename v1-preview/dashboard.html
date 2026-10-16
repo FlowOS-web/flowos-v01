@@ -1398,6 +1398,140 @@
       }
     }
 
+
+    function updateReviewCount() {
+      document.getElementById("reviewCount").textContent = String(pendingReviews.length);
+    }
+
+    async function loadPendingReviews(epoch, businessId, request) {
+      if (currentBusinessRole !== "owner") {
+        pendingReviews = [];
+        updateReviewCount();
+        return;
+      }
+      const { data, error } = await supabaseClient
+        .from("gatebrook_request_reviews")
+        .select("id,business_id,created_at,customer_name,phone,email,service,preferred_date,service_location,notes,flagged_reason,status")
+        .eq("business_id", businessId)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(120);
+      if (!isCurrentContext(epoch, businessId) || request !== loadSequence) return;
+      if (error) throw error;
+      if ((data || []).some(row => row.business_id !== businessId || row.status !== "pending")) {
+        throw new Error("Unable to load this business's review queue.");
+      }
+      pendingReviews = data || [];
+      updateReviewCount();
+    }
+
+    function makeReviewField(container, label, value) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "gb-review-field";
+      const heading = document.createElement("div");
+      heading.className = "gb-review-label";
+      heading.textContent = label;
+      const content = document.createElement("div");
+      content.className = "gb-review-value";
+      content.textContent = value || "Not provided";
+      wrapper.append(heading, content);
+      container.appendChild(wrapper);
+    }
+
+    function renderPendingReviews() {
+      reviewList.replaceChildren();
+      const intro = document.createElement("p");
+      intro.className = "gb-review-intro";
+      intro.textContent = "These requests need a human check before entering the lead pipeline. Approve genuine inquiries or dismiss unwanted ones. Requests here never trigger individual new-lead emails.";
+      reviewList.appendChild(intro);
+      if (!pendingReviews.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "Nothing needs review right now.";
+        reviewList.appendChild(empty);
+        return;
+      }
+      for (const review of pendingReviews) {
+        const card = document.createElement("article");
+        card.className = "gb-review-card";
+        const head = document.createElement("div");
+        head.className = "gb-review-head";
+        const title = document.createElement("div");
+        const customer = document.createElement("div");
+        customer.className = "gb-review-name";
+        customer.textContent = review.customer_name;
+        const when = document.createElement("div");
+        when.className = "gb-review-date";
+        when.textContent = "Received " + formatReceivedTime(review.created_at);
+        title.append(customer, when);
+        const badge = document.createElement("span");
+        badge.className = "gb-review-flag";
+        badge.textContent = "Review suggested";
+        head.append(title, badge);
+        const reason = document.createElement("div");
+        reason.className = "gb-review-reason";
+        reason.textContent = review.flagged_reason;
+        const fields = document.createElement("div");
+        fields.className = "gb-review-fields";
+        makeReviewField(fields, "Service", review.service);
+        makeReviewField(fields, "Preferred date", formatDate(review.preferred_date));
+        makeReviewField(fields, "Phone", review.phone);
+        makeReviewField(fields, "Email", review.email);
+        makeReviewField(fields, "Service location", review.service_location);
+        const actions = document.createElement("div");
+        actions.className = "gb-review-actions";
+        for (const entry of [["approve", "Approve request"],["dismiss", "Mark as spam"]]) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "gb-review-action " + (entry[0] === "approve" ? "gb-review-approve" : "gb-review-dismiss");
+          button.textContent = entry[1];
+          button.disabled = pendingReviewIds.has(review.id);
+          button.addEventListener("click", () => decideReview(review.id, entry[0], button));
+          actions.appendChild(button);
+        }
+        card.append(head, reason, fields);
+        if (review.notes) {
+          const notes = document.createElement("div");
+          notes.className = "gb-review-notes";
+          makeReviewField(notes, "Customer notes", review.notes);
+          card.appendChild(notes);
+        }
+        card.appendChild(actions);
+        reviewList.appendChild(card);
+      }
+    }
+
+    async function decideReview(reviewId, decision, button) {
+      const businessId = currentBusinessId;
+      const epoch = dashboardEpoch;
+      if (currentBusinessRole !== "owner" || !businessId || !["approve","dismiss"].includes(decision) ||
+          !pendingReviews.some(review => review.id === reviewId && review.business_id === businessId) ||
+          pendingReviewIds.has(reviewId)) return;
+      pendingReviewIds.add(reviewId);
+      button.closest(".gb-review-card")?.querySelectorAll("button").forEach(control => { control.disabled = true; });
+      try {
+        const { data, error } = await supabaseClient.rpc("gatebrook_review_request", {
+          p_business_id: businessId, p_review_id: reviewId, p_decision: decision
+        });
+        if (!isCurrentContext(epoch, businessId)) return;
+        if (error) throw error;
+        if (!data || !["approved","dismissed","already_reviewed"].includes(data.disposition)) {
+          throw new Error("Unable to complete review. Refresh to check its status.");
+        }
+        pendingReviews = pendingReviews.filter(review => review.id !== reviewId);
+        updateReviewCount();
+        renderLeads();
+        await loadLeads();
+      } catch (error) {
+        if (isCurrentContext(epoch, businessId)) {
+          showDashboardError(error.message || "Unable to update this review.");
+        }
+      } finally {
+        pendingReviewIds.delete(reviewId);
+        if (isCurrentContext(epoch, businessId)) renderLeads();
+      }
+    }
+
     document.querySelectorAll(".filter-button").forEach(button => {
       button.setAttribute("aria-pressed", String(button.dataset.filter === currentFilter));
       button.addEventListener("click", function() {
