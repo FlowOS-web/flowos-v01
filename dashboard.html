@@ -527,6 +527,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="dashboard-polish.css?v=1">
 <link rel="stylesheet" href="brand-logo.css?v=1">
+<link rel="stylesheet" href="review-queue.css?v=1">
 <link rel="icon" type="image/svg+xml" href="brand-mark.svg">
 
 
@@ -837,6 +838,7 @@
         >
           Lost
         </button>
+        <button class="filter-button gb-review-tab hidden" data-filter="needs_review" id="needsReviewTab">Needs Review <span class="gb-review-count" id="reviewCount">0</span></button>
 
       </div>
 
@@ -853,6 +855,7 @@
         id="leadList"
         class="lead-list"
       ></div>
+      <div id="reviewList" class="lead-list hidden" aria-label="Requests awaiting review"></div>
 
     </main>
 
@@ -886,6 +889,9 @@
 
     let currentBusinessId = null;
     let allLeads = [];
+    let pendingReviews = [];
+    let currentBusinessRole = null;
+    const pendingReviewIds = new Set();
     let currentFilter = "all";
     let moneyFieldsAvailable = false;
     let dashboardEpoch = 0;
@@ -906,6 +912,7 @@
     const dashboardError = document.getElementById("dashboardError");
     const businessName = document.getElementById("businessName");
     const leadList = document.getElementById("leadList");
+    const reviewList = document.getElementById("reviewList");
     const loading = document.getElementById("loading");
     const refreshButton = document.getElementById("refreshButton");
 
@@ -984,6 +991,14 @@
       loadSequence++;
       currentBusinessId = null;
       allLeads = [];
+      pendingReviews = [];
+      currentBusinessRole = null;
+      pendingReviewIds.clear();
+      updateReviewCount();
+      document.getElementById("needsReviewTab").classList.add("hidden");
+      reviewList.innerHTML = "";
+      reviewList.classList.add("hidden");
+      leadList.classList.remove("hidden");
       moneyFieldsAvailable = false;
       pendingLeadIds.clear();
       leadValueDrafts.clear();
@@ -1084,6 +1099,8 @@
       if (businessError) throw businessError;
       if (!business || business.id !== membership.business_id) throw new Error("Business unavailable.");
       currentBusinessId = membership.business_id;
+      currentBusinessRole = membership.role;
+      document.getElementById("needsReviewTab").classList.toggle("hidden", currentBusinessRole !== "owner");
       businessName.textContent = business.name;
       document.getElementById("settingsLink").href = "settings.html?business_id=" + encodeURIComponent(currentBusinessId);
     }
@@ -1121,6 +1138,8 @@
           throw new Error("The lead list changed while loading. Please refresh.");
         }
         allLeads = uniqueRows;
+        await loadPendingReviews(epoch, businessId, request);
+        if (!isCurrent()) return;
         moneyFieldsAvailable = !allLeads.length || allLeads.every(lead =>
           Object.hasOwn(lead, "estimated_value") && Object.hasOwn(lead, "booked_revenue"));
         document.getElementById("valueTrackingNotice").classList.toggle("hidden", moneyFieldsAvailable);
@@ -1183,6 +1202,14 @@
     }
 
     function renderLeads() {
+      if (currentFilter === "needs_review") {
+        leadList.classList.add("hidden");
+        reviewList.classList.remove("hidden");
+        renderPendingReviews();
+        return;
+      }
+      reviewList.classList.add("hidden");
+      leadList.classList.remove("hidden");
       leadList.innerHTML = "";
       const filtered = currentFilter === "all" ? allLeads : allLeads.filter(lead => lead.status === currentFilter);
       if (!filtered.length) {
