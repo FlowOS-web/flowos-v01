@@ -110,6 +110,8 @@
                 <label for="industry">Industry</label><input id="industry" maxlength="120" placeholder="Home services">
                 <label for="tagline">Customer-facing tagline</label><textarea id="tagline" maxlength="280" style="min-height:90px"></textarea>
                 <div class="row"><div><label for="contactPhone">Public phone</label><input id="contactPhone" type="tel" maxlength="50"></div><div><label for="primaryColor">Brand color</label><input id="primaryColor" type="color" value="#6fa7ff"></div></div>
+                <label for="publicEmail">Public contact email (optional)</label><input id="publicEmail" type="email" maxlength="200" placeholder="hello@yourbusiness.com" autocomplete="off" aria-describedby="publicEmailHint">
+                <p id="publicEmailHint" class="hint">Displayed on this business's public request page. It is separate from the private lead notification email.</p>
                 <label for="websiteUrl">Website</label><input id="websiteUrl" type="url" maxlength="300" placeholder="https://example.com">
                 <label for="logoUrl">Logo image URL</label><input id="logoUrl" type="url" maxlength="500" placeholder="https://example.com/logo.png">
               </div>
@@ -288,7 +290,7 @@
       $("detailSetupButton").classList.toggle("hidden", !canSetUp);
       $("detailAccessNote").textContent = !business.owners.length ? "This business does not have an owner account assigned." : canSetUp ? "Lost the original setup link? Generate a new one here and share it with the owner. You can still view this business’s leads below." : business.owners.some(owner => owner.confirmed && owner.has_password) ? "The owner account is already set up. Use the owner's existing sign-in credentials; no new setup link is needed. You can inspect this business's leads here with your admin account." : "Owner access needs review. A setup link cannot be issued for the current account or enrollment state. You can inspect this business's leads here with your admin account.";
       const profile = data.profile || {}, definitions = $("detailProfile"); definitions.replaceChildren();
-      for (const [label, key] of [["Tagline", "tagline"], ["Public phone", "contact_phone"], ["Website", "website_url"]]) addDefinition(definitions, label, profile[key]);
+      for (const [label, key] of [["Tagline", "tagline"], ["Public phone", "contact_phone"], ["Public email", "public_email"], ["Website", "website_url"]]) addDefinition(definitions, label, profile[key]);
       const services = $("detailServices"); services.replaceChildren();
       if (!data.services.length) services.append(node("li", "No services configured."));
       for (const service of data.services) { const item = node("li"); item.append(node("span", service.name || "Unnamed service"), node("span", service.active ? "Enabled" : "Disabled", "tag" + (service.active ? " active" : ""))); services.append(item); }
@@ -346,7 +348,7 @@
       $("slug").value = slug; updateSlugPreview();
       if (!services.length || services.length > 20 || services.some(name => name.length > 120)) throw new Error("Add 1–20 services, each up to 120 characters.");
       if (new Set(services.map(name => name.toLowerCase())).size !== services.length) throw new Error("Each service name must be distinct.");
-      return { business: { name, slug, industry: $("industry").value.trim() || null, tagline: $("tagline").value.trim() || null, contact_phone: $("contactPhone").value.trim() || null, website_url: normalizeUrl($("websiteUrl").value), logo_url: normalizeUrl($("logoUrl").value), primary_color: $("primaryColor").value, notification_email: $("notificationEmail").value.trim().toLowerCase() || ownerEmail }, owner_email: ownerEmail, services };
+      return { business: { name, slug, industry: $("industry").value.trim() || null, tagline: $("tagline").value.trim() || null, contact_phone: $("contactPhone").value.trim() || null, public_email: $("publicEmail").value.trim().toLowerCase() || null, website_url: normalizeUrl($("websiteUrl").value), logo_url: normalizeUrl($("logoUrl").value), primary_color: $("primaryColor").value, notification_email: $("notificationEmail").value.trim().toLowerCase() || ownerEmail }, owner_email: ownerEmail, services };
     }
     function restorePending() {
       try {
@@ -354,7 +356,7 @@
         if (!saved || !UUID.test(saved.request_id) || typeof saved.canonical !== "string" || saved.canonical.length > 9000) return;
         if (saved.admin_user_id !== adminUserId) { clearPending(); return; }
         const data = JSON.parse(saved.canonical); if (!data.business || !Array.isArray(data.services)) return;
-        const fields = { businessName: "name", slug: "slug", industry: "industry", tagline: "tagline", contactPhone: "contact_phone", websiteUrl: "website_url", logoUrl: "logo_url", primaryColor: "primary_color", notificationEmail: "notification_email" };
+        const fields = { businessName: "name", slug: "slug", industry: "industry", tagline: "tagline", contactPhone: "contact_phone", publicEmail: "public_email", websiteUrl: "website_url", logoUrl: "logo_url", primaryColor: "primary_color", notificationEmail: "notification_email" };
         for (const [id, key] of Object.entries(fields)) if (typeof data.business[key] === "string" || data.business[key] === null) $(id).value = data.business[key] || (id === "primaryColor" ? "#6fa7ff" : "");
         $("ownerEmail").value = typeof data.owner_email === "string" ? data.owner_email : ""; $("services").value = data.services.filter(name => typeof name === "string").join("\n");
         pending = saved; updateSlugPreview(); feedback("provisionFeedback", "Your last submission is restored. Submit unchanged to safely retry it.", true);
