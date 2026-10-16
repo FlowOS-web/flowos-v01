@@ -238,6 +238,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="request-polish.css?v=1">
+<link rel="stylesheet" href="contact-card.css?v=1">
 <link rel="stylesheet" href="brand-logo.css?v=1">
 <link rel="icon" type="image/svg+xml" href="brand-mark.svg">
 
@@ -288,10 +289,30 @@
       class="tagline"
     ></div>
 
-    <div
-      id="businessMeta"
-      class="business-meta"
-    ></div>
+    <section id="businessContact" class="gb-contact-panel hidden" aria-labelledby="businessContactTitle">
+      <div class="gb-contact-heading">
+        <div class="gb-contact-symbol" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14M2 20h20M9 20v-5h6v5M8 8h2m4 0h2m-8 4h2m4 0h2"/></svg>
+        </div>
+        <div><div class="gb-contact-eyebrow">Business information</div>
+          <h2 id="businessContactTitle" class="gb-contact-title">Contact the business</h2></div>
+      </div>
+      <p class="gb-contact-caption">Have a question before requesting service? Reach out directly using the information provided by this business.</p>
+      <div class="gb-contact-grid">
+        <a id="businessContactPhone" class="gb-contact-link hidden" href="tel:">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16.5v3a2 2 0 0 1-2.2 2A18.5 18.5 0 0 1 2.5 5.2 2 2 0 0 1 4.5 3h3a2 2 0 0 1 2 1.7l.5 2.6a2 2 0 0 1-.6 1.8L7.7 10.7a14 14 0 0 0 5.6 5.6l1.6-1.7a2 2 0 0 1 1.8-.6l2.6.5a2 2 0 0 1 1.7 2Z"/></svg>
+          <span class="gb-contact-link-inner"><span class="gb-contact-label">Call the business</span><span id="businessPhoneValue" class="gb-contact-value"></span></span>
+        </a>
+        <a id="businessContactEmail" class="gb-contact-link hidden" href="mailto:">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <span class="gb-contact-link-inner"><span class="gb-contact-label">Email the business</span><span id="businessEmailValue" class="gb-contact-value"></span></span>
+        </a>
+        <a id="businessContactWebsite" class="gb-contact-link hidden" href="#" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+          <span class="gb-contact-link-inner"><span class="gb-contact-label">Business website</span><span id="businessWebsiteValue" class="gb-contact-value"></span></span>
+        </a>
+      </div>
+    </section>
 
 
     <div class="card">
@@ -738,6 +759,48 @@
   }
 
 
+
+  function showBusinessContact(profile) {
+    const panel = document.getElementById("businessContact");
+    const phoneLink = document.getElementById("businessContactPhone");
+    const emailLink = document.getElementById("businessContactEmail");
+    const websiteLink = document.getElementById("businessContactWebsite");
+    for (const el of [phoneLink, emailLink, websiteLink]) el.classList.add("hidden");
+    let count = 0;
+
+    // Show only usable contact methods. These values come from the public
+    // profile; never pull the private owner or lead-notification email here.
+    const phone = typeof profile.contact_phone === "string" ? profile.contact_phone.trim() : "";
+    const phoneTarget = phone.replace(/[^+0-9]/g, "");
+    if (phone && /^[+]?[0-9]{7,16}$/.test(phoneTarget)) {
+      phoneLink.href = "tel:" + phoneTarget;
+      document.getElementById("businessPhoneValue").textContent = phone;
+      phoneLink.classList.remove("hidden");
+      count++;
+    }
+
+    const address = typeof profile.public_email === "string" ? profile.public_email.trim() : "";
+    if (address.length <= 200 && /^[^\s@/?#]+@[^\s@/?#]+\.[^\s@/?#]+$/.test(address)) {
+      emailLink.href = "mailto:" + address;
+      document.getElementById("businessEmailValue").textContent = address;
+      emailLink.classList.remove("hidden");
+      count++;
+    }
+
+    try {
+      const website = new URL(profile.website_url);
+      if (["https:", "http:"].includes(website.protocol) &&
+          !website.username && !website.password) {
+        websiteLink.href = website.href;
+        document.getElementById("businessWebsiteValue").textContent = website.hostname.replace(/^www\./i, "");
+        websiteLink.classList.remove("hidden");
+        count++;
+      }
+    } catch {}
+
+    panel.classList.toggle("hidden", count === 0);
+  }
+
   /*
   ==================================================
   LOAD BUSINESS
@@ -763,7 +826,7 @@
           )
 
           .select(
-            "business_id, slug, display_name, industry, tagline, logo_url, primary_color, contact_phone, website_url"
+            "business_id, slug, display_name, industry, tagline, logo_url, primary_color, contact_phone, public_email, website_url"
           )
 
           .eq(
@@ -856,81 +919,7 @@
       }
 
 
-      const meta =
-        document.getElementById(
-          "businessMeta"
-        );
-
-
-      const metaParts = [];
-
-
-      if (
-        profile.contact_phone
-      ) {
-
-        const phone =
-          document.createElement(
-            "a"
-          );
-
-        phone.href =
-          "tel:" +
-          profile.contact_phone
-            .replace(
-              /[^+0-9]/g,
-              ""
-            );
-
-        phone.textContent =
-          profile.contact_phone;
-
-        metaParts.push(
-          phone
-        );
-
-      }
-
-
-      if (
-        profile.website_url
-      ) {
-
-        const website =
-          document.createElement(
-            "a"
-          );
-
-        website.href =
-          profile.website_url;
-
-        website.target =
-          "_blank";
-
-        website.rel =
-          "noopener noreferrer";
-
-        website.textContent =
-          "Visit website";
-
-        metaParts.push(
-          website
-        );
-
-      }
-
-
-      for (
-        const item
-        of metaParts
-      ) {
-
-        meta.appendChild(
-          item
-        );
-
-      }
-
+      showBusinessContact(profile);
 
       await loadServices();
 
