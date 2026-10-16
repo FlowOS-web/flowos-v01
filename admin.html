@@ -206,6 +206,7 @@
     }
     function clearPending() { pending = null; try { sessionStorage.removeItem(PENDING_KEY); } catch {} }
     function clearAdminData(resetForm = true, discardPending = true) {
+      if ($("deleteBusinessDialog").open) $("deleteBusinessDialog").close();
       clearResult(); if (discardPending) clearPending(); listEpoch++; detailEpoch++;
       selectedBusiness = null; listOffset = 0; listTotal = 0; leadOffset = 0; leadTotal = 0;
       listSearch = ""; listActive = true; $("searchInput").value = ""; $("activeFilter").value = "active";
@@ -250,6 +251,7 @@
     }
     function setView(view) {
       currentView = view;
+      if (view !== "details" && $("deleteBusinessDialog").open) $("deleteBusinessDialog").close();
       clearSetupLinks(); feedback("detailSetupFeedback", "");
       if (view !== "details") detailEpoch++;
       $("enrollmentsSection").classList.toggle("hidden", view !== "enrollments");
@@ -454,6 +456,89 @@
     $("refreshDetailsButton").addEventListener("click", () => { if (selectedBusiness) openBusiness(selectedBusiness.business_id, leadOffset); });
     $("leadPrevious").addEventListener("click", () => { if (selectedBusiness && leadOffset > 0) openBusiness(selectedBusiness.business_id, Math.max(0, leadOffset - LEAD_LIMIT)); });
     $("leadNext").addEventListener("click", () => { if (selectedBusiness && leadOffset + LEAD_LIMIT < leadTotal) openBusiness(selectedBusiness.business_id, leadOffset + LEAD_LIMIT); });
+
+    // Permanent business cleanup is available only from the admin details view.
+    // Native <dialog> and a typed business-slug phrase prevent accidental clicks.
+    const deleteBusinessDialog = $("deleteBusinessDialog");
+    const deleteBusinessInput = $("deleteBusinessConfirmation");
+    const deleteBusinessSubmit = $("confirmBusinessDeleteButton");
+    let deleteBusinessTarget = null;
+
+    function updateBusinessDeleteConfirmation() {
+      deleteBusinessSubmit.disabled = busy || !deleteBusinessTarget ||
+        deleteBusinessInput.value !== "DELETE " + deleteBusinessTarget.slug;
+    }
+
+    $("deleteBusinessButton").addEventListener("click", () => {
+      if (!adminUserId || busy || currentView !== "details" || !selectedBusiness) return;
+      const business = verifyBusiness(selectedBusiness);
+      deleteBusinessTarget = { business_id: business.business_id, slug: business.slug, name: business.name };
+      deleteBusinessInput.value = "";
+      $("deleteBusinessName").textContent = business.name;
+      $("deleteBusinessPhrase").textContent = "DELETE " + business.slug;
+      feedback("deleteBusinessFeedback", "");
+      updateBusinessDeleteConfirmation();
+      deleteBusinessDialog.showModal();
+      deleteBusinessInput.focus();
+    });
+    deleteBusinessInput.addEventListener("input", updateBusinessDeleteConfirmation);
+    $("cancelBusinessDeleteButton").addEventListener("click", () => {
+      if (!busy) deleteBusinessDialog.close();
+    });
+    deleteBusinessDialog.addEventListener("cancel", event => {
+      if (busy) event.preventDefault();
+    });
+    deleteBusinessDialog.addEventListener("close", () => {
+      deleteBusinessTarget = null;
+      deleteBusinessInput.value = "";
+      feedback("deleteBusinessFeedback", "");
+      updateBusinessDeleteConfirmation();
+    });
+    $("deleteBusinessForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const target = deleteBusinessTarget;
+      if (!target || !adminUserId || busy || currentView !== "details" ||
+          selectedBusiness?.business_id !== target.business_id ||
+          deleteBusinessInput.value !== "DELETE " + target.slug) return;
+      const epoch = accessEpoch, detailsEpoch = detailEpoch;
+      const button = deleteBusinessSubmit;
+      busy = true;
+      button.textContent = "Deleting…";
+      updateBusinessDeleteConfirmation();
+      $("cancelBusinessDeleteButton").disabled = true;
+      feedback("deleteBusinessFeedback", "Deleting the selected business and its records…", true);
+      try {
+        const response = await invoke({ body: {
+          action: "delete_business",
+          business_id: target.business_id,
+          confirmation: deleteBusinessInput.value
+        } });
+        if (epoch !== accessEpoch || !adminUserId || detailsEpoch !== detailEpoch ||
+            currentView !== "details") return;
+        if (response?.success !== true || response.deleted !== true ||
+            response.business_id !== target.business_id || response.slug !== target.slug) {
+          throw new Error("Deletion could not be verified. Refresh enrollments to confirm its status.");
+        }
+        deleteBusinessDialog.close();
+        selectedBusiness = null;
+        setView("enrollments");
+        listOffset = 0;
+        await loadBusinesses();
+        if (epoch === accessEpoch && adminUserId) {
+          feedback("listFeedback", "Deleted " + target.name + " and its business data.", true);
+        }
+      } catch (error) {
+        if (epoch === accessEpoch && detailsEpoch === detailEpoch && currentView === "details") {
+          feedback("deleteBusinessFeedback", error.message || "Unable to delete this business. Refresh before retrying.");
+        }
+      } finally {
+        busy = false;
+        button.textContent = "Delete permanently";
+        $("cancelBusinessDeleteButton").disabled = false;
+        updateBusinessDeleteConfirmation();
+      }
+    });
+
     $("provisionForm").addEventListener("input", () => { if (!busy) { clearResult(); feedback("provisionFeedback", ""); } });
     $("provisionForm").addEventListener("submit", async event => {
       event.preventDefault(); if (!adminUserId || busy) return; const epoch = accessEpoch;
