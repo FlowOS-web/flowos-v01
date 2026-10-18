@@ -50,6 +50,19 @@ To configure or change the sending domain:
 
 Domain verification is included in [Resend's Free plan](https://resend.com/pricing). A domain must be owned and its DNS editable; Gmail addresses and the shared GitHub Pages hostname cannot be verified as FlowOS domains. See [Resend's testing-sender restriction](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain) and [domain setup](https://resend.com/docs/add-a-domain).
 
+## Existing-account password recovery
+
+The business sign-in page links to `forgot-password.html`. It calls Supabase Auth `resetPasswordForEmail` and sends users to the canonical `https://gatebrook.work/reset-password.html` page. The reset page scrubs recovery parameters from the address bar before loading remote assets, accepts the supported recovery-session formats, verifies the active user session, and changes only that authenticated user's password with `updateUser`. Passwords and recovery tokens are not logged.
+
+Before relying on this flow in production:
+
+1. In **Supabase Dashboard → Authentication → URL Configuration → Redirect URLs**, add the exact URL `https://gatebrook.work/reset-password.html`. Keep the project's Site URL set to `https://gatebrook.work`.
+2. In **Authentication → Email Templates → Reset Password**, keep the standard secure confirmation link (`{{ .ConfirmationURL }}`) unless you deliberately configure an equivalent custom flow.
+3. Confirm Auth email delivery separately from the Resend request-notification sender. The existing Resend configuration for customer/business request notifications does not automatically configure Supabase Auth recovery emails.
+4. Test with an account you control: request a link, use the newest email, set a new password, sign in again, and verify that an expired link gives a safe recovery message. Do not test by changing a real business owner's password without their authorization.
+
+The project documentation currently notes that leaked-password protection is disabled in Supabase Auth; review and enable that protection before a broad public launch.
+
 ## Verification
 
 - `node --test supabase/functions/flowos-admin-onboarding/handler.test.ts`: offline authentication, authorization, validation, retries, existing-owner protection, and interrupted-setup recovery tests.
