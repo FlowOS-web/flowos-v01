@@ -28,6 +28,8 @@ test("reset pages scrub recovery parameters before loading remote assets", () =>
     const css = html.indexOf('<link rel="stylesheet" href="theme.css?v=1">');
     const client = html.indexOf('src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js');
     assert.ok(scrub >= 0 && css > scrub && client > scrub, file + " must scrub tokens before remote assets load");
+    assert.match(html, /const gatebrookRecoveryState = \(\(\) => \{/, file);
+    assert.ok(!html.includes("window.gatebrookRecovery"), file + " must not expose recovery tokens on window");
     assert.match(html, /detectSessionInUrl:\s*false/, file);
     assert.match(html, /exchangeCodeForSession/, file);
     assert.match(html, /auth\.setSession/, file);
