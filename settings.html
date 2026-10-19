@@ -277,7 +277,7 @@
         slug = profile.slug || business.slug;
         services = serviceRows || [];
         const builderRoot = document.getElementById("requestBuilder");
-        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); }
+        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); builderRoot.dataset.services = JSON.stringify((serviceRows || []).filter(service => service.active).map(service => service.name)); }
 
         document.getElementById("businessName").value = business.name || "";
         document.getElementById("tagline").value = profile.tagline || "";
