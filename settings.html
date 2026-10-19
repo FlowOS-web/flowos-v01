@@ -200,6 +200,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="brand-system.css?v=1">
+<link rel="stylesheet" href="request-polish.css?v=1">
+<link rel="stylesheet" href="contact-card.css?v=2">
 </head>
 <body class="gb-brand-settings-page">
   <header class="topbar">
@@ -319,6 +321,49 @@
     </section>
   </main>
 
+  <style>
+    /* The preview is the customer page itself, not a second card around it. */
+    #requestPreview.gb-request-page.gb-request-preview {
+      max-width: none;
+      margin: 14px auto 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background-color: #090a0b;
+      background-image:
+        radial-gradient(ellipse 43% 37% at 89% 17%,rgba(42,91,62,.16),transparent 78%),
+        radial-gradient(ellipse 32% 35% at 3% 77%,rgba(27,68,47,.10),transparent 78%),
+        linear-gradient(180deg,#090a0b 0%,#101314 40%,#23282a 76%,#586460 94%,#939e99 100%);
+      background-attachment: fixed;
+      background-size: cover;
+      box-shadow: none;
+      color: #f5f5f2;
+      text-align: left;
+    }
+    #requestPreview.gb-request-page .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 54px 22px 35px;
+    }
+    #requestPreview.gb-request-page .flowos { margin-bottom: 45px; }
+    #requestPreview.gb-request-page input:disabled,
+    #requestPreview.gb-request-page select:disabled,
+    #requestPreview.gb-request-page textarea:disabled,
+    #requestPreview.gb-request-page button:disabled { opacity: 1; }
+    #requestPreview.gb-request-page button#submitButton:disabled { cursor: default; }
+    :root[data-gb-theme="light"] #requestPreview.gb-request-page.gb-request-preview {
+      color: #182420;
+      background-image:
+        radial-gradient(ellipse 42% 35% at 87% 17%,rgba(39,94,59,.10),transparent 78%),
+        radial-gradient(ellipse 30% 32% at 4% 77%,rgba(53,100,66,.07),transparent 76%),
+        linear-gradient(180deg,#f5f5f2 0%,#eff1ec 37%,#d6ddd6 75%,#9da8a1 94%,#555e59 100%);
+    }
+    @media(max-width:620px) {
+      #requestPreview.gb-request-page .wrap { padding: 28px 16px 30px; }
+      #requestPreview.gb-request-page .flowos { margin-bottom: 35px; }
+    }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
   <script src="request-builder.js?v=1"></script>
   <script>
@@ -401,7 +446,7 @@
         slug = profile.slug || business.slug;
         services = serviceRows || [];
         const builderRoot = document.getElementById("requestBuilder");
-        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); builderRoot.dataset.services = JSON.stringify((serviceRows || []).filter(service => service.active).map(service => service.name)); }
+        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); builderRoot.dataset.businessLogo = String(profile.logo_url || ""); builderRoot.dataset.businessPhone = String(profile.contact_phone || ""); builderRoot.dataset.businessEmail = String(profile.public_email || ""); builderRoot.dataset.businessWebsite = String(profile.website_url || ""); builderRoot.dataset.services = JSON.stringify((serviceRows || []).filter(service => service.active).map(service => service.name)); }
 
         document.getElementById("businessName").value = business.name || "";
         document.getElementById("tagline").value = profile.tagline || "";
