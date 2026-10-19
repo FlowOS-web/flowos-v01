@@ -145,176 +145,61 @@
     });
   }
 
+  let previewFrame = null;
+  let previewFrameReady = false;
+  let previewFrameHeight = 760;
+
+  window.addEventListener("message", event => {
+    if (!previewFrame || event.source !== previewFrame.contentWindow || event.origin !== window.location.origin) return;
+    if (event.data?.type === "gatebrook-preview-ready") {
+      previewFrameReady = true;
+      sendPreviewData();
+    } else if (event.data?.type === "gatebrook-preview-height" && Number.isFinite(event.data.height)) {
+      previewFrameHeight = Math.max(520, Math.min(2400, event.data.height));
+      previewFrame.style.height = previewFrameHeight + "px";
+    }
+  });
+
+  function sendPreviewData() {
+    if (!previewFrame?.contentWindow || !previewFrameReady) return;
+    const base = readBase();
+    let services = [];
+    try { services = JSON.parse(root.dataset.services || "[]"); } catch (_) {}
+    previewFrame.contentWindow.postMessage({
+      type: "gatebrook-preview-data",
+      payload: {
+        businessName: root.dataset.businessName || "Your business",
+        logoUrl: root.dataset.businessLogo || "",
+        tagline: base.page_description,
+        phone: root.dataset.businessPhone || "",
+        email: root.dataset.businessEmail || "",
+        website: root.dataset.businessWebsite || "",
+        pageTitle: base.page_title,
+        submitLabel: base.submit_label,
+        services,
+        fields: base.fields
+      }
+    }, window.location.origin);
+  }
+
   function renderPreview() {
     const preview = $("requestPreview");
-    preview.replaceChildren();
-    preview.classList.add("gb-request-page");
-    const base = readBase();
-
-    // Mirror request.html's real customer-facing hierarchy and shared CSS classes.
-    const wrap = document.createElement("div");
-    wrap.className = "wrap";
-    const powered = document.createElement("div");
-    powered.className = "flowos";
-    powered.innerHTML = '<span class="gb-mark" aria-hidden="true"><svg class="gb-brand-glyph" viewBox="0 0 179 143" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true"><path class="gb-logo-frame" d="M1 0H178V77L161 64V17H19V124H90V142H1Z"/><path class="gb-logo-b" fill-rule="evenodd" d="M103 62H134L178 95V142H102Z M121 80L131 81L157 101L156 125L120 124Z"/><path class="gb-logo-g" d="M32 32V110L90 111V62H72L71 94L50 93V50L89 49L90 33Z"/><path class="gb-logo-cap" d="M103 32V49H126L129 52L147 51L146 32Z"/></svg></span><span class="gb-powered-label"><span>Powered by</span><strong>GATEBROOK</strong></span>';
-
-    const logoUrl = root.dataset.businessLogo || "";
-    if (logoUrl) {
-      const logo = document.createElement("img");
-      logo.className = "business-logo";
-      logo.alt = "";
-      logo.src = logoUrl;
-      logo.style.display = "block";
-      wrap.appendChild(powered);
-      wrap.appendChild(logo);
-    } else {
-      wrap.appendChild(powered);
-    }
-
-    const business = document.createElement("h1");
-    business.textContent = root.dataset.businessName || "Your business";
-    const title = document.createElement("h2");
-    title.className = "request-page-title";
-    title.textContent = base.page_title || "Request a Service";
-    const desc = document.createElement("div");
-    desc.className = "tagline";
-    desc.textContent = base.page_description || "Tell us what you need and we will follow up.";
-    wrap.append(business, title, desc);
-    const metaValues = [
-      ["Phone", root.dataset.businessPhone || ""],
-      ["Email", root.dataset.businessEmail || ""],
-      ["Website", root.dataset.businessWebsite || ""]
-    ].filter(([, value]) => value);
-    if (metaValues.length) {
-      const meta = document.createElement("div");
-      meta.className = "business-meta";
-      metaValues.forEach(([label, value], index) => {
-        if (index) meta.appendChild(document.createTextNode(" · "));
-        const item = document.createElement("span");
-        item.textContent = label + ": " + value;
-        meta.appendChild(item);
+    if (!previewFrame) {
+      preview.replaceChildren();
+      previewFrame = document.createElement("iframe");
+      previewFrame.title = "Live customer request page preview";
+      previewFrame.setAttribute("loading", "eager");
+      previewFrame.setAttribute("referrerpolicy", "same-origin");
+      previewFrame.style.cssText = "display:block;width:100%;height:" + previewFrameHeight + "px;border:0;border-radius:12px;background:#0d0f13;overflow:hidden;";
+      previewFrame.addEventListener("load", () => {
+        previewFrameReady = true;
+        sendPreviewData();
       });
-      wrap.appendChild(meta);
+      const isV1Preview = window.location.pathname.includes("/v1-preview/");
+      previewFrame.src = new URL((isV1Preview ? "../" : "") + "request.html?preview=1", window.location.href).href;
+      preview.appendChild(previewFrame);
     }
-
-    const availableServices = (() => { try { return JSON.parse(root.dataset.services || "[]"); } catch (_) { return []; } })();
-    const card = document.createElement("div");
-    card.className = "card";
-    const form = document.createElement("form");
-    form.addEventListener("submit", event => event.preventDefault());
-    const formGrid = document.createElement("div");
-    formGrid.className = "grid";
-    form.appendChild(formGrid);
-
-    const addPreview = (label, type, required, placeholder, options, full = false) => {
-      const group = document.createElement("div");
-      if (full) group.className = "full";
-      const lab = document.createElement("label");
-      lab.textContent = label + (required ? " *" : "");
-      const control = document.createElement(type === "textarea" ? "textarea" : (type === "select" ? "select" : "input"));
-      if (type !== "textarea" && type !== "select") {
-        control.type = ["number","date","email","tel"].includes(type) ? type : "text";
-      }
-      control.disabled = true;
-      control.placeholder = placeholder || "";
-      if (type === "select") {
-        const op = document.createElement("option");
-        op.textContent = "Choose a service";
-        op.value = "";
-        control.appendChild(op);
-        (options || []).forEach(value => {
-          const o = document.createElement("option");
-          o.textContent = value;
-          o.value = value;
-          control.appendChild(o);
-        });
-      }
-      group.append(lab, control);
-      formGrid.appendChild(group);
-    };
-
-    [
-      ["Name", "text", true, "John Smith", false],
-      ["Phone", "tel", false, "7635551234", false],
-      ["Email", "email", false, "john@example.com", false],
-      ["Service", "select", true, "", false],
-      ["Preferred Date", "date", false, "", false],
-      ["Service Address / Location", "text", false, "Address or service location", false],
-      ["Tell us what you need", "textarea", false, "Describe the job, problem, project, or anything the business should know.", true]
-    ].forEach(([label,type,required,placeholder,full]) => addPreview(
-      label,type,required,placeholder,type === "select" ? availableServices : [],full
-    ));
-
-    base.fields.forEach(field => {
-      if (field.type === "radio" || field.type === "checkbox") {
-        const group = document.createElement("div");
-        group.className = "full custom-question";
-        const label = document.createElement("label");
-        label.textContent = field.label + (field.required ? " *" : "");
-        group.appendChild(label);
-        const choices = document.createElement("div");
-        choices.className = "custom-choice-list";
-        (field.options || []).forEach(value => {
-          const optionLabel = document.createElement("label");
-          optionLabel.className = "custom-choice";
-          const input = document.createElement("input");
-          input.type = field.type;
-          input.disabled = true;
-          input.style.width = "auto";
-          optionLabel.append(input, document.createTextNode(value));
-          choices.appendChild(optionLabel);
-        });
-        group.appendChild(choices);
-        formGrid.appendChild(group);
-      } else {
-        addPreview(field.label,field.type,field.required,field.placeholder,field.options,field.type === "textarea");
-      }
-    });
-
-    const button = document.createElement("button");
-    button.id = "submitButton";
-    button.type = "submit";
-    button.textContent = base.submit_label || "Submit Request";
-    button.disabled = true;
-    form.appendChild(button);
-    const security = document.createElement("div");
-    security.className = "full security-area";
-    const securityNote = document.createElement("div");
-    securityNote.className = "security-note";
-    securityNote.textContent = "Protected against automated spam.";
-    security.appendChild(securityNote);
-    form.appendChild(security);
-    card.appendChild(form);
-
-    const contactItems = [
-      ["Phone", root.dataset.businessPhone || ""],
-      ["Email", root.dataset.businessEmail || ""],
-      ["Website", root.dataset.businessWebsite || ""]
-    ].filter(([, value]) => value);
-    if (contactItems.length) {
-      const contact = document.createElement("details");
-      contact.className = "gb-contact-disclosure";
-      const summary = document.createElement("summary");
-      summary.className = "gb-contact-trigger";
-      summary.textContent = "Contact business";
-      contact.appendChild(summary);
-      const panel = document.createElement("div");
-      panel.className = "gb-contact-panel";
-      const caption = document.createElement("p");
-      caption.className = "gb-contact-caption";
-      caption.textContent = "Other ways to reach this business";
-      panel.appendChild(caption);
-      contactItems.forEach(([label, value]) => {
-        const line = document.createElement("div");
-        line.className = "gb-contact-value";
-        line.textContent = label + ": " + value;
-        panel.appendChild(line);
-      });
-      contact.appendChild(panel);
-      card.appendChild(contact);
-    }
-    wrap.appendChild(card);
-    preview.appendChild(wrap);
+    sendPreviewData();
   }
 
   function renderTemplateDescription() {
