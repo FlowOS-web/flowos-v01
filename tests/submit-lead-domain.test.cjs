@@ -25,7 +25,7 @@ function fixture({ hostname = "gatebrook.work", verified = true, active = true, 
         async maybeSingle() {
           if (table === "businesses") return { data: active ? { id: BUSINESS, name: "Fixture service", owner_email: null, active: true } : null, error: null };
           if (table === "business_services") return { data: service ? { id: "fixture-service" } : null, error: null };
-          if (table === "business_request_forms") return { data: null, error: null };
+          if (table === "business_request_forms") return { data: { fields: [{ id: "urgency", label: "Urgency", type: "select", required: false, options: ["Emergency", "Normal"] }] }, error: null };
           throw new Error("Unexpected fixture lookup: " + table);
         },
         async single() { return { data: { id: "fixture-row" }, error: null }; },
@@ -74,7 +74,7 @@ test("verified custom-domain and legacy hostname submissions reach guarded lead 
     assert.equal(f.calls.inserts.length, 0, "lead creation must happen atomically inside the protected intake RPC");
     assert.deepEqual(f.calls.rpcs.map(call => call.name), ["gatebrook_validate_request_fields", "gatebrook_receive_request_custom"]);
     assert.equal(f.calls.rpcs[1].args.p_business_id, BUSINESS);
-    assert.deepEqual(f.calls.rpcs[1].args.p_answers, { urgency: "Emergency" });
+    assert.equal(JSON.stringify(f.calls.rpcs[1].args.p_answers), JSON.stringify({ urgency: "Emergency" }));
   }
 });
 
