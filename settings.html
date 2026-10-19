@@ -7,7 +7,7 @@
   <style>
     *{box-sizing:border-box}
     :root{--bg:#0d0f13;--panel:#151820;--panel2:#1a1e27;--border:#2a303b;--text:#f5f7fa;--muted:#969eac;--accent:#6fa7ff;--danger:#d76464;--ok:#68d9a0}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:"Instrument Sans",Arial,Helvetica,sans-serif}
     a{color:inherit;text-decoration:none}
     button,input,textarea{font:inherit}
     .topbar{min-height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:#11141a;border-bottom:1px solid var(--border)}
@@ -39,7 +39,7 @@
     .gb-builder-section-head{display:flex;align-items:end;justify-content:space-between;gap:14px;margin-top:28px}
     .gb-builder-section-head h3,.gb-preview-shell h3{margin:0 0 5px;font-size:17px}
     .gb-builder-section-head p{margin:0 0 10px;max-width:620px}
-    .gb-custom-field-row{border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0;background:#101319}
+    .gb-custom-field-row{border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0;background:var(--panel2)}
     .gb-custom-field-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
     .gb-field-actions{display:flex;gap:6px;align-items:center}
     .gb-field-actions .btn{padding:7px 10px}
@@ -48,14 +48,14 @@
     .gb-field-extra input{width:100%}
     .gb-required-toggle{display:flex;align-items:center;gap:8px;margin-top:12px}
     .gb-required-toggle input{width:auto}
-    .gb-preview-shell{margin-top:22px;padding:18px;border:1px solid var(--border);border-radius:13px;background:#101319}
-    .gb-request-preview{margin:14px auto 0;max-width:600px;padding:18px;border:1px solid #303643;border-radius:10px;background:#171a21}
-    .gb-request-preview h3{font-size:24px;margin:0 0 7px}
-    .gb-request-preview>p{color:var(--muted);margin:0 0 18px}
-    .gb-preview-field{margin:12px 0}
-    .gb-preview-field label{margin:0 0 6px}
-    .gb-preview-field input,.gb-preview-field select,.gb-preview-field textarea{width:100%;margin:0}
-    .gb-request-preview button{width:100%;margin-top:12px}
+    .gb-preview-shell{margin-top:22px;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--panel2)}
+    .gb-request-preview{margin:14px auto 0;max-width:760px;padding:24px;border:1px solid var(--border);border-radius:18px;background:var(--panel);color:var(--text);text-align:left}
+    .gb-request-preview .gb-preview-business{font-size:24px;line-height:1.2;margin:0 0 16px;font-weight:700;color:var(--text)}\n    .gb-request-preview h3{font-size:24px;margin:0 0 8px}
+    .gb-request-preview>p{color:var(--muted);margin:0 0 20px;line-height:1.5}\n    .gb-request-preview .gb-preview-powered{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+    .gb-preview-field{margin:0 0 15px;min-width:0}
+    .gb-preview-field label{margin:0 0 7px}
+    .gb-preview-field input,.gb-preview-field select,.gb-preview-field textarea{width:100%;margin:0;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px 13px;font-size:14px}\n    .gb-preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 15px}\n    .gb-preview-grid .full{grid-column:1/-1}\n    .gb-preview-choice{display:flex;align-items:center;gap:9px;margin:0 0 8px;color:var(--text)}\n    .gb-preview-choice input{width:auto;accent-color:var(--accent)}
+    .gb-request-preview button{width:100%;margin-top:4px;padding:14px;border:0;border-radius:10px;background:#f2f3f5;color:#111;font-weight:700}\n    :root[data-gb-theme="light"] .gb-custom-field-row,:root[data-gb-theme="light"] .gb-preview-shell{background:var(--panel2)}\n    @media(max-width:620px){.gb-preview-grid{grid-template-columns:1fr}.gb-preview-grid .full{grid-column:auto}.gb-request-preview{padding:18px}}
     @media(max-width:760px){.gb-field-editor-grid{grid-template-columns:1fr}.gb-builder-section-head{align-items:start;flex-direction:column}}
 
   </style>
@@ -148,7 +148,7 @@
 
       <div class="card" id="requestBuilder" style="grid-column:1 / -1">
         <h2>Request page builder</h2>
-        <p>Choose a starting template, tailor the questions customers see, and preview the page before saving. Your existing request link will not change.</p>
+        <p>Choose a starter, add only the questions you need, and preview the customer page. Your request link stays the same.</p>
         <div class="row">
           <div>
             <label for="formTemplate">Starting template</label>
@@ -163,14 +163,13 @@
             <div id="templateDescription" class="feedback"></div>
           </div>
           <div>
-            <label for="formSubmitLabel">Submit button text</label>
+            <label for="formSubmitLabel">Button label</label>
             <input id="formSubmitLabel" data-builder-input maxlength="40" value="Submit Request">
           </div>
         </div>
-        <label for="formPageTitle">Request page title</label>
+        <label for="formPageTitle">Form heading</label>
         <input id="formPageTitle" data-builder-input maxlength="120" value="Request a Service">
-        <label for="formPageDescription">Page description</label>
-        <textarea id="formPageDescription" data-builder-input maxlength="500">Tell us what you need and we will follow up.</textarea>
+        <p class="feedback" style="margin:12px 0 0">The page description uses your Customer-facing tagline from Business Profile. Edit it there once; it updates this preview automatically.</p>
         <div class="gb-builder-section-head">
           <div><h3>Custom questions</h3><p>Keep the standard contact and service fields, then add the information specific to your business.</p></div>
           <div id="fieldCount" class="feedback"></div>
@@ -178,7 +177,7 @@
         <div id="customFieldList"></div>
         <button id="addCustomField" type="button" class="btn">+ Add question</button>
         <div class="gb-preview-shell">
-          <h3>Live preview</h3>
+          <h3>Customer view</h3>
           <div id="requestPreview" class="gb-request-preview"></div>
         </div>
         <button id="saveRequestForm" type="button" class="btn primary">Save request page</button>
@@ -270,10 +269,10 @@
         slug = profile.slug || business.slug;
         services = serviceRows || [];
         const builderRoot = document.getElementById("requestBuilder");
-        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); }
+        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); }
 
         document.getElementById("businessName").value = business.name || "";
-        document.getElementById("tagline").value = profile.tagline || "";
+        document.getElementById("tagline").value = profile.tagline || "";\n        document.getElementById("tagline").addEventListener("input", event => { if (builderRoot) { builderRoot.dataset.businessTagline = event.target.value; if (window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.refreshPreview(); } });
         document.getElementById("contactPhone").value = profile.contact_phone || "";
         document.getElementById("publicEmail").value = profile.public_email || "";
         document.getElementById("websiteUrl").value = profile.website_url || "";
