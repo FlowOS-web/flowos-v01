@@ -148,45 +148,62 @@
   function renderPreview() {
     const preview = $("requestPreview");
     preview.replaceChildren();
+    preview.classList.add("gb-request-page");
     const base = readBase();
+
+    // Mirror request.html's real customer-facing hierarchy and shared CSS classes.
+    const wrap = document.createElement("div");
+    wrap.className = "wrap";
     const powered = document.createElement("div");
-    powered.className = "gb-preview-powered";
-    powered.textContent = "Powered by GATEBROOK";
-    const business = document.createElement("div");
-    business.className = "gb-preview-business";
+    powered.className = "flowos";
+    powered.innerHTML = '<span class="gb-mark" aria-hidden="true"><svg class="gb-brand-glyph" viewBox="0 0 179 143" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true"><path class="gb-logo-frame" d="M1 0H178V77L161 64V17H19V124H90V142H1Z"/><path class="gb-logo-b" fill-rule="evenodd" d="M103 62H134L178 95V142H102Z M121 80L131 81L157 101L156 125L120 124Z"/><path class="gb-logo-g" d="M32 32V110L90 111V62H72L71 94L50 93V50L89 49L90 33Z"/><path class="gb-logo-cap" d="M103 32V49H126L129 52L147 51L146 32Z"/></svg></span><span class="gb-powered-label"><span>Powered by</span><strong>GATEBROOK</strong></span>';
+
+    const logoUrl = root.dataset.businessLogo || "";
+    if (logoUrl) {
+      const logo = document.createElement("img");
+      logo.className = "business-logo";
+      logo.alt = "";
+      logo.src = logoUrl;
+      logo.style.display = "block";
+      wrap.appendChild(powered);
+      wrap.appendChild(logo);
+    } else {
+      wrap.appendChild(powered);
+    }
+
+    const business = document.createElement("h1");
     business.textContent = root.dataset.businessName || "Your business";
-    const title = document.createElement("h3");
+    const title = document.createElement("h2");
+    title.className = "request-page-title";
     title.textContent = base.page_title || "Request a Service";
-    const desc = document.createElement("p");
+    const desc = document.createElement("div");
+    desc.className = "tagline";
     desc.textContent = base.page_description || "Tell us what you need and we will follow up.";
-    preview.append(powered, business, title, desc);
+    wrap.append(business, title, desc);
 
-    const formGrid = document.createElement("div");
-    formGrid.className = "gb-preview-grid";
-    preview.appendChild(formGrid);
     const availableServices = (() => { try { return JSON.parse(root.dataset.services || "[]"); } catch (_) { return []; } })();
-    const standard = [
-      ["Name", "text", true, "John Smith", false],
-      ["Phone", "tel", false, "7635551234", false],
-      ["Email", "email", false, "you@example.com", false],
-      ["Service", "select", true, "", false],
-      ["Preferred Date", "date", false, "", false],
-      ["Service Address / Location", "text", false, "Address or service location", false],
-      ["Tell us what you need", "textarea", false, "Describe the job, problem, project, or anything the business should know.", true]
-    ];
+    const card = document.createElement("div");
+    card.className = "card";
+    const form = document.createElement("form");
+    form.addEventListener("submit", event => event.preventDefault());
+    const formGrid = document.createElement("div");
+    formGrid.className = "grid";
+    form.appendChild(formGrid);
 
-    const addPreview = (label, type, required, placeholder, options) => {
+    const addPreview = (label, type, required, placeholder, options, full = false) => {
       const group = document.createElement("div");
-      group.className = "gb-preview-field";
+      if (full) group.className = "full";
       const lab = document.createElement("label");
       lab.textContent = label + (required ? " *" : "");
       const control = document.createElement(type === "textarea" ? "textarea" : (type === "select" ? "select" : "input"));
-      if (type !== "textarea" && type !== "select") control.type = type === "number" ? "number" : type === "date" ? "date" : type === "email" ? "email" : "text";
+      if (type !== "textarea" && type !== "select") {
+        control.type = ["number","date","email","tel"].includes(type) ? type : "text";
+      }
       control.disabled = true;
       control.placeholder = placeholder || "";
       if (type === "select") {
         const op = document.createElement("option");
-        op.textContent = type === "select" ? "Choose a service" : "Select an option";
+        op.textContent = "Choose a service";
         op.value = "";
         control.appendChild(op);
         (options || []).forEach(value => {
@@ -200,40 +217,53 @@
       formGrid.appendChild(group);
     };
 
-    standard.forEach(([label, type, required, placeholder, full]) => {
-      addPreview(label, type, required, placeholder, type === "select" ? availableServices : []);
-      if (full) formGrid.lastElementChild.classList.add("full");
-    });
+    [
+      ["Name", "text", true, "John Smith", false],
+      ["Phone", "tel", false, "7635551234", false],
+      ["Email", "email", false, "john@example.com", false],
+      ["Service", "select", true, "", false],
+      ["Preferred Date", "date", false, "", false],
+      ["Service Address / Location", "text", false, "Address or service location", false],
+      ["Tell us what you need", "textarea", false, "Describe the job, problem, project, or anything the business should know.", true]
+    ].forEach(([label,type,required,placeholder,full]) => addPreview(
+      label,type,required,placeholder,type === "select" ? availableServices : [],full
+    ));
 
-    base.fields.forEach(f => {
-      if (f.type === "radio" || f.type === "checkbox") {
+    base.fields.forEach(field => {
+      if (field.type === "radio" || field.type === "checkbox") {
         const group = document.createElement("div");
-        group.className = "gb-preview-field full";
-        const lab = document.createElement("label");
-        lab.textContent = f.label + (f.required ? " *" : "");
-        group.appendChild(lab);
-        (f.options || []).forEach(value => {
+        group.className = "full custom-question";
+        const label = document.createElement("label");
+        label.textContent = field.label + (field.required ? " *" : "");
+        group.appendChild(label);
+        const choices = document.createElement("div");
+        choices.className = "custom-choice-list";
+        (field.options || []).forEach(value => {
           const optionLabel = document.createElement("label");
-          optionLabel.className = "gb-preview-choice";
+          optionLabel.className = "custom-choice";
           const input = document.createElement("input");
-          input.type = f.type;
+          input.type = field.type;
           input.disabled = true;
           input.style.width = "auto";
           optionLabel.append(input, document.createTextNode(value));
-          group.appendChild(optionLabel);
+          choices.appendChild(optionLabel);
         });
+        group.appendChild(choices);
         formGrid.appendChild(group);
       } else {
-        addPreview(f.label, f.type, f.required, f.placeholder, f.options);
-        if (f.type === "textarea") formGrid.lastElementChild.classList.add("full");
+        addPreview(field.label,field.type,field.required,field.placeholder,field.options,field.type === "textarea");
       }
     });
 
     const button = document.createElement("button");
-    button.type = "button";
+    button.id = "submitButton";
+    button.type = "submit";
     button.textContent = base.submit_label || "Submit Request";
     button.disabled = true;
-    preview.appendChild(button);
+    form.appendChild(button);
+    card.appendChild(form);
+    wrap.appendChild(card);
+    preview.appendChild(wrap);
   }
 
   function renderTemplateDescription() {
