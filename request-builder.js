@@ -75,10 +75,42 @@
       }))
     };
   }
+  function renderQuestionSummary() {
+    const host = $("questionReviewList");
+    if (!host) return;
+    host.replaceChildren();
+    if (!fields.length) {
+      const empty = document.createElement("p");
+      empty.className = "gb-field-help";
+      empty.textContent = "No extra questions for this starter. That’s fine — the standard contact and service fields are already included.";
+      host.appendChild(empty);
+      return;
+    }
+    fields.forEach(field => {
+      const item = document.createElement("div");
+      item.className = "gb-question-review-item";
+      const check = document.createElement("span");
+      check.className = "gb-question-review-check";
+      check.setAttribute("aria-hidden", "true");
+      check.textContent = "✓";
+      const copy = document.createElement("div");
+      copy.className = "gb-question-review-copy";
+      const label = document.createElement("strong");
+      label.textContent = field.label || "Untitled question";
+      const meta = document.createElement("span");
+      const typeLabels = {text:"Short answer",textarea:"Long answer",select:"Choose one",radio:"Choose one",checkbox:"Choose any",date:"Date",number:"Number"};
+      meta.textContent = (typeLabels[field.type] || "Answer") + (field.required ? " · Required" : " · Optional");
+      copy.append(label, meta);
+      item.append(check, copy);
+      host.appendChild(item);
+    });
+  }
+
   function renderFieldEditor() {
     const host = $("customFieldList");
     host.replaceChildren();
-    $("fieldCount").textContent = fields.length + " / 20 questions";
+    $("fieldCount").textContent = fields.length + " suggested";
+    renderQuestionSummary();
     if (!fields.length) {
       const empty = document.createElement("p");
       empty.className = "feedback";
