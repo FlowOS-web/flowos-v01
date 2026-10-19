@@ -50,12 +50,20 @@
     .gb-required-toggle input{width:auto}
     .gb-preview-shell{margin-top:22px;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--panel2)}
     .gb-request-preview{margin:14px auto 0;max-width:760px;padding:24px;border:1px solid var(--border);border-radius:18px;background:var(--panel);color:var(--text);text-align:left}
-    .gb-request-preview .gb-preview-business{font-size:24px;line-height:1.2;margin:0 0 16px;font-weight:700;color:var(--text)}\n    .gb-request-preview h3{font-size:24px;margin:0 0 8px}
-    .gb-request-preview>p{color:var(--muted);margin:0 0 20px;line-height:1.5}\n    .gb-request-preview .gb-preview-powered{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+    .gb-request-preview .gb-preview-business{font-size:24px;line-height:1.2;margin:0 0 16px;font-weight:700;color:var(--text)}
+    .gb-request-preview h3{font-size:24px;margin:0 0 8px}
+    .gb-request-preview>p{color:var(--muted);margin:0 0 20px;line-height:1.5}
+    .gb-request-preview .gb-preview-powered{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
     .gb-preview-field{margin:0 0 15px;min-width:0}
     .gb-preview-field label{margin:0 0 7px}
-    .gb-preview-field input,.gb-preview-field select,.gb-preview-field textarea{width:100%;margin:0;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px 13px;font-size:14px}\n    .gb-preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 15px}\n    .gb-preview-grid .full{grid-column:1/-1}\n    .gb-preview-choice{display:flex;align-items:center;gap:9px;margin:0 0 8px;color:var(--text)}\n    .gb-preview-choice input{width:auto;accent-color:var(--accent)}
-    .gb-request-preview button{width:100%;margin-top:4px;padding:14px;border:0;border-radius:10px;background:#f2f3f5;color:#111;font-weight:700}\n    :root[data-gb-theme="light"] .gb-custom-field-row,:root[data-gb-theme="light"] .gb-preview-shell{background:var(--panel2)}\n    @media(max-width:620px){.gb-preview-grid{grid-template-columns:1fr}.gb-preview-grid .full{grid-column:auto}.gb-request-preview{padding:18px}}
+    .gb-preview-field input,.gb-preview-field select,.gb-preview-field textarea{width:100%;margin:0;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:12px 13px;font-size:14px}
+    .gb-preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 15px}
+    .gb-preview-grid .full{grid-column:1/-1}
+    .gb-preview-choice{display:flex;align-items:center;gap:9px;margin:0 0 8px;color:var(--text)}
+    .gb-preview-choice input{width:auto;accent-color:var(--accent)}
+    .gb-request-preview button{width:100%;margin-top:4px;padding:14px;border:0;border-radius:10px;background:#f2f3f5;color:#111;font-weight:700}
+    :root[data-gb-theme="light"] .gb-custom-field-row,:root[data-gb-theme="light"] .gb-preview-shell{background:var(--panel2)}
+    @media(max-width:620px){.gb-preview-grid{grid-template-columns:1fr}.gb-preview-grid .full{grid-column:auto}.gb-request-preview{padding:18px}}
     @media(max-width:760px){.gb-field-editor-grid{grid-template-columns:1fr}.gb-builder-section-head{align-items:start;flex-direction:column}}
 
   </style>
@@ -272,7 +280,8 @@
         if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); }
 
         document.getElementById("businessName").value = business.name || "";
-        document.getElementById("tagline").value = profile.tagline || "";\n        document.getElementById("tagline").addEventListener("input", event => { if (builderRoot) { builderRoot.dataset.businessTagline = event.target.value; if (window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.refreshPreview(); } });
+        document.getElementById("tagline").value = profile.tagline || "";
+        document.getElementById("tagline").addEventListener("input", event => { if (builderRoot) { builderRoot.dataset.businessTagline = event.target.value; if (window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.refreshPreview(); } });
         document.getElementById("contactPhone").value = profile.contact_phone || "";
         document.getElementById("publicEmail").value = profile.public_email || "";
         document.getElementById("websiteUrl").value = profile.website_url || "";
