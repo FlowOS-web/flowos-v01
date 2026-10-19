@@ -169,8 +169,18 @@
     };
     standard.forEach(([label,type]) => addPreview(label,type,label === "Name" || label === "Service","",["General service","Repair","Installation"]));
     base.fields.forEach(f => {
-      if (f.type === "radio" || f.type === "checkbox") addPreview(f.label, "select", f.required, f.placeholder, f.options);
-      else addPreview(f.label, f.type, f.required, f.placeholder, f.options);
+      if (f.type === "radio" || f.type === "checkbox") {
+        const group = document.createElement("div"); group.className = "gb-preview-field";
+        const lab = document.createElement("label"); lab.textContent = f.label + (f.required ? " *" : "");
+        group.appendChild(lab);
+        (f.options || []).forEach(value => {
+          const optionLabel = document.createElement("label");
+          optionLabel.style.display = "flex"; optionLabel.style.alignItems = "center"; optionLabel.style.gap = "8px";
+          const input = document.createElement("input"); input.type = f.type; input.disabled = true; input.style.width = "auto";
+          optionLabel.append(input, document.createTextNode(value)); group.appendChild(optionLabel);
+        });
+        preview.appendChild(group);
+      } else addPreview(f.label, f.type, f.required, f.placeholder, f.options);
     });
     const button = document.createElement("button"); button.type = "button"; button.textContent = base.submit_label || "Submit Request"; button.disabled = true; preview.appendChild(button);
   }
@@ -197,11 +207,11 @@
         $("formSubmitLabel").value = data.submit_label || "Submit Request";
         fields = cloneFields(data.fields);
       } else {
-        const industry = (document.getElementById("businessIndustry")?.textContent || "").toLowerCase();
+        const industry = (root.dataset.industryHint || "").toLowerCase();
         const defaultKey = industry.includes("clean") ? "cleaning" : industry.includes("plumb") ? "plumbing" : industry.includes("detail") ? "auto_detailing" : industry.includes("landscap") ? "landscaping" : industry.includes("photo") ? "photography" : "general";
         $("formTemplate").value = defaultKey;
         $("formPageTitle").value = "Request a Service";
-        $("formPageDescription").value = "Tell us what you need and we will follow up.";
+        $("formPageDescription").value = root.dataset.businessTagline || "Tell us what you need and we will follow up.";
         $("formSubmitLabel").value = "Submit Request";
         fields = cloneFields(templates[defaultKey].fields);
       }
