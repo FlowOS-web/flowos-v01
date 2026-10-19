@@ -72,6 +72,7 @@ declare
   v_value jsonb;
   v_options jsonb;
   v_str text;
+  v_ids text[] := array[]::text[];
 begin
   if jsonb_typeof(coalesce(p_fields,'[]'::jsonb)) <> 'array'
      or jsonb_typeof(coalesce(p_answers,'{}'::jsonb)) <> 'object'
@@ -79,14 +80,28 @@ begin
      or pg_column_size(coalesce(p_answers,'{}'::jsonb)) > 16384 then
     return false;
   end if;
+  if exists (
+    select 1 from jsonb_object_keys(coalesce(p_answers,'{}'::jsonb)) as answer_key(key)
+    where not exists (
+      select 1 from jsonb_array_elements(coalesce(p_fields,'[]'::jsonb)) as configured(value)
+      where configured.value->>'id'=answer_key.key
+    )
+  ) then return false; end if;
   for v_field in select value from jsonb_array_elements(coalesce(p_fields,'[]'::jsonb)) loop
     v_id := v_field->>'id';
     v_type := v_field->>'type';
     if v_id is null or v_id !~ '^[a-z][a-z0-9_]{0,39}$'
        or coalesce(length(v_field->>'label'),0) not between 1 and 80
-       or v_type not in ('text','textarea','select','radio','checkbox','date','number') then
+       or v_type is null or v_type not in ('text','textarea','select','radio','checkbox','date','number')
+       or v_id = any(v_ids) then
       return false;
     end if;
+    v_ids := array_append(v_ids, v_id);
+    if v_type in ('select','radio','checkbox') and (
+      jsonb_typeof(v_field->'options') <> 'array'
+      or jsonb_array_length(v_field->'options') < 1
+      or jsonb_array_length(v_field->'options') > 20
+    ) then return false; end if;
     v_value := p_answers -> v_id;
     if coalesce((v_field->>'required')::boolean,false)
        and (v_value is null or v_value = 'null'::jsonb or v_value = '""'::jsonb or v_value = '[]'::jsonb) then
