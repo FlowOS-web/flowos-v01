@@ -149,36 +149,90 @@
     const preview = $("requestPreview");
     preview.replaceChildren();
     const base = readBase();
-    const powered = document.createElement("div"); powered.className = "gb-preview-powered"; powered.textContent = "Powered by GATEBROOK";\n    const business = document.createElement("div"); business.className = "gb-preview-business"; business.textContent = root.dataset.businessName || "Your business";\n    const title = document.createElement("h3"); title.textContent = base.page_title || "Request a Service";\n    const desc = document.createElement("p"); desc.textContent = base.page_description || "Tell us what you need and we will follow up.";\n    preview.append(powered, business, title, desc);
-    const formGrid = document.createElement("div"); formGrid.className = "gb-preview-grid"; preview.appendChild(formGrid);\n    const standard = [["Full name","text",true,"Your name",false],["Phone","text",false,"Best number to reach you",false],["Email","email",false,"you@example.com",false],["Service","select",true,"",false],["Preferred date","date",false,"",false],["Service address / location","text",false,"Where is the service needed?",true],["Tell us what you need","textarea",false,"Add any helpful details",true]];
+    const powered = document.createElement("div");
+    powered.className = "gb-preview-powered";
+    powered.textContent = "Powered by GATEBROOK";
+    const business = document.createElement("div");
+    business.className = "gb-preview-business";
+    business.textContent = root.dataset.businessName || "Your business";
+    const title = document.createElement("h3");
+    title.textContent = base.page_title || "Request a Service";
+    const desc = document.createElement("p");
+    desc.textContent = base.page_description || "Tell us what you need and we will follow up.";
+    preview.append(powered, business, title, desc);
+
+    const formGrid = document.createElement("div");
+    formGrid.className = "gb-preview-grid";
+    preview.appendChild(formGrid);
+    const standard = [
+      ["Full name", "text", true, "Your name", false],
+      ["Phone", "text", false, "Best number to reach you", false],
+      ["Email", "email", false, "you@example.com", false],
+      ["Service", "select", true, "", false],
+      ["Preferred date", "date", false, "", false],
+      ["Service address / location", "text", false, "Where is the service needed?", true],
+      ["Tell us what you need", "textarea", false, "Add any helpful details", true]
+    ];
+
     const addPreview = (label, type, required, placeholder, options) => {
-      const group = document.createElement("div"); group.className = "gb-preview-field";
-      const lab = document.createElement("label"); lab.textContent = label + (required ? " *" : "");
+      const group = document.createElement("div");
+      group.className = "gb-preview-field";
+      const lab = document.createElement("label");
+      lab.textContent = label + (required ? " *" : "");
       const control = document.createElement(type === "textarea" ? "textarea" : (type === "select" ? "select" : "input"));
-      if (type !== "textarea" && type !== "select") control.type = type === "number" ? "number" : type === "date" ? "date" : "text";
-      control.disabled = true; control.placeholder = placeholder || "";
+      if (type !== "textarea" && type !== "select") control.type = type === "number" ? "number" : type === "date" ? "date" : type === "email" ? "email" : "text";
+      control.disabled = true;
+      control.placeholder = placeholder || "";
       if (type === "select") {
-        const op = document.createElement("option"); op.textContent = "Select an option"; op.value = ""; control.appendChild(op);
-        (options || ["Service"]).forEach(value => { const o=document.createElement("option");o.textContent=value;o.value=value;control.appendChild(o);});
+        const op = document.createElement("option");
+        op.textContent = "Choose a service";
+        op.value = "";
+        control.appendChild(op);
+        (options || []).forEach(value => {
+          const o = document.createElement("option");
+          o.textContent = value;
+          o.value = value;
+          control.appendChild(o);
+        });
       }
-      group.append(lab, control); preview.appendChild(group);
+      group.append(lab, control);
+      formGrid.appendChild(group);
     };
-    standard.forEach(([label,type]) => addPreview(label,type,label === "Name" || label === "Service","",["General service","Repair","Installation"]));
+
+    standard.forEach(([label, type, required, placeholder, full]) => {
+      addPreview(label, type, required, placeholder, type === "select" ? ["Choose a service"] : []);
+      if (full) formGrid.lastElementChild.classList.add("full");
+    });
+
     base.fields.forEach(f => {
       if (f.type === "radio" || f.type === "checkbox") {
-        const group = document.createElement("div"); group.className = "gb-preview-field";
-        const lab = document.createElement("label"); lab.textContent = f.label + (f.required ? " *" : "");
+        const group = document.createElement("div");
+        group.className = "gb-preview-field full";
+        const lab = document.createElement("label");
+        lab.textContent = f.label + (f.required ? " *" : "");
         group.appendChild(lab);
         (f.options || []).forEach(value => {
           const optionLabel = document.createElement("label");
           optionLabel.className = "gb-preview-choice";
-          const input = document.createElement("input"); input.type = f.type; input.disabled = true; input.style.width = "auto";
-          optionLabel.append(input, document.createTextNode(value)); group.appendChild(optionLabel);
+          const input = document.createElement("input");
+          input.type = f.type;
+          input.disabled = true;
+          input.style.width = "auto";
+          optionLabel.append(input, document.createTextNode(value));
+          group.appendChild(optionLabel);
         });
-        preview.appendChild(group);
-      } else addPreview(f.label, f.type, f.required, f.placeholder, f.options);
+        formGrid.appendChild(group);
+      } else {
+        addPreview(f.label, f.type, f.required, f.placeholder, f.options);
+        if (f.type === "textarea") formGrid.lastElementChild.classList.add("full");
+      }
     });
-    const button = document.createElement("button"); button.type = "button"; button.textContent = base.submit_label || "Submit Request"; button.disabled = true; preview.appendChild(button);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = base.submit_label || "Submit Request";
+    button.disabled = true;
+    preview.appendChild(button);
   }
 
   function renderTemplateDescription() {
@@ -210,7 +264,9 @@
         fields = cloneFields(templates[defaultKey].fields);
       }
       if (!canEdit) root.querySelectorAll("input,textarea,select,button").forEach(el => el.disabled = true);
-      root.querySelectorAll("[data-builder-input]").forEach(el => el.addEventListener("input", () => { if (role === "owner") { setDirty(); renderPreview(); } }));\n      const taglineInput = document.getElementById("tagline");\n      if (taglineInput) taglineInput.addEventListener("input", () => { root.dataset.businessTagline = taglineInput.value; renderPreview(); });
+      root.querySelectorAll("[data-builder-input]").forEach(el => el.addEventListener("input", () => { if (role === "owner") { setDirty(); renderPreview(); } }));
+      const taglineInput = document.getElementById("tagline");
+      if (taglineInput) taglineInput.addEventListener("input", () => { root.dataset.businessTagline = taglineInput.value; renderPreview(); });
       $("formTemplate").addEventListener("change", () => {
         if (role !== "owner") return;
         const key = $("formTemplate").value;
