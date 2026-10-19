@@ -1,0 +1,208 @@
+/* Gatebrook unified brand system — shared by dashboard and settings surfaces. */
+:root {
+  color-scheme: dark;
+  --bg: #0A0A0A;
+  --panel: #1A1D21;
+  --panel2: #2A2E34;
+  --panel-2: #2A2E34;
+  --border: #34383E;
+  --text: #F5F5F2;
+  --muted: #B8BDC4;
+  --accent: #1F3A32;
+  --green: #1F3A32;
+  --ok: #91C8AA;
+  --yellow: #E0C27A;
+  --red: #E6A0A0;
+  --blue: #9BB7D7;
+  --shadow: 0 16px 42px rgba(0,0,0,.22);
+  --gb-radius-card: 14px;
+  --gb-radius-control: 9px;
+  --gb-radius-panel: 18px;
+}
+:root[data-gb-theme="light"] {
+  color-scheme: light;
+  --bg: #F5F5F2;
+  --panel: #FFFFFF;
+  --panel2: #ECEDE9;
+  --panel-2: #ECEDE9;
+  --border: #D7D9D3;
+  --text: #1A1D21;
+  --muted: #626A70;
+  --accent: #1F3A32;
+  --green: #1F3A32;
+  --ok: #1F6A49;
+  --yellow: #805F1C;
+  --red: #9D3F42;
+  --blue: #355D85;
+  --shadow: 0 12px 32px rgba(26,29,33,.08);
+}
+html { min-height: 100%; background: var(--bg); }
+body,
+body.gb-brand-settings-page {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Instrument Sans", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body.gb-dashboard-page,
+body.gb-brand-settings-page {
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse at 50% -24%, rgba(31,58,50,.20), transparent 58%);
+}
+.topbar {
+  background: rgba(26,29,33,.94);
+  border-color: var(--border);
+  backdrop-filter: blur(14px);
+}
+:root[data-gb-theme="light"] .topbar { background: rgba(255,255,255,.94); }
+.brand, .logo { letter-spacing: .025em; }
+.brand span, .logo span { color: var(--muted); }
+.gb-wordmark { color: var(--text); letter-spacing: .12em; }
+.gb-brand-glyph .gb-logo-frame,
+.gb-brand-glyph .gb-logo-b,
+.gb-brand-glyph .gb-logo-cap { fill: #B8BDC4; }
+.gb-brand-glyph .gb-logo-g { fill: #F5F5F2; }
+:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-frame,
+:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-b,
+:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-cap { fill: #626A70; }
+:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-g { fill: #1A1D21; }
+.login-card, .card, .stat-card, .lead-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--gb-radius-card);
+  box-shadow: var(--shadow);
+}
+.login-card { border-radius: var(--gb-radius-panel); }
+.card { background-image: linear-gradient(145deg, rgba(255,255,255,.025), transparent 54%); }
+.stat-card { box-shadow: none; }
+.notes, .gb-custom-field-row, .gb-preview-shell {
+  background: var(--panel2);
+  border-color: var(--border);
+  border-radius: var(--gb-radius-card);
+}
+.gb-request-preview {
+  background: var(--panel);
+  color: var(--text);
+  border-color: var(--border);
+  border-radius: var(--gb-radius-panel);
+}
+input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+textarea, select {
+  color: var(--text);
+  background: #111315;
+  border: 1px solid var(--border);
+  border-radius: var(--gb-radius-control);
+}
+:root[data-gb-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+:root[data-gb-theme="light"] textarea,
+:root[data-gb-theme="light"] select {
+  color: var(--text);
+  background: #FFFFFF;
+  border-color: var(--border);
+}
+input::placeholder, textarea::placeholder { color: #858B90; }
+input:focus, textarea:focus, select:focus,
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: none;
+  border-color: #668579;
+  box-shadow: 0 0 0 3px rgba(31,58,50,.30);
+}
+:root[data-gb-theme="light"] input:focus,
+:root[data-gb-theme="light"] textarea:focus,
+:root[data-gb-theme="light"] select:focus,
+:root[data-gb-theme="light"] input:focus-visible,
+:root[data-gb-theme="light"] textarea:focus-visible,
+:root[data-gb-theme="light"] select:focus-visible {
+  border-color: #527467;
+  box-shadow: 0 0 0 3px rgba(31,58,50,.13);
+}
+label { color: var(--muted); font-weight: 600; }
+.primary-button, .btn.primary,
+.gb-request-preview button,
+button[type="submit"]:not(.gb-theme-toggle):not(.action-button) {
+  color: #F5F5F2;
+  background: var(--accent);
+  border: 1px solid #34564A;
+  border-radius: var(--gb-radius-control);
+  font-weight: 650;
+}
+.primary-button:hover:not(:disabled), .btn.primary:hover:not(:disabled),
+.gb-request-preview button:hover { background: #29483D; }
+:root[data-gb-theme="light"] .primary-button,
+:root[data-gb-theme="light"] .btn.primary,
+:root[data-gb-theme="light"] .gb-request-preview button,
+:root[data-gb-theme="light"] button[type="submit"]:not(.gb-theme-toggle):not(.action-button) {
+  color: #F5F5F2;
+  background: #1F3A32;
+  border-color: #1F3A32;
+}
+.logout-button, .refresh-button, .action-button, .btn, .filter-button {
+  color: var(--text);
+  background: #24282D;
+  border: 1px solid var(--border);
+  border-radius: var(--gb-radius-control);
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.logout-button:hover, .refresh-button:hover, .action-button:hover, .btn:hover:not(:disabled), .filter-button:hover {
+  background: #30353A;
+  border-color: #4A5157;
+}
+:root[data-gb-theme="light"] .logout-button,
+:root[data-gb-theme="light"] .refresh-button,
+:root[data-gb-theme="light"] .action-button,
+:root[data-gb-theme="light"] .btn,
+:root[data-gb-theme="light"] .filter-button {
+  color: var(--text);
+  background: #FFFFFF;
+  border-color: var(--border);
+}
+:root[data-gb-theme="light"] .logout-button:hover,
+:root[data-gb-theme="light"] .refresh-button:hover,
+:root[data-gb-theme="light"] .action-button:hover,
+:root[data-gb-theme="light"] .btn:hover:not(:disabled),
+:root[data-gb-theme="light"] .filter-button:hover { background: #ECEDE9; }
+.filter-button.active {
+  color: #F5F5F2;
+  background: #1F3A32;
+  border-color: #34564A;
+}
+:root[data-gb-theme="light"] .filter-button.active { color: #F5F5F2; background: #1F3A32; border-color: #1F3A32; }
+.field-value, .vehicle { color: var(--text); }
+.field-label, .stat-label, .subtitle, .business-name, .metric-detail, .metrics-note,
+.received-time, .value-note, .value-feedback { color: var(--muted); }
+.empty-state { border-color: var(--border); border-radius: var(--gb-radius-card); }
+.status-booked { background: rgba(31,58,50,.55); color: #B7E2C9; }
+.status-contacted { background: #3A3020; color: #E0C27A; }
+.status-new { background: #23313B; color: #B7D3E8; }
+.status-completed { background: #302B3C; color: #D2C5EB; }
+.status-lost { background: #3A2425; color: #E6A0A0; }
+.login-error, .dashboard-error, .feedback.error, #errorBox {
+  background: #301F20;
+  border-color: #624041;
+  color: #F0C7C7;
+  border-radius: 11px;
+}
+:root[data-gb-theme="light"] .login-error,
+:root[data-gb-theme="light"] .dashboard-error,
+:root[data-gb-theme="light"] .feedback.error,
+:root[data-gb-theme="light"] #errorBox { background: #FFF0EF; border-color: #E6C5C2; color: #823A3D; }
+.owner-only-note { border-radius: 11px; }
+button:focus-visible, a:focus-visible { outline: 2px solid #86A99A; outline-offset: 3px; }
+.gb-theme-toggle {
+  background: #24282D !important;
+  border-color: #4A5157 !important;
+  color: var(--text) !important;
+}
+:root[data-gb-theme="light"] .gb-theme-toggle {
+  background: #FFFFFF !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+@media (max-width: 760px) {
+  .topbar { padding-left: 16px; padding-right: 16px; }
+  .container { padding-left: 16px; padding-right: 16px; }
+  .card { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+}
