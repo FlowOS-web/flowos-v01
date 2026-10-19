@@ -312,10 +312,14 @@
 
         <section class="gb-builder-step" aria-labelledby="gb-step-two">
           <div class="gb-builder-step-title"><span>2</span><div><h3 id="gb-step-two">Ask only what you need</h3><p>Name, contact details, service, and description are already included. Add extra questions only when they help you prepare or give an estimate.</p></div></div>
-          <div class="gb-builder-question-summary"><strong>Extra questions</strong><span id="fieldCount" class="feedback"></span></div>
-          <div id="customFieldList"></div>
-          <button id="addCustomField" type="button" class="btn">+ Add a question</button>
-          <p class="gb-field-help">Keep it short. You can change questions or remove them later.</p>
+          <div class="gb-builder-question-summary"><strong>Your suggested questions</strong><span id="fieldCount" class="feedback"></span></div>
+          <div id="questionReviewList" class="gb-question-review-list" aria-live="polite"></div>
+          <details class="gb-advanced-settings gb-question-customize">
+            <summary>Edit or add questions <span>Optional</span></summary>
+            <div id="customFieldList"></div>
+            <button id="addCustomField" type="button" class="btn">+ Add a question</button>
+          </details>
+          <p class="gb-field-help">Start with the suggestions. You can customize them whenever you need to.</p>
         </section>
 
         <section class="gb-builder-step gb-builder-preview-step" aria-labelledby="gb-step-three">
@@ -350,6 +354,15 @@
     .gb-simple-builder .gb-advanced-settings summary{cursor:pointer;display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted,#b8bdc4)}
     .gb-simple-builder .gb-advanced-settings summary span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.75}
     .gb-simple-builder .gb-advanced-settings label{margin-top:14px}
+    .gb-simple-builder .gb-question-review-list{display:grid;gap:8px;margin-bottom:14px}
+    .gb-simple-builder .gb-question-review-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--border,#343a40);border-radius:10px;background:rgba(255,255,255,.025)}
+    .gb-simple-builder .gb-question-review-check{display:grid;place-items:center;flex:0 0 22px;height:22px;border-radius:50%;background:rgba(31,58,50,.55);color:#dce9df;font-size:13px}
+    .gb-simple-builder .gb-question-review-copy{min-width:0}
+    .gb-simple-builder .gb-question-review-copy strong{display:block;font-size:13px;font-weight:600;overflow-wrap:anywhere}
+    .gb-simple-builder .gb-question-review-copy span{display:block;margin-top:3px;font-size:11px;color:var(--muted,#b8bdc4)}
+    .gb-simple-builder .gb-question-customize{margin-top:12px}
+    .gb-simple-builder .gb-question-customize #customFieldList{margin-top:14px}
+    .gb-simple-builder .gb-question-customize .gb-custom-field-row{margin-top:10px}
     .gb-simple-builder .gb-builder-question-summary,.gb-simple-builder .gb-preview-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px}
     .gb-simple-builder .gb-builder-question-summary>strong{font-size:14px}
     .gb-simple-builder .gb-preview-heading h3{margin:0}
