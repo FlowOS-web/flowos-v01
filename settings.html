@@ -375,6 +375,27 @@
       .gb-simple-builder .gb-builder-step-title{gap:10px}
       .gb-simple-builder .gb-builder-step-title p{font-size:12px}
     }
+    /* Clearer section hierarchy and brighter, accessible Evergreen accents. */
+    .gb-simple-builder{--gb-evergreen:#6fb89a;--gb-evergreen-soft:rgba(111,184,154,.10);--gb-evergreen-line:rgba(111,184,154,.34)}
+    .gb-simple-builder .gb-builder-kicker{color:var(--gb-evergreen)}
+    .gb-simple-builder .gb-builder-step{margin-top:18px;padding:22px 20px 24px;border:1px solid var(--border,#343a40);border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,.035),rgba(255,255,255,.012));}
+    .gb-simple-builder .gb-builder-step-title{margin-bottom:21px}
+    .gb-simple-builder .gb-builder-step-title>span{border-color:var(--gb-evergreen-line);background:var(--gb-evergreen-soft);color:var(--gb-evergreen);box-shadow:0 0 0 3px rgba(111,184,154,.045)}
+    .gb-simple-builder .gb-builder-step-title h3{letter-spacing:-.015em}
+    .gb-simple-builder .gb-advanced-settings{border-top-color:var(--gb-evergreen-line)}
+    .gb-simple-builder .gb-advanced-settings summary{color:#c4d9ce}
+    .gb-simple-builder .gb-advanced-settings summary:hover{color:var(--gb-evergreen)}
+    .gb-simple-builder .gb-question-review-check{background:rgba(111,184,154,.16);color:#a7e1c5}
+    .gb-simple-builder .gb-question-review-item{border-color:rgba(255,255,255,.09);background:rgba(0,0,0,.12)}
+    .gb-simple-builder .gb-question-review-item:hover{border-color:var(--gb-evergreen-line)}
+    .gb-simple-builder .gb-builder-step input:focus-visible,
+    .gb-simple-builder .gb-builder-step select:focus-visible,
+    .gb-simple-builder .gb-builder-step textarea:focus-visible,
+    .gb-simple-builder .gb-builder-step button:focus-visible,
+    .gb-simple-builder .gb-builder-step summary:focus-visible{outline:2px solid var(--gb-evergreen);outline-offset:3px}
+    @media(max-width:620px){
+      .gb-simple-builder .gb-builder-step{padding:18px 14px 20px;margin-top:14px}
+    }
     /* The preview is the customer page itself, not a second card around it. */
     #requestPreview.gb-request-page.gb-request-preview {
       max-width: none;
