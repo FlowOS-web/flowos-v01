@@ -561,6 +561,7 @@
   let turnstileWidgetId = null;
   let requestFormConfig = { template_key: "general", page_title: "Request a Service", page_description: "Tell us what you need and we will follow up.", submit_label: "Submit Request", fields: [] };
   let requestCustomFields = [];
+  const isPreviewMode = new URLSearchParams(window.location.search).has("preview");
 
 
   /*
@@ -859,6 +860,85 @@
       if (hint) { const p=document.createElement("div"); p.className="custom-field-hint"; p.textContent=hint; wrapper.appendChild(p); }
       host.appendChild(wrapper);
     }
+  }
+
+  function setupPreviewMode() {
+    const loading = document.getElementById("loading");
+    const content = document.getElementById("businessContent");
+    const profile = {
+      contact_phone: "", public_email: "", website_url: ""
+    };
+
+    window.addEventListener("message", event => {
+      if (event.source !== window.parent || event.origin !== window.location.origin) return;
+      if (!event.data || event.data.type !== "gatebrook-preview-data") return;
+      const data = event.data.payload || {};
+      const safeText = value => typeof value === "string" ? value : "";
+      document.title = (safeText(data.businessName) || "Your business") + " | " + (safeText(data.pageTitle) || "Service Request");
+      document.getElementById("businessName").textContent = safeText(data.businessName) || "Your business";
+      document.getElementById("requestPageTitle").textContent = safeText(data.pageTitle) || "Request a Service";
+      document.getElementById("tagline").textContent = safeText(data.tagline) || "Tell us what you need and we will follow up.";
+      document.getElementById("submitButton").textContent = safeText(data.submitLabel) || "Submit Request";
+
+      const logo = document.getElementById("businessLogo");
+      const logoUrl = safeText(data.logoUrl);
+      if (logoUrl) { logo.src = logoUrl; logo.alt = (safeText(data.businessName) || "Business") + " logo"; logo.style.display = "block"; }
+      else { logo.removeAttribute("src"); logo.alt = ""; logo.style.display = "none"; }
+
+      const accent = safeText(data.primaryColor);
+      if (/^#[0-9A-Fa-f]{6}$/.test(accent)) document.documentElement.style.setProperty("--accent", accent);
+
+      const serviceSelect = document.getElementById("service");
+      serviceSelect.replaceChildren();
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "Select a service";
+      serviceSelect.appendChild(empty);
+      const services = Array.isArray(data.services) ? data.services : [];
+      services.forEach(name => {
+        if (typeof name !== "string" || !name.trim()) return;
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        serviceSelect.appendChild(option);
+      });
+      if (!services.length) {
+        const option = document.createElement("option");
+        option.value = "General Inquiry";
+        option.textContent = "General Inquiry";
+        serviceSelect.replaceChildren(option);
+      }
+
+      requestFormConfig = {
+        ...requestFormConfig,
+        page_title: safeText(data.pageTitle) || "Request a Service",
+        page_description: safeText(data.tagline) || "Tell us what you need and we will follow up.",
+        submit_label: safeText(data.submitLabel) || "Submit Request",
+        fields: Array.isArray(data.fields) ? data.fields : []
+      };
+      requestCustomFields = requestFormConfig.fields;
+      renderCustomFields(requestCustomFields);
+      profile.contact_phone = safeText(data.phone);
+      profile.public_email = safeText(data.email);
+      profile.website_url = safeText(data.website);
+      showBusinessContact(profile);
+
+      // This is the real request page markup, in a non-submitting preview mode.
+      document.getElementById("turnstile-container").classList.add("hidden");
+      document.getElementById("leadForm").setAttribute("novalidate", "novalidate");
+      loading.classList.add("hidden");
+      content.classList.remove("hidden");
+      requestAnimationFrame(() => {
+        window.parent.postMessage({ type: "gatebrook-preview-height", height: document.documentElement.scrollHeight }, window.location.origin);
+      });
+    });
+
+    const observer = new ResizeObserver(() => {
+      window.parent.postMessage({ type: "gatebrook-preview-height", height: document.documentElement.scrollHeight }, window.location.origin);
+    });
+    observer.observe(document.body);
+    loading.textContent = "Loading preview…";
+    window.parent.postMessage({ type: "gatebrook-preview-ready" }, window.location.origin);
   }
 
   function collectCustomAnswers() {
@@ -1163,7 +1243,7 @@
     async function(event) {
 
       event.preventDefault();
-
+      if (isPreviewMode) return;
 
       successMessage.style.display =
         "none";
@@ -1535,7 +1615,8 @@
   ==================================================
   */
 
-  loadBusiness();
+  if (isPreviewMode) setupPreviewMode();
+  else loadBusiness();
 
 </script>
 
