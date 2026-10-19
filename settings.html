@@ -72,9 +72,6 @@
           <label for="businessName">Business name</label>
           <input id="businessName" maxlength="120" required>
 
-          <label for="industry">Industry</label>
-          <input id="industry" maxlength="120">
-
           <label for="tagline">Customer-facing tagline</label>
           <textarea id="tagline" maxlength="280"></textarea>
 
@@ -95,9 +92,6 @@
 
           <label for="logoUrl">Logo image URL</label>
           <input id="logoUrl" type="url" maxlength="500" placeholder="https://...">
-
-          <label for="primaryColor">Brand color</label>
-          <input id="primaryColor" type="color" value="#6fa7ff">
 
           <label for="ownerEmail">Lead notification email (private)</label>
           <input id="ownerEmail" type="email" maxlength="200">
@@ -200,8 +194,8 @@
         document.querySelectorAll("[data-dashboard-link]").forEach(link => link.href = dashboardUrl());
 
         const [{data:business,error:businessError},{data:profile,error:profileError},{data:serviceRows,error:serviceError}] = await Promise.all([
-          supabaseClient.from("businesses").select("id,name,industry,owner_email,slug").eq("id",businessId).single(),
-          supabaseClient.from("business_public_profiles").select("business_id,slug,display_name,industry,tagline,logo_url,primary_color,contact_phone,public_email,website_url").eq("business_id",businessId).single(),
+          supabaseClient.from("businesses").select("id,name,owner_email,slug").eq("id",businessId).single(),
+          supabaseClient.from("business_public_profiles").select("business_id,slug,display_name,tagline,logo_url,contact_phone,public_email,website_url").eq("business_id",businessId).single(),
           supabaseClient.from("business_services").select("id,name,active,sort_order,business_id").eq("business_id",businessId).order("sort_order",{ascending:true}).order("name",{ascending:true})
         ]);
         if(businessError) throw businessError;
@@ -213,13 +207,11 @@
         services = serviceRows || [];
 
         document.getElementById("businessName").value = business.name || "";
-        document.getElementById("industry").value = profile.industry || business.industry || "";
         document.getElementById("tagline").value = profile.tagline || "";
         document.getElementById("contactPhone").value = profile.contact_phone || "";
         document.getElementById("publicEmail").value = profile.public_email || "";
         document.getElementById("websiteUrl").value = profile.website_url || "";
         document.getElementById("logoUrl").value = profile.logo_url || "";
-        document.getElementById("primaryColor").value = /^#[0-9A-Fa-f]{6}$/.test(profile.primary_color || "") ? profile.primary_color : "#6fa7ff";
         document.getElementById("ownerEmail").value = business.owner_email || "";
         document.getElementById("requestLink").value = new URL("request.html?b=" + encodeURIComponent(slug), location.href).href;
 
@@ -306,20 +298,18 @@
       setFeedback(profileFeedback,"");
       try{
         const name = document.getElementById("businessName").value.trim();
-        const industry = document.getElementById("industry").value.trim() || null;
         const tagline = document.getElementById("tagline").value.trim() || null;
         const contactPhone = document.getElementById("contactPhone").value.trim() || null;
         const publicEmail = document.getElementById("publicEmail").value.trim().toLowerCase() || null;
         const websiteUrl = normalizeUrl(document.getElementById("websiteUrl").value);
         const logoUrl = normalizeUrl(document.getElementById("logoUrl").value);
-        const primaryColor = document.getElementById("primaryColor").value;
         const ownerEmail = document.getElementById("ownerEmail").value.trim() || null;
         if(!name) throw new Error("Business name is required.");
 
         const [{error:businessError},{error:profileError}] = await Promise.all([
-          supabaseClient.from("businesses").update({name,industry,owner_email:ownerEmail}).eq("id",businessId),
+          supabaseClient.from("businesses").update({name,owner_email:ownerEmail}).eq("id",businessId),
           supabaseClient.from("business_public_profiles").update({
-            display_name:name,industry,tagline,contact_phone:contactPhone,public_email:publicEmail,website_url:websiteUrl,logo_url:logoUrl,primary_color:primaryColor
+            display_name:name,tagline,contact_phone:contactPhone,public_email:publicEmail,website_url:websiteUrl,logo_url:logoUrl
           }).eq("business_id",businessId)
         ]);
         if(businessError) throw businessError;
