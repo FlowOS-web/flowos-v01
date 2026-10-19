@@ -35,6 +35,29 @@
     .owner-only-note{padding:14px;border:1px solid #5f4b2a;background:#261f12;border-radius:10px;color:#f2d58c;margin-bottom:18px}
     .request-link{display:flex;gap:8px;align-items:center}.request-link input{margin:0}
     @media(max-width:760px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.service-row{grid-template-columns:1fr}.topbar{padding:0 16px}.container{padding:22px 14px 45px}}
+  
+    .gb-builder-section-head{display:flex;align-items:end;justify-content:space-between;gap:14px;margin-top:28px}
+    .gb-builder-section-head h3,.gb-preview-shell h3{margin:0 0 5px;font-size:17px}
+    .gb-builder-section-head p{margin:0 0 10px;max-width:620px}
+    .gb-custom-field-row{border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0;background:#101319}
+    .gb-custom-field-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+    .gb-field-actions{display:flex;gap:6px;align-items:center}
+    .gb-field-actions .btn{padding:7px 10px}
+    .gb-field-editor-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:10px}
+    .gb-field-extra{grid-column:1/-1}
+    .gb-field-extra input{width:100%}
+    .gb-required-toggle{display:flex;align-items:center;gap:8px;margin-top:12px}
+    .gb-required-toggle input{width:auto}
+    .gb-preview-shell{margin-top:22px;padding:18px;border:1px solid var(--border);border-radius:13px;background:#101319}
+    .gb-request-preview{margin:14px auto 0;max-width:600px;padding:18px;border:1px solid #303643;border-radius:10px;background:#171a21}
+    .gb-request-preview h3{font-size:24px;margin:0 0 7px}
+    .gb-request-preview>p{color:var(--muted);margin:0 0 18px}
+    .gb-preview-field{margin:12px 0}
+    .gb-preview-field label{margin:0 0 6px}
+    .gb-preview-field input,.gb-preview-field select,.gb-preview-field textarea{width:100%;margin:0}
+    .gb-request-preview button{width:100%;margin-top:12px}
+    @media(max-width:760px){.gb-field-editor-grid{grid-template-columns:1fr}.gb-builder-section-head{align-items:start;flex-direction:column}}
+
   </style>
 
 <link rel="stylesheet" href="theme.css?v=1">
@@ -122,10 +145,51 @@
         <div id="serviceList" style="margin-top:14px"></div>
         <div id="serviceFeedback" class="feedback"></div>
       </div>
+
+      <div class="card" id="requestBuilder" style="grid-column:1 / -1">
+        <h2>Request page builder</h2>
+        <p>Choose a starting template, tailor the questions customers see, and preview the page before saving. Your existing request link will not change.</p>
+        <div class="row">
+          <div>
+            <label for="formTemplate">Starting template</label>
+            <select id="formTemplate">
+              <option value="general">General service business</option>
+              <option value="cleaning">Cleaning company</option>
+              <option value="plumbing">Plumbing company</option>
+              <option value="auto_detailing">Auto detailing</option>
+              <option value="landscaping">Landscaping company</option>
+              <option value="photography">Photography</option>
+            </select>
+            <div id="templateDescription" class="feedback"></div>
+          </div>
+          <div>
+            <label for="formSubmitLabel">Submit button text</label>
+            <input id="formSubmitLabel" data-builder-input maxlength="40" value="Submit Request">
+          </div>
+        </div>
+        <label for="formPageTitle">Request page title</label>
+        <input id="formPageTitle" data-builder-input maxlength="120" value="Request a Service">
+        <label for="formPageDescription">Page description</label>
+        <textarea id="formPageDescription" data-builder-input maxlength="500">Tell us what you need and we will follow up.</textarea>
+        <div class="gb-builder-section-head">
+          <div><h3>Custom questions</h3><p>Keep the standard contact and service fields, then add the information specific to your business.</p></div>
+          <div id="fieldCount" class="feedback"></div>
+        </div>
+        <div id="customFieldList"></div>
+        <button id="addCustomField" type="button" class="btn">+ Add question</button>
+        <div class="gb-preview-shell">
+          <h3>Live preview</h3>
+          <div id="requestPreview" class="gb-request-preview"></div>
+        </div>
+        <button id="saveRequestForm" type="button" class="btn primary">Save request page</button>
+        <div id="builderFeedback" class="feedback" role="status" aria-live="polite"></div>
+      </div>
+
     </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+  <script src="request-builder.js?v=1"></script>
   <script>
     const SUPABASE_URL = "https://mxyikhxpzijrdrgowmxr.supabase.co";
     const SUPABASE_KEY = "sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
@@ -222,6 +286,7 @@
         }
 
         renderServices();
+        if (window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.init({ supabaseClient, businessId, role });
         loading.classList.add("hidden");
         settingsContent.classList.remove("hidden");
       }catch(error){
