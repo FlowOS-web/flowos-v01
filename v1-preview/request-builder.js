@@ -164,7 +164,8 @@
     const formGrid = document.createElement("div");
     formGrid.className = "gb-preview-grid";
     preview.appendChild(formGrid);
-    const availableServices = (() => { try { return JSON.parse(root.dataset.services || "[]"); } catch (_) { return []; } })();\n    const standard = [
+    const availableServices = (() => { try { return JSON.parse(root.dataset.services || "[]"); } catch (_) { return []; } })();
+    const standard = [
       ["Name", "text", true, "John Smith", false],
       ["Phone", "tel", false, "7635551234", false],
       ["Email", "email", false, "you@example.com", false],
