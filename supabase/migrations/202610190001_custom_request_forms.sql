@@ -108,6 +108,7 @@ begin
       return false;
     end if;
     if v_value is null or v_value = 'null'::jsonb then continue; end if;
+    if v_value = '""'::jsonb or v_value = '[]'::jsonb then continue; end if;
     if v_type in ('text','textarea','select','radio','date','number') then
       if jsonb_typeof(v_value) <> 'string' then return false; end if;
       v_str := v_value #>> '{}';
