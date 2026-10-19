@@ -14,7 +14,7 @@ const source = fs.readFileSync(path.join(__dirname, "../supabase/functions/submi
 const javascript = stripTypeScriptTypes(source);
 
 function fixture({ hostname = "gatebrook.work", verified = true, active = true, service = true } = {}) {
-  const calls = { verification: 0, tables: [], inserts: [] };
+  const calls = { verification: 0, tables: [], inserts: [], rpcs: [] };
   const db = {
     from(table) {
       calls.tables.push(table);
@@ -25,11 +25,18 @@ function fixture({ hostname = "gatebrook.work", verified = true, active = true, 
         async maybeSingle() {
           if (table === "businesses") return { data: active ? { id: BUSINESS, name: "Fixture service", owner_email: null, active: true } : null, error: null };
           if (table === "business_services") return { data: service ? { id: "fixture-service" } : null, error: null };
+          if (table === "business_request_forms") return { data: null, error: null };
           throw new Error("Unexpected fixture lookup: " + table);
         },
-        async single() { assert.equal(table, "leads"); return { data: { id: "fixture-lead" }, error: null }; },
+        async single() { return { data: { id: "fixture-row" }, error: null }; },
       };
     },
+  };
+  db.rpc = async (name, args) => {
+    calls.rpcs.push({ name, args });
+    if (name === "gatebrook_validate_request_fields") return { data: true, error: null };
+    if (name === "gatebrook_receive_request_custom") return { data: { disposition: "accepted", lead_id: "55555555-5555-4555-8555-555555555555" }, error: null };
+    throw new Error("Unexpected RPC: " + name);
   };
   const module = { exports: {} };
   vm.runInNewContext(javascript, {
@@ -61,12 +68,13 @@ function fixture({ hostname = "gatebrook.work", verified = true, active = true, 
 test("verified custom-domain and legacy hostname submissions reach guarded lead storage", async () => {
   for (const hostname of ["gatebrook.work", "flowos-web.github.io"]) {
     const f = fixture({ hostname });
-    const { response, json } = await f.submit();
+    const { response, json } = await f.submit({ custom_answers: { urgency: "Emergency" } });
     assert.equal(response.status, 200);
     assert.equal(json.success, true);
-    assert.equal(f.calls.inserts.length, 1);
-    assert.equal(f.calls.inserts[0].table, "leads");
-    assert.equal(f.calls.inserts[0].row.business_id, BUSINESS);
+    assert.equal(f.calls.inserts.length, 0, "lead creation must happen atomically inside the protected intake RPC");
+    assert.deepEqual(f.calls.rpcs.map(call => call.name), ["gatebrook_validate_request_fields", "gatebrook_receive_request_custom"]);
+    assert.equal(f.calls.rpcs[1].args.p_business_id, BUSINESS);
+    assert.deepEqual(f.calls.rpcs[1].args.p_answers, { urgency: "Emergency" });
   }
 });
 
