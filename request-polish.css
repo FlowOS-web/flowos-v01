@@ -242,3 +242,26 @@ body.gb-request-page{
   .gb-request-page #submitButton{transition:none}
   .gb-request-page #submitButton:hover:not(:disabled){transform:none}
 }
+
+/* Keep native controls (especially iOS date inputs) inside the request card. */
+.gb-request-page .card,
+.gb-request-page .grid,
+.gb-request-page .grid > div { min-width: 0; }
+.gb-request-page .grid > div { max-width: 100%; }
+.gb-request-page input,
+.gb-request-page select,
+.gb-request-page textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.gb-request-page input[type="date"] {
+  display: block;
+  -webkit-appearance: none;
+  appearance: none;
+}
+@media (max-width: 620px) {
+  .gb-request-page .wrap { min-width: 0; }
+  .gb-request-page .card { overflow: hidden; }
+}
