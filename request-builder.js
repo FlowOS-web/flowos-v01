@@ -180,6 +180,22 @@
     desc.className = "tagline";
     desc.textContent = base.page_description || "Tell us what you need and we will follow up.";
     wrap.append(business, title, desc);
+    const metaValues = [
+      ["Phone", root.dataset.businessPhone || ""],
+      ["Email", root.dataset.businessEmail || ""],
+      ["Website", root.dataset.businessWebsite || ""]
+    ].filter(([, value]) => value);
+    if (metaValues.length) {
+      const meta = document.createElement("div");
+      meta.className = "business-meta";
+      metaValues.forEach(([label, value], index) => {
+        if (index) meta.appendChild(document.createTextNode(" · "));
+        const item = document.createElement("span");
+        item.textContent = label + ": " + value;
+        meta.appendChild(item);
+      });
+      wrap.appendChild(meta);
+    }
 
     const availableServices = (() => { try { return JSON.parse(root.dataset.services || "[]"); } catch (_) { return []; } })();
     const card = document.createElement("div");
@@ -261,7 +277,42 @@
     button.textContent = base.submit_label || "Submit Request";
     button.disabled = true;
     form.appendChild(button);
+    const security = document.createElement("div");
+    security.className = "full security-area";
+    const securityNote = document.createElement("div");
+    securityNote.className = "security-note";
+    securityNote.textContent = "Protected against automated spam.";
+    security.appendChild(securityNote);
+    form.appendChild(security);
     card.appendChild(form);
+
+    const contactItems = [
+      ["Phone", root.dataset.businessPhone || ""],
+      ["Email", root.dataset.businessEmail || ""],
+      ["Website", root.dataset.businessWebsite || ""]
+    ].filter(([, value]) => value);
+    if (contactItems.length) {
+      const contact = document.createElement("details");
+      contact.className = "gb-contact-disclosure";
+      const summary = document.createElement("summary");
+      summary.className = "gb-contact-trigger";
+      summary.textContent = "Contact business";
+      contact.appendChild(summary);
+      const panel = document.createElement("div");
+      panel.className = "gb-contact-panel";
+      const caption = document.createElement("p");
+      caption.className = "gb-contact-caption";
+      caption.textContent = "Other ways to reach this business";
+      panel.appendChild(caption);
+      contactItems.forEach(([label, value]) => {
+        const line = document.createElement("div");
+        line.className = "gb-contact-value";
+        line.textContent = label + ": " + value;
+        panel.appendChild(line);
+      });
+      contact.appendChild(panel);
+      card.appendChild(contact);
+    }
     wrap.appendChild(card);
     preview.appendChild(wrap);
   }
