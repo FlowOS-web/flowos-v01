@@ -328,7 +328,13 @@
       padding: 0;
       border: 0;
       border-radius: 0;
-      background: transparent;
+      background-color: #090a0b;
+      background-image:
+        radial-gradient(ellipse 43% 37% at 89% 17%,rgba(42,91,62,.16),transparent 78%),
+        radial-gradient(ellipse 32% 35% at 3% 77%,rgba(27,68,47,.10),transparent 78%),
+        linear-gradient(180deg,#090a0b 0%,#101314 40%,#23282a 76%,#586460 94%,#939e99 100%);
+      background-attachment: fixed;
+      background-size: cover;
       box-shadow: none;
       color: #f5f5f2;
       text-align: left;
@@ -344,6 +350,13 @@
     #requestPreview.gb-request-page textarea:disabled,
     #requestPreview.gb-request-page button:disabled { opacity: 1; }
     #requestPreview.gb-request-page button#submitButton:disabled { cursor: default; }
+    :root[data-gb-theme="light"] #requestPreview.gb-request-page.gb-request-preview {
+      color: #182420;
+      background-image:
+        radial-gradient(ellipse 42% 35% at 87% 17%,rgba(39,94,59,.10),transparent 78%),
+        radial-gradient(ellipse 30% 32% at 4% 77%,rgba(53,100,66,.07),transparent 76%),
+        linear-gradient(180deg,#f5f5f2 0%,#eff1ec 37%,#d6ddd6 75%,#9da8a1 94%,#555e59 100%);
+    }
     @media(max-width:620px) {
       #requestPreview.gb-request-page .wrap { padding: 28px 16px 30px; }
       #requestPreview.gb-request-page .flowos { margin-bottom: 35px; }
