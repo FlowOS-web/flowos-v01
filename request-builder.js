@@ -66,7 +66,7 @@
     return {
       template_key: $("formTemplate").value,
       page_title: $("formPageTitle").value.trim(),
-      page_description: $("formPageDescription").value.trim(),
+      page_description: String(root.dataset.businessTagline || "").trim(),
       submit_label: $("formSubmitLabel").value.trim(),
       fields: fields.map(f => ({
         id: f.id, label: f.label.trim(), type: f.type, required: !!f.required,
@@ -149,12 +149,8 @@
     const preview = $("requestPreview");
     preview.replaceChildren();
     const base = readBase();
-    const title = document.createElement("h3"); title.textContent = base.page_title || "Request a Service";
-    const desc = document.createElement("p"); desc.textContent = base.page_description || "Tell us what you need and we will follow up.";
-    preview.append(title, desc);
-    const standard = [
-      ["Name", "text"], ["Phone or email", "text"], ["Service", "select"], ["Preferred date", "date"], ["Service address / location", "text"], ["Tell us what you need", "textarea"]
-    ];
+    const powered = document.createElement("div"); powered.className = "gb-preview-powered"; powered.textContent = "Powered by GATEBROOK";\n    const business = document.createElement("div"); business.className = "gb-preview-business"; business.textContent = root.dataset.businessName || "Your business";\n    const title = document.createElement("h3"); title.textContent = base.page_title || "Request a Service";\n    const desc = document.createElement("p"); desc.textContent = base.page_description || "Tell us what you need and we will follow up.";\n    preview.append(powered, business, title, desc);
+    const formGrid = document.createElement("div"); formGrid.className = "gb-preview-grid"; preview.appendChild(formGrid);\n    const standard = [["Full name","text",true,"Your name",false],["Phone","text",false,"Best number to reach you",false],["Email","email",false,"you@example.com",false],["Service","select",true,"",false],["Preferred date","date",false,"",false],["Service address / location","text",false,"Where is the service needed?",true],["Tell us what you need","textarea",false,"Add any helpful details",true]];
     const addPreview = (label, type, required, placeholder, options) => {
       const group = document.createElement("div"); group.className = "gb-preview-field";
       const lab = document.createElement("label"); lab.textContent = label + (required ? " *" : "");
@@ -175,7 +171,7 @@
         group.appendChild(lab);
         (f.options || []).forEach(value => {
           const optionLabel = document.createElement("label");
-          optionLabel.style.display = "flex"; optionLabel.style.alignItems = "center"; optionLabel.style.gap = "8px";
+          optionLabel.className = "gb-preview-choice";
           const input = document.createElement("input"); input.type = f.type; input.disabled = true; input.style.width = "auto";
           optionLabel.append(input, document.createTextNode(value)); group.appendChild(optionLabel);
         });
@@ -203,7 +199,6 @@
       if (data) {
         $("formTemplate").value = templates[data.template_key] ? data.template_key : "general";
         $("formPageTitle").value = data.page_title || "Request a Service";
-        $("formPageDescription").value = data.page_description || "";
         $("formSubmitLabel").value = data.submit_label || "Submit Request";
         fields = cloneFields(data.fields);
       } else {
@@ -211,12 +206,11 @@
         const defaultKey = industry.includes("clean") ? "cleaning" : industry.includes("plumb") ? "plumbing" : industry.includes("detail") ? "auto_detailing" : industry.includes("landscap") ? "landscaping" : industry.includes("photo") ? "photography" : "general";
         $("formTemplate").value = defaultKey;
         $("formPageTitle").value = "Request a Service";
-        $("formPageDescription").value = root.dataset.businessTagline || "Tell us what you need and we will follow up.";
         $("formSubmitLabel").value = "Submit Request";
         fields = cloneFields(templates[defaultKey].fields);
       }
       if (!canEdit) root.querySelectorAll("input,textarea,select,button").forEach(el => el.disabled = true);
-      root.querySelectorAll("[data-builder-input]").forEach(el => el.addEventListener("input", () => { if (role === "owner") { setDirty(); renderPreview(); } }));
+      root.querySelectorAll("[data-builder-input]").forEach(el => el.addEventListener("input", () => { if (role === "owner") { setDirty(); renderPreview(); } }));\n      const taglineInput = document.getElementById("tagline");\n      if (taglineInput) taglineInput.addEventListener("input", () => { root.dataset.businessTagline = taglineInput.value; renderPreview(); });
       $("formTemplate").addEventListener("change", () => {
         if (role !== "owner") return;
         const key = $("formTemplate").value;
@@ -270,5 +264,5 @@
     }
   }
 
-  window.GatebrookRequestBuilder = { init };
+  window.GatebrookRequestBuilder = { init, refreshPreview: renderPreview };
 })();
