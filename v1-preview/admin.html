@@ -130,7 +130,7 @@
                 <label for="ownerEmail">Owner sign-in email</label><input id="ownerEmail" type="email" autocomplete="off" maxlength="200" required>
                 <p class="hint">An existing account keeps its password. For a new owner, generate and share a private setup link so they can choose their password.</p>
                 <label for="notificationEmail">Lead notification email</label><input id="notificationEmail" type="email" maxlength="200" placeholder="Defaults to owner email">
-                <div id="initialServicesLabel" class="service-field-label">Initial services</div>
+                <label id="initialServicesLabel" for="newInitialServiceName" class="service-field-label">Initial services</label>
                 <div class="request-link initial-service-entry"><input id="newInitialServiceName" maxlength="120" placeholder="New service name" autocomplete="off" aria-describedby="servicesHint"><button id="addInitialServiceButton" class="btn primary" type="button">Add</button></div>
                 <div id="initialServiceEmpty" class="hint">No services added yet.</div>
                 <div id="initialServiceList" class="initial-service-list" role="group" aria-labelledby="initialServicesLabel" aria-describedby="servicesHint"></div>
