@@ -1533,13 +1533,9 @@
           button.addEventListener("click", () => decideReview(review.id, entry[0], button));
           actions.appendChild(button);
         }
-        card.append(head, reason, fields);
-        if (review.notes) {
-          const notes = document.createElement("div");
-          notes.className = "gb-review-notes";
-          makeReviewField(notes, "Customer notes", review.notes);
-          card.appendChild(notes);
-        }
+        const notes = document.createElement("div");
+        notes.className = "gb-review-notes";
+        if (review.notes) makeReviewField(notes, "Customer notes", review.notes);
         const customReviewFields = Array.isArray(review.custom_field_definitions) ? review.custom_field_definitions : [];
         const customReviewAnswers = review.custom_answers && typeof review.custom_answers === "object" ? review.custom_answers : {};
         for (const field of customReviewFields) {
@@ -1548,6 +1544,8 @@
           makeReviewField(fields, field.label || field.id, Array.isArray(value) ? value.join(", ") : String(value));
         }
         card.append(head, reason, fields);
+        if (review.notes) card.appendChild(notes);
+        card.appendChild(actions);
         reviewList.appendChild(card);
       }
     }
