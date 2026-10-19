@@ -112,7 +112,7 @@ begin
     if v_type in ('text','textarea','select','radio','date','number') then
       if jsonb_typeof(v_value) <> 'string' then return false; end if;
       v_str := v_value #>> '{}';
-      if length(v_str) > case when v_type='textarea' then 2000 else 300 end then return false; end if;
+      if length(v_str) > (case when v_type='textarea' then 2000 else 300 end) then return false; end if;
       if v_type in ('select','radio') then
         v_options := v_field->'options';
         if jsonb_typeof(v_options) <> 'array' or not exists (
