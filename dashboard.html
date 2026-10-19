@@ -1156,7 +1156,22 @@
         if (expectedCount !== null && uniqueRows.length !== expectedCount) {
           throw new Error("The lead list changed while loading. Please refresh.");
         }
-        allLeads = uniqueRows;
+        let customAnswerRows = [];
+        if (uniqueRows.length) {
+          const { data: answerRows, error: answerError } = await supabaseClient
+            .from("lead_custom_answers")
+            .select("lead_id,business_id,answers,field_definitions")
+            .eq("business_id", businessId)
+            .in("lead_id", uniqueRows.map(lead => lead.id));
+          if (!isCurrent()) return;
+          if (answerError) throw answerError;
+          customAnswerRows = answerRows || [];
+          if (customAnswerRows.some(row => row.business_id !== businessId || !uniqueRows.some(lead => lead.id === row.lead_id))) {
+            throw new Error("Unable to load custom request answers for this business.");
+          }
+        }
+        const answersByLead = new Map(customAnswerRows.map(row => [row.lead_id, row]));
+        allLeads = uniqueRows.map(lead => ({ ...lead, custom_answer_record: answersByLead.get(lead.id) || null }));
         await loadPendingReviews(epoch, businessId, request);
         if (!isCurrent()) return;
         moneyFieldsAvailable = !allLeads.length || allLeads.every(lead =>
@@ -1239,6 +1254,15 @@
         const card = document.createElement("div");
         card.className = "lead-card";
         const status = validStatuses.has(lead.status) ? lead.status : "unknown";
+        const answerRecord = lead.custom_answer_record;
+        const customAnswerFields = Array.isArray(answerRecord?.field_definitions) ? answerRecord.field_definitions : [];
+        const customAnswers = answerRecord?.answers && typeof answerRecord.answers === "object" ? answerRecord.answers : {};
+        const customAnswerHtml = customAnswerFields.map(field => {
+          const value = customAnswers[field.id];
+          if (value === null || value === undefined || value === "" || (Array.isArray(value) && !value.length)) return "";
+          const displayValue = Array.isArray(value) ? value.join(", ") : String(value);
+          return '<div><div class="field-label">' + escapeHtml(field.label || field.id) + '</div><div class="field-value">' + escapeHtml(displayValue) + '</div></div>';
+        }).join("");
         const fields = [
           ["Service", lead.service], ["Preferred Date", formatDate(lead.preferred_date)],
           ["Service Location", lead.service_location], ["Phone", lead.phone], ["Email", lead.email],
@@ -1256,6 +1280,7 @@
           <div class="lead-grid">${fields.map(([label, value]) => `<div><div class="field-label">${label}</div>
             <div class="field-value">${escapeHtml(value || "Not provided")}</div></div>`).join("")}</div>
           ${lead.notes ? '<div class="notes">' + escapeHtml(lead.notes) + '</div>' : ""}
+          ${customAnswerHtml ? '<div class="lead-grid gb-custom-answer-grid">' + customAnswerHtml + '</div>' : ""}
           ${valueEditorHtml(lead)}
           <div class="actions">
             ${["contacted", "booked", "completed", "lost"].map(next => `<button type="button"
@@ -1430,7 +1455,7 @@
       }
       const { data, error } = await supabaseClient
         .from("gatebrook_request_reviews")
-        .select("id,business_id,created_at,customer_name,phone,email,service,preferred_date,service_location,notes,flagged_reason,status")
+        .select("id,business_id,created_at,customer_name,phone,email,service,preferred_date,service_location,notes,flagged_reason,status,custom_answers,custom_field_definitions")
         .eq("business_id", businessId)
         .eq("status", "pending")
         .order("created_at", { ascending: false })
@@ -1515,7 +1540,14 @@
           makeReviewField(notes, "Customer notes", review.notes);
           card.appendChild(notes);
         }
-        card.appendChild(actions);
+        const customReviewFields = Array.isArray(review.custom_field_definitions) ? review.custom_field_definitions : [];
+        const customReviewAnswers = review.custom_answers && typeof review.custom_answers === "object" ? review.custom_answers : {};
+        for (const field of customReviewFields) {
+          const value = customReviewAnswers[field.id];
+          if (value === null || value === undefined || value === "" || (Array.isArray(value) && !value.length)) continue;
+          makeReviewField(fields, field.label || field.id, Array.isArray(value) ? value.join(", ") : String(value));
+        }
+        card.append(head, reason, fields);
         reviewList.appendChild(card);
       }
     }
