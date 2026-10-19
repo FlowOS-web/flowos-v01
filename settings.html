@@ -280,48 +280,88 @@
         <div id="serviceFeedback" class="feedback"></div>
       </div>
 
-      <div class="card" id="requestBuilder" style="grid-column:1 / -1">
-        <h2>Request page builder</h2>
-        <p>Choose a starter, add only the questions you need, and preview the customer page. Your request link stays the same.</p>
-        <div class="row">
-          <div>
-            <label for="formTemplate">Starting template</label>
-            <select id="formTemplate">
-              <option value="general">General service business</option>
-              <option value="cleaning">Cleaning company</option>
-              <option value="plumbing">Plumbing company</option>
-              <option value="auto_detailing">Auto detailing</option>
-              <option value="landscaping">Landscaping company</option>
-              <option value="photography">Photography</option>
-            </select>
-            <div id="templateDescription" class="feedback"></div>
-          </div>
-          <div>
-            <label for="formSubmitLabel">Button label</label>
+      <div class="card gb-simple-builder" id="requestBuilder" style="grid-column:1 / -1">
+        <div class="gb-builder-intro">
+          <p class="gb-builder-kicker">CUSTOMER EXPERIENCE</p>
+          <h2>Build your request page</h2>
+          <p>Choose what customers see, add any extra questions, then save. Your existing customer link will keep working.</p>
+        </div>
+
+        <section class="gb-builder-step" aria-labelledby="gb-step-one">
+          <div class="gb-builder-step-title"><span>1</span><div><h3 id="gb-step-one">Choose your starting point</h3><p>Pick the closest match. We’ll suggest useful questions for your business.</p></div></div>
+          <label for="formTemplate">Business type</label>
+          <select id="formTemplate">
+            <option value="general">General service business</option>
+            <option value="cleaning">Cleaning company</option>
+            <option value="plumbing">Plumbing company</option>
+            <option value="auto_detailing">Auto detailing</option>
+            <option value="landscaping">Landscaping company</option>
+            <option value="photography">Photography</option>
+          </select>
+          <p id="templateDescription" class="feedback gb-template-hint"></p>
+          <label for="formPageTitle">Page heading</label>
+          <input id="formPageTitle" data-builder-input maxlength="120" value="Request a Service">
+          <p class="gb-field-help">This is the main heading customers see above the form.</p>
+          <details class="gb-advanced-settings">
+            <summary>Change the submit button text <span>Optional</span></summary>
+            <label for="formSubmitLabel">Button text</label>
             <input id="formSubmitLabel" data-builder-input maxlength="40" value="Submit Request">
+          </details>
+          <p class="gb-field-help">The short description comes from your <strong>Customer-facing tagline</strong> in Business Profile.</p>
+        </section>
+
+        <section class="gb-builder-step" aria-labelledby="gb-step-two">
+          <div class="gb-builder-step-title"><span>2</span><div><h3 id="gb-step-two">Ask only what you need</h3><p>Name, contact details, service, and description are already included. Add extra questions only when they help you prepare or give an estimate.</p></div></div>
+          <div class="gb-builder-question-summary"><strong>Extra questions</strong><span id="fieldCount" class="feedback"></span></div>
+          <div id="customFieldList"></div>
+          <button id="addCustomField" type="button" class="btn">+ Add a question</button>
+          <p class="gb-field-help">Keep it short. You can change questions or remove them later.</p>
+        </section>
+
+        <section class="gb-builder-step gb-builder-preview-step" aria-labelledby="gb-step-three">
+          <div class="gb-builder-step-title"><span>3</span><div><h3 id="gb-step-three">Preview and save</h3><p>Check how the page will look to customers. Your changes won’t go live until you save.</p></div></div>
+          <div class="gb-preview-shell">
+            <div class="gb-preview-heading"><h3>Customer preview</h3><span>What customers will see</span></div>
+            <div id="requestPreview" class="gb-request-preview"></div>
           </div>
-        </div>
-        <label for="formPageTitle">Form heading</label>
-        <input id="formPageTitle" data-builder-input maxlength="120" value="Request a Service">
-        <p class="feedback" style="margin:12px 0 0">The page description uses your Customer-facing tagline from Business Profile. Edit it there once; it updates this preview automatically.</p>
-        <div class="gb-builder-section-head">
-          <div><h3>Custom questions</h3><p>Keep the standard contact and service fields, then add the information specific to your business.</p></div>
-          <div id="fieldCount" class="feedback"></div>
-        </div>
-        <div id="customFieldList"></div>
-        <button id="addCustomField" type="button" class="btn">+ Add question</button>
-        <div class="gb-preview-shell">
-          <h3>Customer view</h3>
-          <div id="requestPreview" class="gb-request-preview"></div>
-        </div>
-        <button id="saveRequestForm" type="button" class="btn primary">Save request page</button>
-        <div id="builderFeedback" class="feedback" role="status" aria-live="polite"></div>
+          <button id="saveRequestForm" type="button" class="btn primary gb-save-request">Save request page</button>
+          <div id="builderFeedback" class="feedback" role="status" aria-live="polite"></div>
+        </section>
       </div>
 
     </section>
   </main>
 
   <style>
+
+    /* Request builder: a calm, numbered setup flow with advanced choices tucked away. */
+    .gb-simple-builder .gb-builder-intro{max-width:760px;margin-bottom:26px}
+    .gb-simple-builder .gb-builder-kicker{margin:0 0 8px;color:var(--accent,#85a593);font-size:11px;font-weight:700;letter-spacing:.16em}
+    .gb-simple-builder .gb-builder-intro h2{margin:0 0 9px}
+    .gb-simple-builder .gb-builder-intro>p:last-child{margin:0;color:var(--muted,#b8bdc4);line-height:1.65}
+    .gb-simple-builder .gb-builder-step{min-width:0;padding:24px 0;border-top:1px solid var(--border,#343a40)}
+    .gb-simple-builder .gb-builder-step-title{display:flex;align-items:flex-start;gap:13px;margin-bottom:19px}
+    .gb-simple-builder .gb-builder-step-title>span{display:grid;place-items:center;flex:0 0 32px;height:32px;border:1px solid var(--accent,#547861);border-radius:50%;color:var(--accent,#85a593);font-weight:700}
+    .gb-simple-builder .gb-builder-step-title h3{margin:2px 0 5px;font-size:17px}
+    .gb-simple-builder .gb-builder-step-title p,.gb-simple-builder .gb-field-help{margin:0;color:var(--muted,#b8bdc4);font-size:13px;line-height:1.6}
+    .gb-simple-builder .gb-field-help{margin-top:8px}
+    .gb-simple-builder .gb-template-hint{margin:7px 0 16px}
+    .gb-simple-builder .gb-advanced-settings{margin-top:16px;border-top:1px solid var(--border,#343a40);padding-top:12px}
+    .gb-simple-builder .gb-advanced-settings summary{cursor:pointer;display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted,#b8bdc4)}
+    .gb-simple-builder .gb-advanced-settings summary span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;opacity:.75}
+    .gb-simple-builder .gb-advanced-settings label{margin-top:14px}
+    .gb-simple-builder .gb-builder-question-summary,.gb-simple-builder .gb-preview-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+    .gb-simple-builder .gb-builder-question-summary>strong{font-size:14px}
+    .gb-simple-builder .gb-preview-heading h3{margin:0}
+    .gb-simple-builder .gb-preview-heading span{font-size:12px;color:var(--muted,#b8bdc4)}
+    .gb-simple-builder .gb-preview-shell{margin-top:6px}
+    .gb-simple-builder .gb-save-request{width:100%;margin-top:20px;min-height:48px;font-weight:700}
+    .gb-simple-builder #builderFeedback{margin-top:10px}
+    @media(max-width:620px){
+      .gb-simple-builder .gb-builder-step{padding:20px 0}
+      .gb-simple-builder .gb-builder-step-title{gap:10px}
+      .gb-simple-builder .gb-builder-step-title p{font-size:12px}
+    }
     /* The preview is the customer page itself, not a second card around it. */
     #requestPreview.gb-request-page.gb-request-preview {
       max-width: none;
