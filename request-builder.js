@@ -211,7 +211,7 @@
         const defaultKey = industry.includes("clean") ? "cleaning" : industry.includes("plumb") ? "plumbing" : industry.includes("detail") ? "auto_detailing" : industry.includes("landscap") ? "landscaping" : industry.includes("photo") ? "photography" : "general";
         $("formTemplate").value = defaultKey;
         $("formPageTitle").value = "Request a Service";
-        $("formPageDescription").value = "Tell us what you need and we will follow up.";
+        $("formPageDescription").value = root.dataset.businessTagline || "Tell us what you need and we will follow up.";
         $("formSubmitLabel").value = "Submit Request";
         fields = cloneFields(templates[defaultKey].fields);
       }
