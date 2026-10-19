@@ -258,8 +258,8 @@
         document.querySelectorAll("[data-dashboard-link]").forEach(link => link.href = dashboardUrl());
 
         const [{data:business,error:businessError},{data:profile,error:profileError},{data:serviceRows,error:serviceError}] = await Promise.all([
-          supabaseClient.from("businesses").select("id,name,owner_email,slug").eq("id",businessId).single(),
-          supabaseClient.from("business_public_profiles").select("business_id,slug,display_name,tagline,logo_url,contact_phone,public_email,website_url").eq("business_id",businessId).single(),
+          supabaseClient.from("businesses").select("id,name,owner_email,slug,industry").eq("id",businessId).single(),
+          supabaseClient.from("business_public_profiles").select("business_id,slug,display_name,industry,tagline,logo_url,contact_phone,public_email,website_url").eq("business_id",businessId).single(),
           supabaseClient.from("business_services").select("id,name,active,sort_order,business_id").eq("business_id",businessId).order("sort_order",{ascending:true}).order("name",{ascending:true})
         ]);
         if(businessError) throw businessError;
@@ -269,6 +269,8 @@
 
         slug = profile.slug || business.slug;
         services = serviceRows || [];
+        const builderRoot = document.getElementById("requestBuilder");
+        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); }
 
         document.getElementById("businessName").value = business.name || "";
         document.getElementById("tagline").value = profile.tagline || "";
