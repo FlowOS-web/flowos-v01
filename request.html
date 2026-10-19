@@ -844,7 +844,7 @@
         wrapper.appendChild(group);
       } else {
         const input = document.createElement(field.type === "textarea" ? "textarea" : field.type === "select" ? "select" : "input");
-        input.id = "custom_" + field.id; input.name = input.id;
+        input.id = "custom_" + field.id; input.name = input.id; label.htmlFor = input.id;
         if (field.type !== "textarea" && field.type !== "select") input.type = field.type;
         input.required = field.required === true;
         input.maxLength = field.type === "textarea" ? 2000 : 300;
