@@ -54,12 +54,6 @@
       font-size: 35px;
     }
 
-    .industry {
-      color: #7f8897;
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-
     .tagline {
       color: var(--muted);
       line-height: 1.5;
@@ -272,11 +266,6 @@
       class="business-logo"
       alt=""
     >
-
-    <div
-      id="industry"
-      class="industry"
-    ></div>
 
 
     <h1 id="businessName">
@@ -592,11 +581,6 @@
       "businessName"
     );
 
-  const industry =
-    document.getElementById(
-      "industry"
-    );
-
   const tagline =
     document.getElementById(
       "tagline"
@@ -831,7 +815,7 @@
           )
 
           .select(
-            "business_id, slug, display_name, industry, tagline, logo_url, primary_color, contact_phone, public_email, website_url"
+            "business_id, slug, display_name, tagline, logo_url, primary_color, contact_phone, public_email, website_url"
           )
 
           .eq(
@@ -877,10 +861,6 @@
 
       document.title =
         `${profile.display_name} | Service Request`;
-
-
-      industry.textContent =
-        profile.industry || "";
 
 
       tagline.textContent =
