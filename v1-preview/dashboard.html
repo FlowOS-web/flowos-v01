@@ -1156,16 +1156,19 @@
         if (expectedCount !== null && uniqueRows.length !== expectedCount) {
           throw new Error("The lead list changed while loading. Please refresh.");
         }
-        let customAnswerRows = [];
-        if (uniqueRows.length) {
+        const customAnswerRows = [];
+        const leadIds = uniqueRows.map(lead => lead.id);
+        // Keep each PostgREST IN list small even for long-lived businesses with many leads.
+        for (let answerOffset = 0; answerOffset < leadIds.length; answerOffset += 100) {
+          const batchIds = leadIds.slice(answerOffset, answerOffset + 100);
           const { data: answerRows, error: answerError } = await supabaseClient
             .from("lead_custom_answers")
             .select("lead_id,business_id,answers,field_definitions")
             .eq("business_id", businessId)
-            .in("lead_id", uniqueRows.map(lead => lead.id));
+            .in("lead_id", batchIds);
           if (!isCurrent()) return;
           if (answerError) throw answerError;
-          customAnswerRows = answerRows || [];
+          customAnswerRows.push(...(answerRows || []));
           if (customAnswerRows.some(row => row.business_id !== businessId || !uniqueRows.some(lead => lead.id === row.lead_id))) {
             throw new Error("Unable to load custom request answers for this business.");
           }
