@@ -164,14 +164,14 @@
     const formGrid = document.createElement("div");
     formGrid.className = "gb-preview-grid";
     preview.appendChild(formGrid);
-    const standard = [
-      ["Full name", "text", true, "Your name", false],
-      ["Phone", "text", false, "Best number to reach you", false],
+    const availableServices = (() => { try { return JSON.parse(root.dataset.services || "[]"); } catch (_) { return []; } })();\n    const standard = [
+      ["Name", "text", true, "John Smith", false],
+      ["Phone", "tel", false, "7635551234", false],
       ["Email", "email", false, "you@example.com", false],
       ["Service", "select", true, "", false],
-      ["Preferred date", "date", false, "", false],
-      ["Service address / location", "text", false, "Where is the service needed?", true],
-      ["Tell us what you need", "textarea", false, "Add any helpful details", true]
+      ["Preferred Date", "date", false, "", false],
+      ["Service Address / Location", "text", false, "Address or service location", false],
+      ["Tell us what you need", "textarea", false, "Describe the job, problem, project, or anything the business should know.", true]
     ];
 
     const addPreview = (label, type, required, placeholder, options) => {
@@ -185,7 +185,7 @@
       control.placeholder = placeholder || "";
       if (type === "select") {
         const op = document.createElement("option");
-        op.textContent = "Choose a service";
+        op.textContent = type === "select" ? "Choose a service" : "Select an option";
         op.value = "";
         control.appendChild(op);
         (options || []).forEach(value => {
@@ -200,7 +200,7 @@
     };
 
     standard.forEach(([label, type, required, placeholder, full]) => {
-      addPreview(label, type, required, placeholder, type === "select" ? ["Choose a service"] : []);
+      addPreview(label, type, required, placeholder, type === "select" ? availableServices : []);
       if (full) formGrid.lastElementChild.classList.add("full");
     });
 
