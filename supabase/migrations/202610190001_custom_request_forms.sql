@@ -127,8 +127,13 @@ create table if not exists public.lead_custom_answers (
   business_id uuid not null references public.businesses(id) on delete cascade,
   answers jsonb not null default '{}'::jsonb
     check (jsonb_typeof(answers)='object' and pg_column_size(answers)<=16384),
+  field_definitions jsonb not null default '[]'::jsonb
+    check (jsonb_typeof(field_definitions)='array' and jsonb_array_length(field_definitions)<=20 and pg_column_size(field_definitions)<=16384),
   created_at timestamptz not null default now()
 );
+alter table public.lead_custom_answers
+  add column if not exists field_definitions jsonb not null default '[]'::jsonb
+  check (jsonb_typeof(field_definitions)='array' and jsonb_array_length(field_definitions)<=20 and pg_column_size(field_definitions)<=16384);
 create index if not exists lead_custom_answers_business_idx on public.lead_custom_answers(business_id, created_at desc);
 alter table public.lead_custom_answers enable row level security;
 revoke all on public.lead_custom_answers from anon, authenticated;
@@ -157,6 +162,9 @@ for all to authenticated using (exists (
 alter table public.gatebrook_request_reviews
   add column if not exists custom_answers jsonb not null default '{}'::jsonb
   check (jsonb_typeof(custom_answers)='object' and pg_column_size(custom_answers)<=16384);
+alter table public.gatebrook_request_reviews
+  add column if not exists custom_field_definitions jsonb not null default '[]'::jsonb
+  check (jsonb_typeof(custom_field_definitions)='array' and jsonb_array_length(custom_field_definitions)<=20 and pg_column_size(custom_field_definitions)<=16384);
 
 -- Additive v2 intake RPC: the existing v1 signature remains available for old callers.
 -- Standard lead insert, rate protection, review holding, and custom-answer persistence
@@ -251,11 +259,11 @@ begin
       else 'Unusually high request volume for this business' end;
     insert into public.gatebrook_request_reviews (
       business_id,customer_name,phone,email,service,preferred_date,
-      service_location,notes,flagged_reason,custom_answers
+      service_location,notes,flagged_reason,custom_answers,custom_field_definitions
     ) values (
       p_business_id,p_customer_name,nullif(p_phone,''),nullif(p_email,''),
       p_service,p_preferred_date,nullif(p_service_location,''),nullif(p_notes,''),
-      v_reason,v_answers
+      v_reason,v_answers,v_fields
     ) returning id into v_review_id;
   else
     insert into public.leads (
@@ -267,8 +275,8 @@ begin
       nullif(p_notes,''),'new','website'
     ) returning id into v_lead_id;
     if v_answers <> '{}'::jsonb then
-      insert into public.lead_custom_answers(lead_id,business_id,answers)
-      values (v_lead_id,p_business_id,v_answers);
+      insert into public.lead_custom_answers(lead_id,business_id,answers,field_definitions)
+      values (v_lead_id,p_business_id,v_answers,v_fields);
     end if;
   end if;
 
@@ -325,8 +333,8 @@ begin
       v_review.service_location,v_review.notes,'new','website'
     ) returning id into v_lead_id;
     if coalesce(v_review.custom_answers,'{}'::jsonb) <> '{}'::jsonb then
-      insert into public.lead_custom_answers(lead_id,business_id,answers)
-      values(v_lead_id,p_business_id,v_review.custom_answers);
+      insert into public.lead_custom_answers(lead_id,business_id,answers,field_definitions)
+      values(v_lead_id,p_business_id,v_review.custom_answers,v_review.custom_field_definitions);
     end if;
   end if;
 
