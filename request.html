@@ -54,6 +54,13 @@
       font-size: 35px;
     }
 
+    .request-page-title { margin: 4px 0 8px; font-size: 24px; letter-spacing: -.3px; }
+    .custom-question { min-width: 0; }
+    .custom-choice-list { display: grid; gap: 8px; }
+    .custom-choice { display: flex; align-items: center; gap: 9px; margin: 0; color: var(--text); }
+    .custom-choice input { width: auto; accent-color: var(--accent); }
+    .custom-field-hint { margin-top: 6px; color: var(--muted); font-size: 12px; }
+
     .tagline {
       color: var(--muted);
       line-height: 1.5;
@@ -273,6 +280,8 @@
     </h1>
 
 
+    <h2 id="requestPageTitle" class="request-page-title">Request a Service</h2>
+
     <div
       id="tagline"
       class="tagline"
@@ -388,6 +397,8 @@
             ></textarea>
           </div>
 
+
+          <div id="customFields" class="full custom-fields"></div>
 
           <div class="full security-area">
 
@@ -548,6 +559,8 @@
   let turnstileToken = null;
 
   let turnstileWidgetId = null;
+  let requestFormConfig = { template_key: "general", page_title: "Request a Service", page_description: "Tell us what you need and we will follow up.", submit_label: "Submit Request", fields: [] };
+  let requestCustomFields = [];
 
 
   /*
@@ -790,6 +803,94 @@
     panel.classList.toggle("hidden", count === 0);
   }
 
+
+  async function loadRequestForm() {
+    const { data, error } = await supabaseClient.rpc("gatebrook_get_public_request_form", { p_slug: BUSINESS_SLUG });
+    if (error) throw new Error("Request form settings could not be loaded. Please try again later.");
+    if (data && typeof data === "object") {
+      if (!Array.isArray(data.fields) || data.fields.length > 20) throw new Error("This request form is not configured correctly.");
+      requestFormConfig = { ...requestFormConfig, ...data };
+      requestCustomFields = data.fields;
+    }
+  }
+
+  function renderCustomFields(fields) {
+    const host = document.getElementById("customFields");
+    host.replaceChildren();
+    for (const field of fields) {
+      if (!field || !/^[a-z][a-z0-9_]{0,39}$/.test(field.id || "") ||
+          typeof field.label !== "string" || !field.label.trim() ||
+          !["text","textarea","select","radio","checkbox","date","number"].includes(field.type)) {
+        throw new Error("This request form contains an invalid question.");
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "custom-question" + (field.type === "textarea" ? " full" : "");
+      wrapper.dataset.customField = field.id;
+      const label = document.createElement("label");
+      label.textContent = field.label + (field.required ? " *" : "");
+      wrapper.appendChild(label);
+      if (field.type === "radio" || field.type === "checkbox") {
+        const group = document.createElement("div"); group.className = "custom-choice-list";
+        group.setAttribute("role", field.type === "radio" ? "radiogroup" : "group");
+        const legend = field.label;
+        group.setAttribute("aria-label", legend);
+        (field.options || []).forEach((choice, index) => {
+          const choiceLabel = document.createElement("label"); choiceLabel.className = "custom-choice";
+          const input = document.createElement("input");
+          input.type = field.type; input.name = "custom_" + field.id; input.value = choice;
+          input.id = "custom_" + field.id + "_" + index; input.required = field.required && field.type === "radio" && index === 0;
+          choiceLabel.append(input, document.createTextNode(choice)); group.appendChild(choiceLabel);
+        });
+        wrapper.appendChild(group);
+      } else {
+        const input = document.createElement(field.type === "textarea" ? "textarea" : field.type === "select" ? "select" : "input");
+        input.id = "custom_" + field.id; input.name = input.id; label.htmlFor = input.id;
+        if (field.type !== "textarea" && field.type !== "select") input.type = field.type;
+        input.required = field.required === true;
+        input.maxLength = field.type === "textarea" ? 2000 : 300;
+        input.placeholder = field.placeholder || "";
+        if (field.type === "select") {
+          const empty = document.createElement("option"); empty.value = ""; empty.textContent = "Select an option"; input.appendChild(empty);
+          (field.options || []).forEach(choice => { const option=document.createElement("option"); option.value=choice; option.textContent=choice; input.appendChild(option); });
+        }
+        wrapper.appendChild(input);
+      }
+      const hint = field.help_text || "";
+      if (hint) { const p=document.createElement("div"); p.className="custom-field-hint"; p.textContent=hint; wrapper.appendChild(p); }
+      host.appendChild(wrapper);
+    }
+  }
+
+  function collectCustomAnswers() {
+    const answers = {};
+    for (const field of requestCustomFields) {
+      const wrapper = document.querySelector('[data-custom-field="' + CSS.escape(field.id) + '"]');
+      if (!wrapper) continue;
+      if (field.type === "checkbox") {
+        answers[field.id] = [...wrapper.querySelectorAll('input[type="checkbox"]:checked')].map(input => input.value);
+      } else if (field.type === "radio") {
+        answers[field.id] = wrapper.querySelector('input[type="radio"]:checked')?.value ?? null;
+      } else {
+        answers[field.id] = wrapper.querySelector("input,select,textarea")?.value ?? null;
+      }
+    }
+    return answers;
+  }
+
+  function validateCustomAnswers() {
+    for (const field of requestCustomFields) {
+      if (!field.required) continue;
+      const wrapper = document.querySelector('[data-custom-field="' + CSS.escape(field.id) + '"]');
+      if (!wrapper) continue;
+      if (field.type === "checkbox" && !wrapper.querySelector('input[type="checkbox"]:checked')) {
+        throw new Error("Please answer: " + field.label);
+      }
+      if (field.type === "radio" && !wrapper.querySelector('input[type="radio"]:checked')) {
+        throw new Error("Please answer: " + field.label);
+      }
+    }
+  }
+
   /*
   ==================================================
   LOAD BUSINESS
@@ -858,14 +959,16 @@
       businessName.textContent =
         profile.display_name;
 
+      await loadRequestForm();
 
       document.title =
-        `${profile.display_name} | Service Request`;
+        `${profile.display_name} | ${requestFormConfig.page_title || "Service Request"}`;
 
 
-      tagline.textContent =
-        profile.tagline ||
-        "Submit your request and we will get back to you.";
+      document.getElementById("requestPageTitle").textContent = requestFormConfig.page_title || "Request a Service";
+      tagline.textContent = requestFormConfig.page_description || profile.tagline || "Submit your request and we will get back to you.";
+      submitButton.textContent = requestFormConfig.submit_label || "Submit Request";
+      renderCustomFields(requestFormConfig.fields || []);
 
 
       if (
@@ -1205,6 +1308,10 @@
       --------------------------------------------
       */
 
+      let customAnswers;
+      try { validateCustomAnswers(); customAnswers = collectCustomAnswers(); }
+      catch (validationError) { errorMessage.style.display = "block"; errorDetails.textContent = validationError.message; return; }
+
       const payload = {
 
         business_id:
@@ -1230,6 +1337,8 @@
 
         notes:
           notes || null,
+
+        custom_answers: customAnswers,
 
         turnstile_token:
           turnstileToken
@@ -1359,6 +1468,7 @@
           confirmationMessage;
 
         leadForm.reset();
+      // Keep configured fields, but reset each dynamically rendered control to its initial value.
 
 
         successMessage.style.display =
@@ -1410,7 +1520,7 @@
 
 
         submitButton.textContent =
-          "Submit Request";
+          requestFormConfig.submit_label || "Submit Request";
 
       }
 
