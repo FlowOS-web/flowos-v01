@@ -728,6 +728,41 @@ const handler =
 
       /*
       ==========================================
+      VALIDATE CUSTOM ANSWERS AGAINST SERVER CONFIG
+      ==========================================
+      Never trust field definitions from the browser. The active form definition
+      is loaded from the tenant-owned database record, and the validator runs
+      server-side before the atomic intake RPC accepts any request.
+      */
+      const { data: requestForm, error: requestFormError } = await ctx.supabaseAdmin
+        .from("business_request_forms").select("fields").eq("business_id", businessId).maybeSingle();
+      if (requestFormError) {
+        console.error("Request form configuration lookup failed:", requestFormError);
+        return Response.json({ error: "This request form is temporarily unavailable." }, { status: 503 });
+      }
+      const configuredFields = Array.isArray(requestForm?.fields) ? requestForm.fields : [];
+      const rawAnswers = body.custom_answers === undefined ? {} : body.custom_answers;
+      if (!rawAnswers || typeof rawAnswers !== "object" || Array.isArray(rawAnswers)) {
+        return Response.json({ error: "Invalid custom request answers." }, { status: 400 });
+      }
+      const customAnswers = rawAnswers as Record<string, unknown>;
+      const { data: answersValid, error: answersValidationError } = await ctx.supabaseAdmin.rpc(
+        "gatebrook_validate_request_fields",
+        { p_fields: configuredFields, p_answers: customAnswers }
+      );
+      if (answersValidationError || answersValid !== true) {
+        console.warn("Custom request answers failed validation:", answersValidationError);
+        return Response.json({ error: "Please check the additional questions and try again." }, { status: 400 });
+      }
+      const customEmailFields = configuredFields.flatMap((field: any) => {
+        const value = customAnswers[field.id];
+        if (value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0)) return [];
+        const displayValue = Array.isArray(value) ? value.join(", ") : String(value);
+        return [{ label: cleanText(field.label, 80), value: cleanText(displayValue, 2000) }];
+      });
+
+      /*
+      ==========================================
       ATOMIC REQUEST PROTECTION + SAVE
       ==========================================
       The DB function serializes each business's submissions, enforces
@@ -752,6 +787,7 @@ const handler =
       }
       const contactHash = await privateHash(contactIdentity);
       const fingerprint = await privateHash(JSON.stringify({
+        customAnswers,
         contact: contactIdentity,
         customerName: normalize(customerName),
         phone: phone.replace(/[^\d+]/g, ""),
@@ -763,7 +799,7 @@ const handler =
       }));
 
       const { data: intake, error: intakeError } = await ctx.supabaseAdmin.rpc(
-        "gatebrook_receive_request", {
+        "gatebrook_receive_request_custom", {
           p_business_id: businessId,
           p_contact_hash: contactHash,
           p_fingerprint: fingerprint,
@@ -773,7 +809,8 @@ const handler =
           p_service: service,
           p_preferred_date: preferredDate || null,
           p_service_location: serviceLocation,
-          p_notes: notes
+          p_notes: notes,
+          p_answers: customAnswers
         }
       );
       if (intakeError || !intake?.disposition) {
@@ -846,7 +883,8 @@ const handler =
             { label: "Service", value: service },
             { label: "Preferred date", value: preferredDate || "Not provided" },
             { label: "Service location", value: serviceLocation || "Not provided" },
-            { label: "Notes", value: notes || "None" }
+            { label: "Notes", value: notes || "None" },
+            ...customEmailFields
           ],
           message: "This request is saved in Gatebrook. Sign in to manage the customer and track the next steps.",
           action: { label: "OPEN BUSINESS DASHBOARD", url: "https://gatebrook.work/dashboard.html" }
