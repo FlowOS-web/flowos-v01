@@ -200,6 +200,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="brand-system.css?v=1">
+<link rel="stylesheet" href="request-polish.css?v=1">
 </head>
 <body class="gb-brand-settings-page">
   <header class="topbar">
@@ -319,6 +320,36 @@
     </section>
   </main>
 
+  <style>
+    /* The preview is the customer page itself, not a second card around it. */
+    #requestPreview.gb-request-page.gb-request-preview {
+      max-width: none;
+      margin: 14px auto 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: #f5f5f2;
+      text-align: left;
+    }
+    #requestPreview.gb-request-page .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 54px 22px 35px;
+    }
+    #requestPreview.gb-request-page .flowos { margin-bottom: 45px; }
+    #requestPreview.gb-request-page input:disabled,
+    #requestPreview.gb-request-page select:disabled,
+    #requestPreview.gb-request-page textarea:disabled,
+    #requestPreview.gb-request-page button:disabled { opacity: 1; }
+    #requestPreview.gb-request-page button#submitButton:disabled { cursor: default; }
+    @media(max-width:620px) {
+      #requestPreview.gb-request-page .wrap { padding: 28px 16px 30px; }
+      #requestPreview.gb-request-page .flowos { margin-bottom: 35px; }
+    }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
   <script src="request-builder.js?v=1"></script>
   <script>
@@ -401,7 +432,7 @@
         slug = profile.slug || business.slug;
         services = serviceRows || [];
         const builderRoot = document.getElementById("requestBuilder");
-        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); builderRoot.dataset.services = JSON.stringify((serviceRows || []).filter(service => service.active).map(service => service.name)); }
+        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); builderRoot.dataset.businessLogo = String(profile.logo_url || ""); builderRoot.dataset.services = JSON.stringify((serviceRows || []).filter(service => service.active).map(service => service.name)); }
 
         document.getElementById("businessName").value = business.name || "";
         document.getElementById("tagline").value = profile.tagline || "";
