@@ -269,6 +269,8 @@
 
         slug = profile.slug || business.slug;
         services = serviceRows || [];
+        const builderRoot = document.getElementById("requestBuilder");
+        if (builderRoot) builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase();
 
         document.getElementById("businessName").value = business.name || "";
         document.getElementById("tagline").value = profile.tagline || "";
