@@ -7,7 +7,7 @@ const MONTHLY_PRICE = Deno.env.get("STRIPE_PRICE_MONTHLY")!;
 const ANNUAL_PRICE = Deno.env.get("STRIPE_PRICE_ANNUAL")!;
 const SITE = "https://gatebrook.work";
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
-const cors = { "Access-Control-Allow-Origin": SITE, "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS", "Vary": "Origin" };
+const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS", "Vary": "Origin" };
 const reply = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const clean = (v: unknown, max: number) => typeof v === "string" ? v.trim().normalize("NFC").slice(0, max) : "";
 Deno.serve(async (req) => {
