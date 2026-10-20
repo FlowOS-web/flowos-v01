@@ -42,7 +42,8 @@ Copy the endpoint signing secret into `STRIPE_WEBHOOK_SECRET`. The webhook verif
 
 - `gatebrook-checkout`: validates the Supabase access token, derives the user ID from the verified session, saves an inactive business draft, and creates Stripe-hosted Checkout.
 - `gatebrook-stripe-webhook`: verifies signed Stripe events and persists subscription/customer/trial/period/cancellation status.
-- `gatebrook-access`: checks server-side subscription state for account routing and dashboard entry.\n- `gatebrook-billing-portal`: creates an authenticated Stripe Customer Portal session so owners can manage billing without Gatebrook storing payment details.
+- `gatebrook-access`: checks server-side subscription state for account routing and dashboard entry.
+- `gatebrook-billing-portal`: creates an authenticated Stripe Customer Portal session so owners can manage billing without Gatebrook storing payment details.
 - Database migrations create `gatebrook_subscriptions` and an event-deduplication table, plus RLS checks that prevent inactive/cancelled subscriptions from accessing dashboard data.
 - `billing.html` does not activate accounts based on the Checkout success URL. It waits for server-verified access state.
 
@@ -52,7 +53,8 @@ Do not announce live billing until all steps below pass:
 
 1. Confirm the product and both recurring prices are in **Live mode**.
 2. Add all four secrets above in Supabase and verify they were saved without exposing their values.
-3. Configure the webhook endpoint and its event list, then save the endpoint signing secret in Supabase.\n4. In Stripe Billing → Customer portal, enable subscription cancellation and set cancellation to **at period end** (not immediately); enable payment method updates. Confirm the portal configuration uses the intended Live-mode configuration.
+3. Configure the webhook endpoint and its event list, then save the endpoint signing secret in Supabase.
+4. In Stripe Billing → Customer portal, enable subscription cancellation and set cancellation to **at period end** (not immediately); enable payment method updates. Confirm the portal configuration uses the intended Live-mode configuration.
 5. In a controlled real launch test, create a new account, enter business setup, and complete Stripe Checkout. Verify the subscription row, business activation, and dashboard access only after the signed webhook is processed.
 6. Verify cancellation at period end retains access until Stripe's paid-period end, then removes access after the subscription-deleted/updated event.
 7. Verify a failed payment does not grant new access, a forged/invalid webhook signature is rejected, duplicate webhook deliveries are idempotent, and a direct dashboard URL cannot bypass access checks.
