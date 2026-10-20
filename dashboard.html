@@ -1604,6 +1604,16 @@
       loginSection.classList.add("hidden");
       dashboardSection.classList.remove("hidden");
       try {
+        const { data: access, error: accessError } = await supabaseClient.functions.invoke("gatebrook-access", { method: "GET" });
+        if (epoch !== dashboardEpoch) return;
+        if (accessError) throw new Error("Workspace access could not be verified. Please retry in a moment.");
+        if (!access?.allowed) {
+          location.replace(access?.next || "onboarding.html");
+          return;
+        }
+        if (requestedBusinessId && requestedBusinessId !== access.business_id) {
+          throw new Error("This account does not have access to the business in this link.");
+        }
         await getBusiness(epoch);
         if (epoch === dashboardEpoch) await loadLeads();
       } catch (error) {
