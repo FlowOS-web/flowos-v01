@@ -50,8 +50,18 @@ Deno.serve(async (req) => {
     // Do not let a customer turn an existing paid business into a different slug/name via a checkout retry.
     const { data: member } = await db.from("business_users").select("role").eq("business_id", businessId).eq("user_id", auth.user.id).maybeSingle();
     if (!member || member.role !== "owner") return reply(403, { error: "Business owner access is required." });
-    const { data: sub } = await db.from("gatebrook_subscriptions").select("status").eq("business_id", businessId).maybeSingle();
+    const { data: sub } = await db.from("gatebrook_subscriptions").select("status,stripe_checkout_session_id,plan").eq("business_id", businessId).maybeSingle();
     if (sub && ["active","trialing","past_due"].includes(sub.status)) return reply(409, { error: "A subscription already exists for this workspace. Sign in to continue." });
+    if (sub?.status === "incomplete" && sub.stripe_checkout_session_id) {
+      try {
+        const priorResponse = await fetch("https://api.stripe.com/v1/checkout/sessions/" + encodeURIComponent(sub.stripe_checkout_session_id), { headers: { Authorization: "Bearer " + STRIPE_KEY } });
+        const prior = await priorResponse.json();
+        if (priorResponse.ok && prior.status === "open" && typeof prior.url === "string") {
+          if (prior.metadata?.checkout_option !== plan) return reply(409, { error: "A checkout session is already open for a different plan. Finish or let that session expire before choosing another plan." });
+          return reply(200, { url: prior.url });
+        }
+      } catch { /* An expired/unavailable session can be recreated below. */ }
+    }
     const { error: updateError } = await db.from("businesses").update({ name, slug, industry, owner_email: auth.user.email ?? null, active: false }).eq("id", businessId);
     if (updateError) return reply(409, { error: "Could not update this setup. Check whether the public link is available." });
     await db.from("business_public_profiles").upsert({ business_id: businessId, slug, display_name: name, industry, tagline: tagline || null, active: false });
@@ -68,17 +78,18 @@ Deno.serve(async (req) => {
   form.set("metadata[business_id]", businessId);
   form.set("metadata[user_id]", auth.user.id);
   form.set("metadata[plan]", plan === "trial" ? "monthly" : plan);
+  form.set("metadata[checkout_option]", plan);
   form.set("subscription_data[metadata][business_id]", businessId);
   form.set("subscription_data[metadata][user_id]", auth.user.id);
   form.set("subscription_data[metadata][plan]", plan === "trial" ? "monthly" : plan);
+  form.set("subscription_data[metadata][checkout_option]", plan);
   if (plan === "trial") {
     form.set("subscription_data[trial_period_days]", "7");
     form.set("payment_method_collection", "always");
     form.set("subscription_data[trial_settings][end_behavior][missing_payment_method]", "cancel");
   }
-  const idempotency = clean(body.idempotency_key, 80);
-  const headers: Record<string, string> = { "Authorization": "Bearer " + STRIPE_KEY, "Content-Type": "application/x-www-form-urlencoded" };
-  if (/^[a-zA-Z0-9_-]{16,80}$/.test(idempotency)) headers["Idempotency-Key"] = "gatebrook-" + auth.user.id + "-" + idempotency;
+  const retryKey = typeof sub !== "undefined" && sub?.stripe_checkout_session_id ? String(sub.stripe_checkout_session_id) : "initial";
+  const headers: Record<string, string> = { "Authorization": "Bearer " + STRIPE_KEY, "Content-Type": "application/x-www-form-urlencoded", "Idempotency-Key": "gatebrook-" + auth.user.id + "-" + businessId + "-" + retryKey };
   let session: Record<string, unknown>;
   try {
     const response = await fetch("https://api.stripe.com/v1/checkout/sessions", { method: "POST", headers, body: form });
