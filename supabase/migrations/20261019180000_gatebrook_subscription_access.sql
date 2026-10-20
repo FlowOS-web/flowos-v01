@@ -21,7 +21,7 @@ alter table public.gatebrook_subscriptions enable row level security;
 revoke all on public.gatebrook_subscriptions from anon, authenticated;
 drop policy if exists "subscription owners can read own subscription" on public.gatebrook_subscriptions;
 create policy "subscription owners can read own subscription" on public.gatebrook_subscriptions for select to authenticated using (user_id = (select auth.uid()));
-grant select on public.gatebrook_subscriptions to authenticated;
+grant select (business_id,user_id,plan,status,trial_end,current_period_start,current_period_end,cancel_at_period_end,created_at,updated_at) on public.gatebrook_subscriptions to authenticated;
 
 create table if not exists public.gatebrook_stripe_events (
   event_id text primary key,
