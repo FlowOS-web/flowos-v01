@@ -59,8 +59,11 @@ Deno.serve(async (req) => {
   if (seen) return json(200,{received:true,duplicate:true});
   try {
     const obj = event.data.object as Record<string, any>;
-    if (event.type.startsWith("customer.subscription.")) {
+    if (event.type === "customer.subscription.deleted") {
       await persistSubscription(obj,event.id);
+    } else if (event.type === "customer.subscription.created" || event.type === "customer.subscription.updated") {
+      // Fetch current Stripe state so delayed/retried events cannot roll a newer status backward.
+      await persistSubscription(await stripeSubscription(obj.id),event.id);
     } else if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const subscriptionId = typeof obj.subscription === "string" ? obj.subscription : obj.subscription?.id;
       if (subscriptionId) await persistSubscription(await stripeSubscription(subscriptionId),event.id);
