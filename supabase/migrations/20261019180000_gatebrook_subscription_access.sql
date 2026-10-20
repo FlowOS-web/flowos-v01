@@ -31,7 +31,7 @@ create table if not exists public.gatebrook_stripe_events (
 alter table public.gatebrook_stripe_events enable row level security;
 revoke all on public.gatebrook_stripe_events from anon, authenticated;
 
-create or replace function public.gatebrook_business_has_access(target_business_id uuid)
+create or replace function flowos_private.gatebrook_business_has_access(target_business_id uuid)
 returns boolean language sql stable security definer set search_path = public, pg_temp
 as $$
   select exists (
@@ -41,27 +41,14 @@ as $$
         or (s.status = 'trialing' and s.trial_end is not null and s.trial_end > now()))
   );
 $$;
-revoke all on function public.gatebrook_business_has_access(uuid) from public, anon;
-grant execute on function public.gatebrook_business_has_access(uuid) to authenticated;
+revoke all on function flowos_private.gatebrook_business_has_access(uuid) from public, anon;
+grant usage on schema flowos_private to authenticated;
+grant execute on function flowos_private.gatebrook_business_has_access(uuid) to authenticated;
 
-create or replace function public.gatebrook_user_has_access()
-returns boolean language sql stable security definer set search_path = public, pg_temp
-as $$
-  select exists (
-    select 1 from public.gatebrook_subscriptions s
-    join public.business_users bu on bu.business_id = s.business_id
-    where bu.user_id = (select auth.uid()) and s.user_id = (select auth.uid())
-      and s.status in ('trialing','active')
-      and ((s.current_period_end is not null and s.current_period_end > now())
-        or (s.status = 'trialing' and s.trial_end is not null and s.trial_end > now()))
-  );
-$$;
-revoke all on function public.gatebrook_user_has_access() from public, anon;
-grant execute on function public.gatebrook_user_has_access() to authenticated;
 
 drop policy if exists "business users can read their business leads" on public.leads;
 create policy "business users can read their business leads" on public.leads for select to authenticated
-using (business_id in (select bu.business_id from public.business_users bu where bu.user_id = (select auth.uid())) and public.gatebrook_business_has_access(business_id));
+using (business_id in (select bu.business_id from public.business_users bu where bu.user_id = (select auth.uid())) and flowos_private.gatebrook_business_has_access(business_id));
 drop policy if exists "business users can update their business leads" on public.leads;
 create policy "business users can update their business leads" on public.leads for update to authenticated
 using (business_id in (select bu.business_id from public.business_users bu where bu.user_id = (select auth.uid())) and public.gatebrook_business_has_access(business_id))
