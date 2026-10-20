@@ -33,6 +33,7 @@ Deno.serve(async (req) => {
   // Reuse the authenticated user's incomplete setup; never trust a client-supplied user/business ID.
   const { data: existing } = await db.from("business_users").select("business_id,businesses(id,name,slug)").eq("user_id", auth.user.id).limit(1).maybeSingle();
   let businessId = existing?.business_id as string | undefined;
+  let previousCheckoutSessionId: string | null = null;
   if (!businessId) {
     const { data: business, error: businessError } = await db.from("businesses").insert({
       name, slug, industry, owner_email: auth.user.email ?? null, active: false
@@ -51,6 +52,7 @@ Deno.serve(async (req) => {
     const { data: member } = await db.from("business_users").select("role").eq("business_id", businessId).eq("user_id", auth.user.id).maybeSingle();
     if (!member || member.role !== "owner") return reply(403, { error: "Business owner access is required." });
     const { data: sub } = await db.from("gatebrook_subscriptions").select("status,stripe_checkout_session_id,plan").eq("business_id", businessId).maybeSingle();
+    previousCheckoutSessionId = sub?.stripe_checkout_session_id ?? null;
     if (sub && ["active","trialing","past_due"].includes(sub.status)) return reply(409, { error: "A subscription already exists for this workspace. Sign in to continue." });
     if (sub?.status === "incomplete" && sub.stripe_checkout_session_id) {
       try {
@@ -88,7 +90,7 @@ Deno.serve(async (req) => {
     form.set("payment_method_collection", "always");
     form.set("subscription_data[trial_settings][end_behavior][missing_payment_method]", "cancel");
   }
-  const retryKey = typeof sub !== "undefined" && sub?.stripe_checkout_session_id ? String(sub.stripe_checkout_session_id) : "initial";
+  const retryKey = previousCheckoutSessionId ? previousCheckoutSessionId : "initial";
   const headers: Record<string, string> = { "Authorization": "Bearer " + STRIPE_KEY, "Content-Type": "application/x-www-form-urlencoded", "Idempotency-Key": "gatebrook-" + auth.user.id + "-" + businessId + "-" + retryKey };
   let session: Record<string, unknown>;
   try {
