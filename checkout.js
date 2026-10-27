@@ -86,7 +86,7 @@
         throw Error(reason.message);
       }
       if (data?.mode === "hosted") {
-        openHosted(data.url);
+        failure("Previous checkout is still open", "Try again to open the embedded form, or choose the alternate checkout.", true, true);
         return;
       }
       if (data?.mode !== "embedded" || typeof data.client_secret !== "string" || !/^pk_(?:live|test)_/.test(data.publishable_key)) {
