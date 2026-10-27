@@ -1,0 +1,279 @@
+/* Gatebrook visual baseline — shared across all published pages.
+   Dark theme: graphite-to-silver fixed gradient. Light: reverse palette.
+   Marketing homepage retains its intentional scroll-driven art direction. */
+:root{
+  --gb-unified-night:#090a0b;
+  --gb-unified-panel:#1a1d21;
+  --gb-unified-edge:#34383e;
+  --gb-unified-ink:#f5f5f2;
+  --gb-unified-muted:#b8bdc4;
+  --gb-unified-green:#244633;
+  --gb-unified-glow:rgba(48,111,67,.23);
+}
+html body.gb-dashboard-page,
+html body.gb-brand-settings-page,
+html body.gb-admin-page,
+html body.gb-request-page,
+html body.gb-brand-activate-page,
+html body.gb-simple-page,
+html body.gb-legal-page{
+  color:#f5f5f2;
+  font-family:"Instrument Sans",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background-color:#090a0b;
+  background-image:
+    radial-gradient(ellipse 42% 38% at 90% 12%,rgba(34,81,57,.13),transparent 77%),
+    radial-gradient(ellipse 33% 37% at 4% 75%,rgba(29,71,49,.09),transparent 79%),
+    linear-gradient(180deg,#090a0b 0%,#090a0b 26%,#151819 49%,#282c2f 73%,#50585b 89%,#b5bdbb 100%);
+  background-attachment:fixed;
+  background-size:cover;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+html[data-gb-theme="light"] body.gb-dashboard-page,
+html[data-gb-theme="light"] body.gb-brand-settings-page,
+html[data-gb-theme="light"] body.gb-admin-page,
+html[data-gb-theme="light"] body.gb-request-page,
+html[data-gb-theme="light"] body.gb-brand-activate-page,
+html[data-gb-theme="light"] body.gb-simple-page,
+html[data-gb-theme="light"] body.gb-legal-page{
+  color:#1a1d21;
+  background-color:#f5f5f2;
+  background-image:
+    radial-gradient(ellipse 42% 38% at 90% 12%,rgba(35,89,56,.08),transparent 77%),
+    radial-gradient(ellipse 33% 37% at 4% 75%,rgba(38,91,59,.07),transparent 79%),
+    linear-gradient(180deg,#f5f5f2 0%,#eef1ed 34%,#d8deda 69%,#9eaca4 92%,#4b5550 100%);
+  background-attachment:fixed;
+  background-size:cover;
+}
+/* Page-level fonts and the neutral, green-tinted appearance toggle. */
+html body.gb-home,
+html body.gb-simple-page,
+html body.gb-legal-page,
+html body.gb-brand-activate-page{
+  font-family:"Instrument Sans",Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+html .gb-theme-toggle{
+  border-color:#4a5750 !important;
+  background:#202725 !important;
+  color:#eff5f0 !important;
+}
+html[data-gb-theme="light"] .gb-theme-toggle{
+  border-color:#aabbb1 !important;
+  background:#f8faf7 !important;
+  color:#244633 !important;
+}
+html .gb-theme-toggle:focus-visible{
+  outline-color:#8bb39b;
+}
+/* Compact account, signup, onboarding, and billing surfaces. */
+html body.gb-simple-page .card,
+html body.gb-simple-page .panel{
+  background:rgba(26,29,33,.96);
+  border:1px solid #34383e;
+  color:#f5f5f2;
+  border-radius:18px;
+  box-shadow:0 20px 52px rgba(0,0,0,.18);
+}
+html body.gb-simple-page h1,
+html body.gb-simple-page h2,
+html body.gb-simple-page h3{color:#f5f5f2;letter-spacing:-.035em;}
+html body.gb-simple-page p,
+html body.gb-simple-page small{color:#b8bdc4;}
+html body.gb-simple-page label{color:#dde5df;font-weight:600;}
+html body.gb-simple-page input,
+html body.gb-simple-page select{
+  font:inherit;
+  background:#111515;
+  border-color:#455048;
+  color:#f5f5f2;
+  border-radius:9px;
+}
+html body.gb-simple-page input:focus-visible,
+html body.gb-simple-page select:focus-visible{
+  outline:2px solid #799f88;
+  outline-offset:1px;
+  box-shadow:0 0 15px var(--gb-unified-glow);
+}
+html body.gb-simple-page .submit,
+html body.gb-simple-page .button:not(.secondary),
+html body.gb-simple-page .tabs button[aria-pressed="true"]{
+  background:#244633;
+  color:#f5f5f2;
+  border:1px solid #527662;
+  font-weight:700;
+}
+html body.gb-simple-page .submit:hover:not(:disabled),
+html body.gb-simple-page .button:not(.secondary):hover:not(:disabled){
+  background:#315840;
+  box-shadow:0 0 22px var(--gb-unified-glow);
+}
+html body.gb-simple-page .secondary,
+html body.gb-simple-page .tabs button[aria-pressed="false"]{
+  background:#292f2d;
+  color:#f5f5f2;
+  border:1px solid #414a44;
+}
+html body.gb-simple-page a{color:#a8cfb6;}
+html body.gb-simple-page .notice,
+html body.gb-simple-page .status{
+  background:#202927;
+  border-color:#405a49;
+  color:#dfebe1;
+}
+html body.gb-simple-page .notice.error{
+  background:#3a2020;
+  border-color:#694343;
+  color:#ffe0e0;
+}
+html body.gb-simple-page .link-preview{
+  background:#101a17;
+  border-color:#3c5047;
+}
+html body.gb-simple-page .link-preview strong{color:#ddf4e6;}
+html body.gb-simple-page .link-customize{background:#171d1b;border-color:#3c5047;}
+html body.gb-simple-page .link-customize-body{border-color:#3c5047;}
+html body.gb-simple-page .plan{
+  background:#111515;
+  border-color:#455048;
+  color:#f5f5f2;
+}
+html body.gb-simple-page .plan:has(input:checked){
+  background:#182b20;
+  border-color:#70977a;
+}
+html body.gb-simple-page .plan small{color:#b8bdc4;}
+html body.gb-simple-page [hidden]{display:none!important;}
+/* Authentication recovery and invitation pages keep the same panels and accents. */
+html body.gb-brand-activate-page .card{
+  background:rgba(26,29,33,.96);
+  border-color:#34383e;
+  box-shadow:0 20px 52px rgba(0,0,0,.18);
+}
+html body.gb-brand-activate-page .brand,
+html body.gb-brand-activate-page h1{color:#f5f5f2;}
+html body.gb-brand-activate-page p{color:#b8bdc4;}
+html body.gb-brand-activate-page label{color:#dde5df;}
+html body.gb-brand-activate-page input{
+  background:#111515;
+  color:#f5f5f2;
+  border-color:#455048;
+}
+html body.gb-brand-activate-page a{color:#a8cfb6;}
+html body.gb-brand-activate-page .btn{
+  background:#244633;
+  border:1px solid #527662;
+  color:#f5f5f2;
+}
+html body.gb-brand-activate-page .btn:hover:not(:disabled){
+  background:#315840;
+  box-shadow:0 0 22px var(--gb-unified-glow);
+}
+/* Legible paper-like surfaces for privacy and terms, including the pale bottom gradient. */
+html body.gb-legal-page .wrap{
+  max-width:810px;
+  margin:32px auto 88px;
+  padding:40px clamp(22px,5vw,54px) 56px;
+  background:rgba(26,29,33,.96);
+  border:1px solid #34383e;
+  border-radius:18px;
+  box-shadow:0 20px 55px rgba(0,0,0,.2);
+}
+html body.gb-legal-page h1,
+html body.gb-legal-page h2{color:#f5f5f2;}
+html body.gb-legal-page p,
+html body.gb-legal-page li{color:#b8bdc4;}
+html body.gb-legal-page a{color:#a8cfb6;}
+html body.gb-legal-page .note{
+  color:#dfebe1;
+  border-color:#405a49;
+  background:#202927;
+}
+/* Reverse the card palette in light mode; the gradient itself stays fixed. */
+html[data-gb-theme="light"] body.gb-simple-page .card,
+html[data-gb-theme="light"] body.gb-simple-page .panel,
+html[data-gb-theme="light"] body.gb-brand-activate-page .card,
+html[data-gb-theme="light"] body.gb-legal-page .wrap{
+  color:#1a1d21;
+  background:rgba(253,254,251,.97);
+  border-color:#cbd7cd;
+  box-shadow:0 15px 42px rgba(26,58,36,.10);
+}
+html[data-gb-theme="light"] body.gb-simple-page h1,
+html[data-gb-theme="light"] body.gb-simple-page h2,
+html[data-gb-theme="light"] body.gb-simple-page h3,
+html[data-gb-theme="light"] body.gb-brand-activate-page .brand,
+html[data-gb-theme="light"] body.gb-brand-activate-page h1,
+html[data-gb-theme="light"] body.gb-legal-page h1,
+html[data-gb-theme="light"] body.gb-legal-page h2{color:#1a1d21;}
+html[data-gb-theme="light"] body.gb-simple-page p,
+html[data-gb-theme="light"] body.gb-simple-page small,
+html[data-gb-theme="light"] body.gb-brand-activate-page p,
+html[data-gb-theme="light"] body.gb-legal-page p,
+html[data-gb-theme="light"] body.gb-legal-page li{color:#53625a;}
+html[data-gb-theme="light"] body.gb-simple-page label,
+html[data-gb-theme="light"] body.gb-brand-activate-page label{color:#344a3a;}
+html[data-gb-theme="light"] body.gb-simple-page input,
+html[data-gb-theme="light"] body.gb-simple-page select,
+html[data-gb-theme="light"] body.gb-brand-activate-page input{
+  background:#fff;
+  color:#1a1d21;
+  border-color:#b9cabc;
+}
+html[data-gb-theme="light"] body.gb-simple-page .plan{
+  background:#f5f8f3;
+  border-color:#c4d2c5;
+  color:#1a1d21;
+}
+html[data-gb-theme="light"] body.gb-simple-page .plan:has(input:checked){
+  background:#e6f1e8;
+  border-color:#527b5b;
+}
+html[data-gb-theme="light"] body.gb-simple-page .plan small{color:#53625a;}
+html[data-gb-theme="light"] body.gb-simple-page .secondary,
+html[data-gb-theme="light"] body.gb-simple-page .tabs button[aria-pressed="false"]{
+  background:#ecf0eb;
+  border-color:#cbd7cd;
+  color:#234333;
+}
+html[data-gb-theme="light"] body.gb-simple-page .status,
+html[data-gb-theme="light"] body.gb-simple-page .notice,
+html[data-gb-theme="light"] body.gb-legal-page .note{
+  background:#eaf3ec;
+  border-color:#bed3c2;
+  color:#2a4f38;
+}
+html[data-gb-theme="light"] body.gb-simple-page .notice.error{
+  background:#fff0ef;
+  color:#943b3d;
+  border-color:#e7c2c2;
+}
+html[data-gb-theme="light"] body.gb-simple-page .link-preview{
+  background:#f0f6f0;
+  border-color:#b7cbb9;
+}
+html[data-gb-theme="light"] body.gb-simple-page .link-preview .link-prefix{color:#52675a;}
+html[data-gb-theme="light"] body.gb-simple-page .link-preview strong{color:#24563b;}
+html[data-gb-theme="light"] body.gb-simple-page .link-customize{
+  background:#f6f9f5;
+  border-color:#b7cbb9;
+}
+html[data-gb-theme="light"] body.gb-simple-page .link-customize summary{color:#1a1d21;}
+html[data-gb-theme="light"] body.gb-simple-page .link-customize-body{border-color:#b7cbb9;}
+html[data-gb-theme="light"] body.gb-simple-page .link-reset{color:#24563b;}
+html[data-gb-theme="light"] body.gb-simple-page a,
+html[data-gb-theme="light"] body.gb-brand-activate-page a,
+html[data-gb-theme="light"] body.gb-legal-page a{color:#24563b;}
+html[data-gb-theme="light"] body.gb-brand-activate-page .btn{background:#244633;color:#fff;}
+html[data-gb-theme="light"] body.gb-simple-page .submit,
+html[data-gb-theme="light"] body.gb-simple-page .button:not(.secondary),
+html[data-gb-theme="light"] body.gb-simple-page .tabs button[aria-pressed="true"]{
+  background:#244633;color:#fff;border-color:#244633;
+}
+@media(max-width:640px){
+  html body.gb-legal-page .wrap{margin:12px 12px 70px;padding:28px 20px 38px;}
+}
+@media(prefers-reduced-motion:reduce){
+  html .gb-theme-toggle,
+  html body.gb-simple-page .submit,
+  html body.gb-brand-activate-page .btn{transition:none;}
+}
