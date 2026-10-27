@@ -21,6 +21,23 @@ In the Supabase dashboard for project `mxyikhxpzijrdrgowmxr`, open **Edge Functi
 
 Never put these values in Git, HTML/JavaScript, browser storage, or chat. The Supabase service-role key is managed by the Supabase runtime; do not replace it with a publishable key. The deployed checkout function returns a configuration error until the Stripe secrets and both Price IDs exist.
 
+## Embedded Gatebrook checkout (new)
+
+Gatebrook now has a branded, responsive `checkout.html` page. Workspace Setup saves the current business details and chosen subscription plan in **sessionStorage** (never card details), then opens that page. Stripe.js displays the secure Stripe form inside Gatebrook; subscription activation still depends on the existing **verified Stripe webhook** and server-side access checks.
+
+The new Supabase Edge Function **`gatebrook-embedded-checkout`** is deployed separately from `gatebrook-checkout` (which remains the operational Stripe-hosted fallback). It validates the authenticated user, the plan and business, and the Stripe key mode before creating a Checkout Session using Stripe's `ui_mode=embedded`. It returns only the Stripe Checkout Session `client_secret` and the **publishable** key for browser initialization; it never returns or embeds the Stripe secret key or service-role key. The frontend uses Stripe.js, not Gatebrook card fields.
+
+**One additional setting is required before the embedded form works:**
+
+1. In the Stripe Dashboard's Live mode, open **Developers → API keys** and copy the **publishable key** (starts with `pk_live_`). This is intentionally a browser-safe key; never use the live secret key here.
+2. In Supabase project `mxyikhxpzijrdrgowmxr`, go to **Edge Functions → Secrets**. Add `STRIPE_PUBLISHABLE_KEY` with that publishable key.
+3. Ensure `STRIPE_SECRET_KEY` and the publishable key belong to the same Stripe account and the same **live/test mode**.
+4. Test a non-charge launch path first: ensure the form loads, displays the selected plan and trial, and that signing out blocks checkout. Validate a Stripe **test-mode** end-to-end purchase in a separate safe environment before any live transaction. Verify the signed webhook persisted activation, then check cancellations, failures and duplicates.
+
+If the publishable key is not configured (or its mode differs from the secret key), the embedded function returns `embedded_unavailable` **before writing business or checkout records**. The page then offers the existing hosted checkout as a deliberate fallback. If a hosted Stripe session is already open for the account, it can be resumed. Errors **after** the new function has begun writing records do not automatically launch a second checkout.
+
+Important: using an embedded form **does not override Stripe's public merchant name** or banking descriptors. Configure Stripe's public business/branding settings to show Gatebrook appropriately. Do not use this checkout as evidence that production billing is fully tested.
+
 ## Stripe webhook
 
 Add a webhook destination in Stripe Live mode:
@@ -41,6 +58,7 @@ Copy the endpoint signing secret into `STRIPE_WEBHOOK_SECRET`. The webhook verif
 ## Deployed implementation
 
 - `gatebrook-checkout`: validates the Supabase access token, derives the user ID from the verified session, saves an inactive business draft, and creates Stripe-hosted Checkout.
+- `gatebrook-embedded-checkout`: creates Stripe embedded Checkout Sessions after authenticated server-side validation, with a publishable-key preflight and safe resumption of pre-existing sessions.
 - `gatebrook-stripe-webhook`: verifies signed Stripe events and persists subscription/customer/trial/period/cancellation status.
 - `gatebrook-access`: checks server-side subscription state for account routing and dashboard entry.
 - `gatebrook-billing-portal`: creates an authenticated Stripe Customer Portal session so owners can manage billing without Gatebrook storing payment details.
