@@ -246,6 +246,7 @@
     let visible = [];
     let activeIndex = -1;
     let browseAll = false;
+    let confirmedValue = "";
 
     function isOpen() { return !menu.hidden; }
     function updateExpanded(open) {
@@ -273,19 +274,21 @@
         }
       });
     }
-    function storeSelection(label) {
+    function storeSelection(label, persist = true) {
       const value = String(label || "").trim().replace(/\s+/g, " ").slice(0, 100);
       actual.value = value;
+      confirmedValue = value;
       input.value = value;
       input.setCustomValidity("");
       feedback.textContent = value ? "Selected: " + value : "";
       feedback.classList.toggle("is-selected", Boolean(value));
       close();
       // Persist immediately through the form's existing draft-saving handler.
-      actual.dispatchEvent(new Event("input", { bubbles: true }));
+      if (persist) actual.dispatchEvent(new Event("input", { bubbles: true }));
     }
     function setValue(label) {
-      storeSelection(label);
+      // Restoring a saved draft must not overwrite its other fields mid-hydration.
+      storeSelection(label, false);
     }
     function appendHeader(label) {
       const heading = document.createElement("div");
@@ -372,13 +375,15 @@
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         if (!isOpen()) open();
-        setActive(activeIndex + (event.key === "ArrowDown" ? 1 : -1));
+        setActive(activeIndex < 0
+          ? (event.key === "ArrowUp" ? visible.length - 1 : 0)
+          : activeIndex + (event.key === "ArrowDown" ? 1 : -1));
       } else if (event.key === "Enter" && isOpen()) {
         event.preventDefault();
         if (visible.length) storeSelection(visible[activeIndex >= 0 ? activeIndex : 0].label);
       } else if (event.key === "Escape" && isOpen()) {
         event.preventDefault();
-        storeSelection(actual.value);
+        storeSelection(confirmedValue);
       } else if (event.key === "Tab") {
         close();
       }
