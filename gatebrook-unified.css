@@ -277,3 +277,18 @@ html[data-gb-theme="light"] body.gb-simple-page .tabs button[aria-pressed="true"
   html body.gb-simple-page .submit,
   html body.gb-brand-activate-page .btn{transition:none;}
 }
+
+/* Prevent legacy light-theme blue emphasis from overriding the unified green. */
+html[data-gb-theme="light"] body .gb-theme-toggle.gb-theme-toggle{
+  color:#244633 !important;
+  background:#f8faf7 !important;
+  border-color:#aabbb1 !important;
+}
+html[data-gb-theme="light"] body.gb-legal-page .wrap a{color:#24563b !important;}
+html[data-gb-theme="light"] body.gb-legal-page .wrap p,
+html[data-gb-theme="light"] body.gb-legal-page .wrap li{color:#53625a !important;}
+html[data-gb-theme="light"] body.gb-legal-page .wrap .note{
+  background:#eaf3ec !important;
+  border-color:#bed3c2 !important;
+  color:#2a4f38 !important;
+}
