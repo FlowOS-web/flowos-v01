@@ -322,3 +322,38 @@
   .gb-checkout-perks{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){.gb-checkout-spinner{animation:none}}
+
+/* Missing checkout configuration is a setup notice, not a failed payment. */
+.gb-checkout-error.is-setup-notice {
+  background:#1d3024;
+  border-color:#4f7259;
+  color:#d8eddb;
+}
+.gb-checkout-error.is-setup-notice strong { color:#e4f4e8; }
+.gb-checkout-error.is-setup-notice .gb-checkout-alternative{
+  order:-1;
+  background:#244633;
+  border-color:#6a9875;
+  color:#fff;
+}
+.gb-checkout-error.is-setup-notice .gb-checkout-alternative:hover{
+  background:#305b42;
+  box-shadow:0 0 20px rgba(57,130,77,.22);
+}
+.gb-checkout-error.is-setup-notice .gb-checkout-retry{
+  background:#26372c;
+  border-color:#4f6655;
+  color:#e0eae3;
+}
+.gb-checkout-error.is-setup-notice .gb-checkout-retry:hover { background:#34493a; }
+:root[data-gb-theme="light"] .gb-checkout-error.is-setup-notice {
+  background:#e9f4eb;
+  border-color:#9cbca3;
+  color:#30543a;
+}
+:root[data-gb-theme="light"] .gb-checkout-error.is-setup-notice strong { color:#244e31; }
+:root[data-gb-theme="light"] .gb-checkout-error.is-setup-notice .gb-checkout-retry{
+  background:#f1f8f1;
+  border-color:#b7ceb8;
+  color:#244e31;
+}
