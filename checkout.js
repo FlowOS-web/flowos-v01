@@ -19,10 +19,12 @@
     visible("gbEmbeddedMount", false);
     $("gbCheckoutLoadingText").textContent = message;
   }
-  function failure(title, message, canFallback = false) {
+  function failure(title, message, canFallback = false, isSetupNotice = false) {
     visible("gbCheckoutLoading", false);
     visible("gbCheckoutError", true);
     visible("gbEmbeddedMount", false);
+    $("gbCheckoutError").classList.toggle("is-setup-notice", isSetupNotice);
+    $("gbCheckoutError").setAttribute("role", isSetupNotice ? "status" : "alert");
     $("gbCheckoutErrorTitle").textContent = title;
     $("gbCheckoutErrorText").textContent = message;
     allowHostedFallback = canFallback;
@@ -71,14 +73,14 @@
       if (!details) throw Error("Return to business setup to choose your plan.");
       await requireSession();
       if (typeof window.Stripe !== "function") {
-        failure("Embedded payment form unavailable", "Your browser couldn't load Stripe's payment form. You can use the existing secure checkout.", true);
+        failure("Stripe checkout is available", "The in-page payment form could not load. You can continue securely using Stripe's checkout page.", true, true);
         return;
       }
       const { data, error } = await client.functions.invoke("gatebrook-embedded-checkout", { body:details });
       if (error) {
         const reason = await readFailure(error);
         if (reason.code === "embedded_unavailable") {
-          failure("Secure checkout is available", "The in-page form needs one final Stripe setting. You can continue through the current checkout.", true);
+          failure("In-page checkout is not enabled yet", "Gatebrook needs its Stripe publishable key configured. Until then, you can use Stripe's secure checkout page.", true, true);
           return;
         }
         throw Error(reason.message);
