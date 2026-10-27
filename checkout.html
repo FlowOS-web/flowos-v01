@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gatebrook — Checkout</title>
+<link rel="icon" type="image/svg+xml" href="brand-mark.svg">
+<link rel="stylesheet" href="theme.css?v=1">
+<script src="theme.js?v=1"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="brand-logo.css?v=1">
+<link rel="stylesheet" href="gatebrook-unified.css?v=1">
+<link rel="stylesheet" href="checkout.css?v=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" defer></script>
+<script src="https://js.stripe.com/v3/" defer></script>
+<script src="checkout.js?v=1" defer></script>
+</head>
+<body class="gb-simple-page gb-checkout-page">
+<header class="gb-checkout-header">
+<a class="gb-checkout-logo" href="index.html" aria-label="Gatebrook homepage">
+<span class="gb-wordmark">GATEBROOK</span>
+</a>
+<a class="gb-checkout-back" href="onboarding.html">← Back to setup</a>
+</header>
+<main class="gb-checkout-main">
+<section class="gb-checkout-details" aria-labelledby="gbCheckoutTitle">
+<div class="gb-checkout-eyebrow">Your Gatebrook workspace</div>
+<h1 id="gbCheckoutTitle">Start your 7-day free trial.</h1>
+<p id="gbCheckoutIntro" class="gb-checkout-intro">A clear place for customer requests, follow-ups, and booked work.</p>
+<div class="gb-checkout-summary">
+<div class="gb-checkout-summary-label">Your subscription</div>
+<div class="gb-checkout-row"><span id="gbCheckoutPlanName">Gatebrook Monthly</span><span id="gbCheckoutPlanRate">$149 / month</span></div>
+<div class="gb-checkout-row gb-checkout-row-muted"><span>Business</span><span id="gbCheckoutBusiness">Your workspace</span></div>
+<div class="gb-checkout-row gb-checkout-row-muted"><span id="gbCheckoutOfferLabel">7-day free trial</span><span id="gbCheckoutOfferValue">Included</span></div>
+<hr class="gb-checkout-division">
+<div class="gb-checkout-row gb-checkout-total"><span>Due today</span><span id="gbCheckoutDueToday">$0.00</span></div>
+</div>
+<p class="gb-checkout-fineprint" id="gbCheckoutBillingTerms">After your 7-day trial, billing is $149/month unless you cancel. A payment method is required today.</p>
+<div class="gb-checkout-perks">
+<div class="gb-checkout-perk">✓ Customer inquiries in one place</div>
+<div class="gb-checkout-perk">✓ Organized follow-ups and bookings</div>
+<div class="gb-checkout-perk">✓ Subscription management in billing settings</div>
+</div>
+</section>
+<section class="gb-checkout-form-card" aria-labelledby="gbCheckoutPaymentHeading">
+<div class="gb-checkout-form-heading"><h2 id="gbCheckoutPaymentHeading">Payment details</h2><span class="gb-checkout-secure">Secure by Stripe</span></div>
+<div id="gbCheckoutNotice" class="gb-checkout-notice" role="status" aria-live="polite" hidden></div>
+<div id="gbCheckoutLoading" class="gb-checkout-loading" role="status" aria-live="polite"><span class="gb-checkout-spinner" aria-hidden="true"></span><span id="gbCheckoutLoadingText">Preparing secure checkout…</span></div>
+<div id="gbEmbeddedMount" aria-label="Stripe checkout" hidden></div>
+<div id="gbCheckoutError" class="gb-checkout-error" role="alert" hidden><strong id="gbCheckoutErrorTitle">Unable to open checkout</strong><span id="gbCheckoutErrorText"></span><div class="gb-checkout-actions"><button type="button" class="gb-checkout-retry" id="gbCheckoutRetry">Try again</button><button type="button" class="gb-checkout-alternative" id="gbCheckoutUseHosted" hidden>Use Stripe-hosted checkout</button></div></div>
+<div class="gb-checkout-trust">Payments are processed by Stripe. Gatebrook does not store payment card information. <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms</a> · <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a>.</div>
+</section>
+</main>
+<footer class="gb-checkout-footer">GATEBROOK · Secure checkout powered by Stripe</footer>
+</body>
+</html>
