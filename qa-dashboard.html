@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Gatebrook QA Dashboard | Sandbox access test</title>
+<link rel="icon" type="image/svg+xml" href="brand-mark.svg">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#0c130f,#1b2b20 75%,#0b100d);font:15px "Instrument Sans",Arial,sans-serif;color:#edf5ee}
+main{max-width:1000px;margin:auto;padding:38px 22px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:12px}
+a{color:#bfe3c5;text-decoration:none}
+h1{font-size:clamp(33px,6vw,53px);letter-spacing:-.065em;margin:30px 0 18px}
+p{color:#b3c7b7;line-height:1.7}
+.tag{display:inline-block;border:1px solid #609f72;background:#1e3f29;color:#bff5cc;padding:8px 12px;border-radius:100px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.panel{border:1px solid #3a6246;background:#17251b;border-radius:20px;padding:27px;margin-top:25px}
+.status{font-size:17px;color:#d6f7dd;font-weight:750}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.tile{background:#0d1711;border:1px solid #344e3c;border-radius:13px;padding:19px}
+.tile strong{display:block;font-size:22px;letter-spacing:-.035em}.tile span{display:block;color:#a3b6a8;font-size:12px;margin-top:7px}
+button{color:white;background:#2d6740;border:1px solid #6ba378;padding:12px 18px;border-radius:10px;cursor:pointer;font:inherit}
+#qaUnlocked[hidden],#qaLocked[hidden]{display:none!important}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<nav><a href="index.html"><strong>Gb · Gatebrook</strong></a><a href="qa.html">Back to QA checkout</a></nav>
+<h1>Sandbox dashboard</h1>
+<span class="tag">Testing only — production access unchanged</span>
+<div class="panel" id="qaLocked">
+<h2 id="qaHeading">Verifying QA subscription…</h2>
+<p id="qaMessage" role="status" aria-live="polite">This QA preview is available only after Stripe confirms a sandbox trial or subscription through the signed test webhook.</p>
+<button type="button" id="qaCheck">Check again</button>
+</div>
+<div id="qaUnlocked" hidden>
+<div class="panel">
+<span class="status">✓ Sandbox access verified</span>
+<h2 id="qaBusiness">QA Workspace</h2>
+<p>Your Stripe sandbox subscription is confirmed and QA-only access is active. The live Gatebrook workspace remains separate.</p>
+<div class="grid">
+<div class="tile"><strong id="qaPlan">Trial</strong><span>Sandbox plan</span></div>
+<div class="tile"><strong id="qaState">Trialing</strong><span>Verified subscription state</span></div>
+<div class="tile"><strong id="qaEnd">—</strong><span>Trial or billing period ends</span></div>
+</div>
+</div>
+<div class="panel">
+<h2>Dashboard gate passed</h2>
+<p>This is a controlled access preview. It intentionally does not read or write live customer requests, revenue, or production business data. After we verify this gate, the same checks can be exercised in a fully isolated staging deployment.</p>
+<a href="qa.html">Return to QA tools</a>
+</div>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script>
+(()=>{
+  const db=window.supabase.createClient("https://mxyikhxpzijrdrgowmxr.supabase.co","sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09");
+  const $=id=>document.getElementById(id);
+  async function check(){
+    $("qaCheck").disabled=true;
+    try{
+      const {data:{user}}=await db.auth.getUser();
+      if(!user){$("qaHeading").textContent="Sign in required";$("qaMessage").textContent="Sign in at Gatebrook first, then return here.";return}
+      const {data,error}=await db.functions.invoke("gatebrook-qa-status",{method:"GET"});
+      if(error||!data?.sandbox)throw Error("Could not verify Gatebrook QA status.");
+      if(!data.allowed){
+        $("qaHeading").textContent="QA subscription required";
+        $("qaMessage").textContent="No active, verified sandbox subscription has been recorded. Return to QA checkout and finish the test first.";
+        return;
+      }
+      $("qaBusiness").textContent=data.workspace_name||"QA Workspace";
+      $("qaPlan").textContent=data.plan==="annual"?"Annual":data.plan==="trial"?"7-day trial":"Monthly";
+      $("qaState").textContent=data.status||"Active";
+      const end=data.status==="trialing"?data.trial_end:data.current_period_end;
+      $("qaEnd").textContent=end?new Date(end).toLocaleDateString():"Not available";
+      $("qaLocked").hidden=true;$("qaUnlocked").hidden=false;
+    }catch(e){$("qaHeading").textContent="Unable to verify QA access";$("qaMessage").textContent=e.message||"Please try again."}
+    finally{$("qaCheck").disabled=false}
+  }
+  $("qaCheck").addEventListener("click",check);check();
+})();
+</script>
+</body>
+</html>
