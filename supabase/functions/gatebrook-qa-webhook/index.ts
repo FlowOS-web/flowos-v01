@@ -121,7 +121,7 @@ Deno.serve(async req=>{
       const id=subscriptionIdFromInvoice(obj);
       if(id)result=await persistVerifiedSubscription(id);
     }
-    if(result==="pending")return respond(202,{received:true,pending:true});
+    if(result==="pending")return respond(503,{error:"Sandbox payment pending; retry after Stripe confirms payment"});
     if(result==="updated"){
       const {error:saveEvent}=await db.from("gatebrook_qa_events").insert({
         event_id:event.id,event_type:event.type
