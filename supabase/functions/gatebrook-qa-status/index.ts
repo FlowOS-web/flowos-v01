@@ -21,7 +21,7 @@ Deno.serve(async req=>{
   if(req.method==="OPTIONS") return response(200,{ok:true},origin);
   if(req.method!=="GET") return response(405,{error:"Method not allowed"},origin);
   if(origin && !allowedOrigins.has(origin)) return response(403,{error:"Untrusted origin"},origin);
-  const token=req.headers.get("authorization")?.replace(/^Bearer\\s+/i,"");
+  const token=req.headers.get("authorization")?.replace(/^Bearer\s+/i,"");
   if(!token) return response(401,{error:"Sign in to test Gatebrook QA."},origin);
   const {data:{user},error:authError}=await db.auth.getUser(token);
   if(authError||!user||user.is_anonymous) return response(401,{error:"Sign in again to continue."},origin);
