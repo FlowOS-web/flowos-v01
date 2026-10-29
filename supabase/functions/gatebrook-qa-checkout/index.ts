@@ -71,14 +71,41 @@ Deno.serve(async req=>{
       old=response.value;
     }catch{return reply(503,{error:"Could not contact Stripe to verify the QA checkout."},origin)}
     if(old.livemode!==false)return reply(409,{error:"Unsafe checkout mode detected."},origin);
-    if(old.status==="complete")return reply(409,{error:"Checkout has completed; check the QA subscription status."},origin);
-    if(old.status==="open"){
-      if(prior?.plan!==plan)return reply(409,{error:"A checkout for another plan is open. Let it expire before changing plans."},origin);
-      if(old.ui_mode==="embedded_page"&&typeof old.client_secret==="string")
-        return reply(200,{mode:"embedded",client_secret:old.client_secret,publishable_key:STRIPE_PUBLIC_TEST,reused:true},origin);
-      return reply(409,{error:"An earlier checkout is still open. Let it expire before retrying."},origin);
+    // Never expire a checkout we cannot prove belongs to this exact tester and QA workspace.
+    if(old.id!==oldSessionId||!oldSessionId.startsWith("cs_test_")||
+       old.mode!=="subscription"||old.ui_mode!=="embedded_page"||
+       old.metadata?.qa_env!=="gatebrook_qa"||
+       old.metadata?.qa_owner_user_id!==user.id||
+       old.metadata?.qa_workspace_id!==workspaceId||
+       old.metadata?.qa_plan!==prior?.plan||
+       old.client_reference_id!==user.id) {
+      return reply(409,{error:"Existing checkout could not be verified. No changes were made."},origin);
     }
-    if(old.status!=="expired")return reply(409,{error:"Existing checkout has an unexpected status."},origin);
+    if(old.status==="complete"||old.subscription||
+       (old.payment_status&&old.payment_status!=="unpaid")) {
+      return reply(409,{error:"The previous checkout may have completed. Check QA status before retrying."},origin);
+    }
+    if(old.status==="open"){
+      if(prior?.plan===plan&&typeof old.client_secret==="string")
+        return reply(200,{mode:"embedded",client_secret:old.client_secret,publishable_key:STRIPE_PUBLIC_TEST,reused:true},origin);
+      // A different plan was selected. Only the unpaid, open, verified QA session can
+      // be expired. This closes the old form so a new sandbox trial can be started.
+      if(prior?.plan===plan)
+        return reply(409,{error:"Unable to reopen the existing checkout. Try again later."},origin);
+      try{
+        const expired=await stripe("checkout/sessions/"+encodeURIComponent(oldSessionId)+"/expire",{
+          method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"}
+        });
+        if(!expired.ok||expired.value.livemode!==false||
+           expired.value.id!==oldSessionId||expired.value.status!=="expired") {
+          return reply(409,{error:"Unable to safely close the previous test checkout. Check its status before retrying."},origin);
+        }
+      }catch{
+        return reply(503,{error:"Could not close the previous sandbox checkout. Please retry."},origin);
+      }
+    }else if(old.status!=="expired"){
+      return reply(409,{error:"Existing checkout has an unexpected status."},origin);
+    }
   }
   const form=new URLSearchParams();
   form.set("mode","subscription");
