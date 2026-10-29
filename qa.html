@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Gatebrook QA | Secure sandbox checkout</title>
+<meta name="description" content="Gatebrook QA-only Stripe checkout testing. Sandbox payments only.">
+<link rel="icon" type="image/svg+xml" href="brand-mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--page:#090e0b;--panel:#151d18;--panel2:#1c2820;--line:#355342;--text:#eef5ef;--muted:#a5b9ac;--green:#65c986}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font-family:"Instrument Sans",Arial,sans-serif;background:radial-gradient(ellipse 850px 500px at 62% -160px,#254d34 0%,transparent 80%),linear-gradient(170deg,#080b09 0%,#131b16 70%,#0c110d 100%)}
+button,input,a{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.6;cursor:not-allowed}
+a{color:#bce4c5}
+header{display:flex;align-items:center;justify-content:space-between;max-width:1080px;padding:24px 22px;margin:auto;gap:20px}
+.brand{display:inline-flex;align-items:center;gap:12px;color:#f3f5f3;text-decoration:none;font-size:19px;font-weight:800;letter-spacing:-.055em}
+.symbol{display:grid;place-items:center;background:#193824;color:#78df9a;border:1px solid #477b56;border-radius:12px;width:42px;height:42px;font-weight:800;letter-spacing:-.08em}
+.eyebrow{font-size:11px;letter-spacing:.19em;font-weight:800;text-transform:uppercase;color:#83c995}
+.top-link{font-size:13px;color:#c9d7ce;text-decoration:none}
+.badge{display:inline-flex;align-items:center;gap:7px;border:1px solid #609675;background:#1d3527;color:#b7f6c8;border-radius:100px;padding:7px 13px;font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.badge:before{content:"";width:7px;height:7px;border-radius:100%;background:#82e3a4;box-shadow:0 0 12px #82e3a4}
+main{max-width:1080px;margin:0 auto;padding:44px 22px 100px}
+h1{font-size:clamp(37px,7vw,67px);letter-spacing:-.065em;line-height:1.08;margin:20px 0 20px;max-width:760px}
+.intro{font-size:16px;line-height:1.7;color:var(--muted);max-width:660px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.68fr);gap:24px;margin-top:36px;align-items:start}
+.panel{background:linear-gradient(155deg,rgba(30,43,35,.93),rgba(16,23,19,.98));border:1px solid #3b5844;border-radius:22px;padding:29px;box-shadow:0 24px 90px rgba(0,0,0,.22)}
+.panel h2{font-size:23px;letter-spacing:-.045em;margin:0 0 8px}
+.panel p{line-height:1.6;color:var(--muted);font-size:14px}
+label.form-label{font-size:12px;font-weight:700;color:#c6ddca;display:block;margin:24px 0 10px}
+input{background:#0d1410;border:1px solid #42604a;padding:14px 15px;border-radius:11px;color:#f3f7f2;width:100%;outline:none}
+input:focus{border-color:#83d39a;box-shadow:0 0 0 3px rgba(105,207,137,.14)}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:24px 0}
+.plan{padding:17px 10px;display:flex;flex-direction:column;gap:8px;min-height:112px;text-align:left;border:1px solid #395744;background:#141d16;color:#e8f2e9;border-radius:13px}
+.plan strong{font-size:15px}
+.plan small{font-size:11px;color:#93a999;line-height:1.5}
+.plan.selected,.plan[aria-pressed="true"]{background:#22412d;border-color:#7bc892;box-shadow:inset 0 0 0 1px rgba(114,204,139,.3)}
+.primary{background:#265b38;border:1px solid #549767;color:white;font-weight:700;border-radius:11px;padding:14px 18px;transition:.2s background}
+.primary:hover{background:#31754a}
+.secondary{background:transparent;border:1px solid #56705c;border-radius:11px;padding:11px 15px;color:#d5e4d8}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.wide{width:100%;padding:15px}
+.status{margin:20px 0;border:1px solid #415d48;background:#192a1e;color:#d6f2dc;padding:15px 17px;border-radius:12px;line-height:1.6;font-size:13px}
+.status[data-kind="error"]{background:#371f23;color:#ffced1;border-color:#87555b}
+.status[data-kind="warn"]{background:#342d1e;color:#f9dfaa;border-color:#7a6947}
+.sidebar{display:grid;gap:20px}
+.numbers{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:20px}
+.number{background:#121d15;border:1px solid #354b3b;border-radius:12px;padding:15px}
+.number strong{display:block;font-size:23px;letter-spacing:-.045em}
+.number span{font-size:11px;color:#adc2b2;line-height:1.45}
+.points{margin:15px 0 0;padding-left:20px;font-size:13px;line-height:1.95;color:#bdcfc1}
+hr{border:0;border-top:1px solid #3a5140;margin:24px 0}
+#qaStripeMount{margin-top:20px;min-height:280px}
+#qaPaymentContainer{margin-top:24px}
+#qaPaymentContainer[hidden],#qaAuth[hidden],#qaVerified[hidden],#qaSelect[hidden],#qaNotice[hidden],#qaAccountLine[hidden]{display:none!important}
+.muted{color:#a9bfad;font-size:12px;line-height:1.6}
+.footer{margin-top:48px;color:#91ad97;font-size:12px}
+@media(max-width:790px){.layout{grid-template-columns:1fr}main{padding-top:20px}.plans{grid-template-columns:1fr}.plan{min-height:74px}header{padding:16px 20px}.panel{padding:21px}}
+</style>
+</head>
+<body>
+<header>
+<a class="brand" href="index.html"><span class="symbol">Gb</span>Gatebrook</a>
+<a class="top-link" href="index.html">Back to Gatebrook</a>
+</header>
+<main>
+<span class="badge">QA Sandbox — no real charges</span>
+<h1>Test the full checkout.<br><span style="color:#80d79a">Pay absolutely nothing.</span></h1>
+<p class="intro">This is Gatebrook's isolated Stripe sandbox. We can verify our seven-day trial, recurring billing and QA-only workspace access without touching live subscriptions.</p>
+<div class="layout">
+<section class="panel">
+<h2>Subscription checkout</h2>
+<p>Sign in with your approved test account. All payment fields are provided securely by Stripe.</p>
+<p class="muted" id="qaAccountLine" hidden>Signed in: <strong id="qaAccount"></strong></p>
+<div id="qaAuth" hidden>
+<p>You need to sign in to the existing Gatebrook test account first.</p>
+<a class="primary" style="display:inline-block;text-decoration:none" href="account.html">Sign in to Gatebrook</a>
+<p class="muted">Then return to this QA page. You don't need to create a new account.</p>
+</div>
+<div id="qaSelect" hidden>
+<label class="form-label" for="qaBusinessName">Test workspace name</label>
+<input id="qaBusinessName" value="J&amp;J Plumbing QA" maxlength="100" autocomplete="off" required>
+<div class="plans" role="group" aria-label="Choose sandbox subscription plan">
+<button type="button" class="plan selected" aria-pressed="true" data-qa-plan="trial"><strong>7-day trial</strong><small>$0 today, then $149/mo</small></button>
+<button type="button" class="plan" aria-pressed="false" data-qa-plan="monthly"><strong>Monthly</strong><small>$149 every month</small></button>
+<button type="button" class="plan" aria-pressed="false" data-qa-plan="annual"><strong>Annual</strong><small>$1,490 every year</small></button>
+</div>
+<button type="button" class="primary wide" id="qaSubmit">Start free test trial</button>
+<p class="muted">All prices are simulated in Stripe's <strong>Gatebrook QA</strong> sandbox. Never enter a real payment card.</p>
+</div>
+<div id="qaNotice" class="status" role="status" aria-live="polite" hidden></div>
+<div class="actions"><button class="secondary" id="qaRefresh" type="button">Check status</button><a class="top-link" href="billing.html">Live billing status</a></div>
+<div id="qaPaymentContainer" hidden>
+<hr>
+<h2>Secure test payment details</h2>
+<p class="muted">Use Stripe's test card: <strong>4242 4242 4242 4242</strong>, any future expiry and any three-digit CVC. Test payment processing does not move money.</p>
+<div id="qaStripeMount"></div>
+</div>
+<div id="qaVerified" hidden>
+<hr>
+<h2 id="qaStatusValue">Sandbox subscription active</h2>
+<div class="numbers">
+<div class="number"><strong id="qaStatusPlan">Trial</strong><span>Subscription option</span></div>
+<div class="number"><strong>QA only</strong><span>Access environment</span></div>
+</div>
+<p><strong id="qaWorkspaceName">QA Workspace</strong></p>
+<p class="muted">Subscription period/trial ends: <span id="qaStatusUntil">—</span></p>
+<a class="primary" style="display:inline-block;text-decoration:none" href="qa-dashboard.html">Open QA dashboard</a>
+</div>
+</section>
+<aside class="sidebar">
+<div class="panel">
+<h2>How this test works</h2>
+<ol class="points">
+<li>Start a subscription in the sandbox.</li>
+<li>Complete the secure test checkout.</li>
+<li>Stripe sends a signed sandbox webhook.</li>
+<li>Gatebrook verifies the subscription in its separate QA records.</li>
+<li>The QA-only dashboard becomes available.</li>
+</ol>
+</div>
+<div class="panel">
+<span class="eyebrow">Test vs production</span>
+<div class="numbers">
+<div class="number"><strong>$0</strong><span>Real funds moved</span></div>
+<div class="number"><strong>Isolated</strong><span>QA subscriptions</span></div>
+</div>
+<p>This testing page cannot activate the production dashboard or create a live Stripe payment. The normal Gatebrook account and live billing flow are separate.</p>
+</div>
+</aside>
+</div>
+<p class="footer">Gatebrook QA · Test only · Payment forms provided by Stripe · No actual card numbers stored by Gatebrook.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="qa.js?v=1"></script>
+</body>
+</html>
