@@ -1,67 +1,95 @@
-# Gatebrook checkout — zero-charge test kit
+# Gatebrook QA — isolated sandbox subscription test
 
-**Prepared:** 2026-10-29  
-**Target:** a dedicated Stripe sandbox and a separate Gatebrook staging environment.  
-**Status:** mock smoke tests prepared and exercised. Real Stripe sandbox checkout is **not yet connected**.
+**Updated:** October 29, 2026  
+**Implementation:** Dedicated QA functions and tables in the existing Supabase project, separate Stripe **Gatebrook QA** sandbox.  
+**Status:** Code deployed; sandbox webhook created; **three QA secrets must still be entered in Supabase**.
 
-> SAFETY: Never enter a test card on `https://gatebrook.work/checkout.html` while that site uses Stripe Live keys. The real website currently points to the production Supabase project. Do not change production secrets to test values.
+## QA links
 
-## What is already in place
+- [QA checkout page](https://gatebrook.work/qa.html)
+- [QA dashboard preview](https://gatebrook.work/qa-dashboard.html)
+- [Supabase Edge Functions](https://supabase.com/dashboard/project/mxyikhxpzijrdrgowmxr/functions)
+- [Stripe sandboxes](https://dashboard.stripe.com/sandboxes)
+- [Stripe account/API keys](https://dashboard.stripe.com/apikeys)
 
-- `tests/checkout-flow.test.cjs` has 12 zero-network checkout tests:
-  - 7-day trial ($0 today, then $149/month).
-  - $149 monthly and $1,490 annual plan summaries.
-  - Embedding Stripe's payment UI with mock `pk_test_` credentials.
-  - Missing embedded configuration offers an explicit hosted-checkout fallback, with no automatic redirect.
-  - Legacy hosted-session responses do not automatically send customers away.
-  - Unsigned-in customers cannot create a checkout session.
-  - Stripe owns card-entry fields; Gatebrook doesn't collect the card number.
-  - Server-side auth/plan/mode guards exist.
-  - Webhook signature checks, subscription state, and database access enforcement remain in the backend.
-- Run checks with **Node 20+**: `node --test tests/checkout-flow.test.cjs`.
-- These are **mock/static smoke tests**, not real Stripe payments, real webhook deliveries, or complete end-to-end tests.
+**Production stays untouched:** The regular Gatebrook site still uses the original live Stripe credentials and live billing functions. No sandbox subscription can unlock the production dashboard. This setup shares only the Supabase Auth user directory with production; it does **not** offer the isolation of a completely separate staging Supabase project.
 
-## Remaining setup: isolated live-simulation environment
+## Already configured
 
-1. **Stripe:** In the Stripe Dashboard account picker choose **Sandboxes → Create sandbox** (suggested name: `Gatebrook QA`). [Stripe sandbox documentation](https://docs.stripe.com/sandboxes/dashboard/manage). Do not choose a live account for tests. This separate sandbox has no real funds movement.
-2. **Catalog:** In that sandbox, create a `Gatebrook QA` product and recurring **$149 USD monthly** and **$1,490 USD annual** prices. Copy its *test* Price IDs, or verify any copied prices are in the sandbox.
-3. **Supabase:** Use a **separate project** (for example `gatebrook-qa`) for test users, test subscriptions and webhook deliveries. Do not alter live Supabase secrets. Creating a new Supabase project may have a cost/plan limit; check that before provisioning.
-4. **Staging frontend:** Publish a separate hostname/origin (for example `qa.gatebrook.work`) with a **staging-specific Supabase URL and publishable key**. Never reuse the production project's client config. The current frontend hardcodes the production Supabase URL; copying it unchanged to staging is **not safe**.
-5. **Edge functions:** Deploy copies of the current checkout, embedded checkout, Stripe webhook, access and billing-portal functions to staging. The current checkout functions hardcode the production `SITE` / allowed origins; **update those values in staging** before running any real test. Do not reuse live webhook signing secrets or Stripe keys.
-6. **Staging secrets (no values in the repository or chat):** `STRIPE_SECRET_KEY` (sandbox `sk_test_`), `STRIPE_PUBLISHABLE_KEY` (matching sandbox `pk_test_`), `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, and `STRIPE_WEBHOOK_SECRET` from a webhook destination in the **same sandbox**, aimed at the **staging** webhook function. Ensure authentication redirect URLs also point to staging.
-7. **Connect sandbox to ChatGPT:** After creating it, add that sandbox to the connected Stripe accounts so tests can be inspected from here. The current Stripe connection exposes only one **live** account; it cannot be used for test API calls.
-8. **Release guard:** Before publishing staging, verify `pk_test_` and `sk_test_` are paired, staging calls only the staging Supabase project, Stripe sessions are `livemode:false`, and no page redirects to production.
-
-## Real sandbox test cases and expected outcomes
-
-| Case | Action | Expected result |
+| Component | Identifier | State |
 |---|---|---|
-| Trial signup | Create a fresh staging account and choose 7-day free trial | Stripe test Checkout due today $0; subscription `trialing`; verified sandbox webhook activates **staging** dashboard |
-| Trial expiration | Use a Stripe **test clock** to advance beyond 7 days | Sandbox invoice for $149 is generated; successful payment updates subscription and dashboard correctly |
-| Monthly | Choose $149/month with a test card | Simulated $149 charge; active monthly subscription after signed webhook |
-| Annual | Choose $1,490/year with a test card | Simulated $1,490 charge; correct annual recurrence |
-| Declined card | Use Stripe's documented declined-payment test method | No paid access granted if payment fails |
-| Cancel trial | Cancel before trial ends | No first paid invoice; access ends per cancellation policy |
-| Cancel paid plan | Set cancel-at-period-end on a paid subscription | Access until paid period expires, then no access |
-| Duplicate event | Deliver the same signed webhook event twice | Event is processed once; no duplicate subscriptions |
-| Invalid signature | Deliver a webhook request with an invalid signature | HTTP 400; no database changes |
-| Unauthenticated | Visit staging dashboard without a valid session | No business details or subscription access |
-| Session retry | Reopen checkout without completing payment | No duplicate subscriptions or unexpected live Stripe redirect |
+| Stripe account | Gatebrook QA (`acct_1UW2IXH6B0zVSPUK`) | Connected, sandbox mode |
+| QA monthly price | `price_1UW2J0H6B0zVSPUKp4kjPn1z` | $149/month test only |
+| QA annual price | `price_1UW2IzH6B0zVSPUKLnfJI8nj` | $1,490/year test only |
+| Sandbox webhook | `we_1UW2i7H6B0zVSPUKNRm4cRlN` | Enabled, requires signing secret configured in Supabase |
+| Webhook URL | `https://mxyikhxpzijrdrgowmxr.supabase.co/functions/v1/gatebrook-qa-webhook` | Deployed |
+| Checkout API | `gatebrook-qa-checkout` | Deployed |
+| Status API | `gatebrook-qa-status` | Deployed |
+| Webhook API | `gatebrook-qa-webhook` | Deployed |
+| QA database | `gatebrook_qa_testers/workspaces/subscriptions/events` | Created, RLS enabled, no direct public or signed-in table grants |
+| QA tester | Existing confirmed account `jp920975@gmail.com` | Allowlisted |
 
-Stripe's successful Visa *test only* is `4242 4242 4242 4242`; use a future expiry and any 3-digit CVC. [Stripe testing](https://docs.stripe.com/testing). **Never use it in a live checkout**.
+The prior sandbox-hosted trial `sub_1UW2XNH6B0zVSPUK5cZuJ8TV` is separate from this QA integration: it has no QA workspace metadata and cannot activate the new QA dashboard. It is left unchanged.
 
-[Stripe test clocks](https://docs.stripe.com/billing/testing) simulate renewal/trial time without waiting days. Confirm asynchronous webhook deliveries have succeeded before judging staging access state.
+## Action required — add exactly three secrets
 
-## Stop/go criteria
+1. In the **Gatebrook QA sandbox**, go to Developers / API keys and copy the **test** publishable key `pk_test_...` and **test** secret key `sk_test_...` (or a suitably scoped `rk_test_...` restricted key).
+2. In the **Gatebrook QA sandbox**, find **Workbench → Webhooks →** the Gatebrook QA endpoint with ID `we_1UW2i7H6B0zVSPUKNRm4cRlN`. Reveal that endpoint's signing secret `whsec_...`. Do **not** use the signing secret from Gatebrook Live.
+3. In Supabase project `mxyikhxpzijrdrgowmxr`, open **Edge Functions → Secrets** and create or update:
 
-- [x] Mock checkout cases written and exercised with no external payment calls.
-- [ ] Stripe QA sandbox exists and is connected.
-- [ ] Staging Supabase and site are isolated from production.
-- [ ] Sandbox webhook endpoint is signed, configured, and observed delivering successful events.
-- [ ] Trial, monthly, and annual checkouts succeed with sandbox credentials only.
-- [ ] Failure, cancellation, event replay, expired trial, and direct URL access are tested.
-- [ ] The remaining risk-side Stripe events and Stripe Tax obligations are reviewed before live launch.
+| Secret name in Supabase | Value to paste into Supabase |
+|---|---|
+| `GATEBROOK_QA_STRIPE_SECRET_KEY` | The Gatebrook QA sandbox `sk_test_...` or `rk_test_...` |
+| `GATEBROOK_QA_STRIPE_PUBLISHABLE_KEY` | The same sandbox's `pk_test_...` |
+| `GATEBROOK_QA_WEBHOOK_SECRET` | The Gatebrook QA webhook's `whsec_...` |
 
-**Nothing in this test kit creates a live Stripe customer, opens a real Checkout Session, charges a card, or modifies a production subscription.**
+**Never paste any secret key or signing secret into ChatGPT, GitHub, a web page, or a screenshot.** The QA functions check for test-mode prefixes and will refuse live keys. The sandbox Price IDs are already configured server-side; do not add new prices.
 
-One more live-launch item: assess [Stripe Tax for subscription payments](https://docs.stripe.com/billing/taxes/collect-taxes) and applicable registrations before enabling automatic tax. Merely toggling a tax setting does not establish a registration.
+If using a restricted API key, permit the sandbox Checkout Session and Subscription read/write operations needed by the functions. The webhook function also reads subscriptions and Checkout Sessions.
+
+## First connected test
+
+1. Sign in to Gatebrook with the allowlisted tester account (use the normal Account page if necessary).
+2. Go to [QA checkout](https://gatebrook.work/qa.html), select **7-day trial**, and choose **Start free test trial**.
+3. In Stripe's embedded form, enter only the test Visa `4242 4242 4242 4242`, a future expiration and any 3-digit CVC. Stripe's card testing guide: https://docs.stripe.com/testing
+4. Finish checkout; the return URL is `qa.html?checkout=success`.
+5. Stripe sends the signed sandbox webhook to `gatebrook-qa-webhook`. On [QA checkout](https://gatebrook.work/qa.html), use **Check status** after the webhook has been delivered.
+6. Confirm **Trial active** and open the [QA dashboard](https://gatebrook.work/qa-dashboard.html).
+7. Check Supabase `public.gatebrook_qa_subscriptions` for `status='trialing'` and `stripe_subscription_id`. Verify the production `public.gatebrook_subscriptions` record count/status is unchanged.
+
+If checkout shows **"Sandbox checkout is not configured yet"**, check the three secret names and make sure the keys are from the same Gatebrook QA sandbox. If a customer session succeeds but the QA dashboard stays locked, look at the sandbox webhook's delivery logs and Supabase `gatebrook-qa-webhook` function logs.
+
+## Boundaries and security notes
+
+- QA functions read/write only the `gatebrook_qa_*` tables. The production dashboard continues to check `gatebrook_subscriptions`; QA does not bypass it.
+- QA requires a signed-in allowlisted tester before checkout; never use Supabase `user_metadata` for authorization.
+- The webhook independently verifies its HMAC signing secret, `livemode:false`, the Stripe subscription, the matching QA checkout session, workspace ownership, and the tester allowlist before updating state.
+- Unpaid sessions do not grant access. Duplicate processed events are recorded in `gatebrook_qa_events`.
+- The isolated QA tables use RLS **without client-side policies on purpose** (default deny), and ordinary authenticated clients have no direct SELECT privilege. Server-side service-role functions enforce all access.
+- The Stripe test card is valid **only in sandbox**. Never use it on the live `checkout.html` page.
+- Test-only QA dashboard content is an **access gate preview**, not the full production service-business dashboard.
+- No production test or real payment has been performed as part of this new Gatebrook QA flow.
+
+## Verification completed
+
+- QA database tables exist; RLS and forced RLS are on; `anon` and `authenticated` have no direct read access; `service_role` can read.
+- Three QA functions are deployed in Supabase.
+- Stripe accepted the exact `ui_mode=embedded_page` + seven-day trial parameters in sandbox and returned a `cs_test_...` session with client secret, with $0 due.
+- `tests/qa-isolation.test.cjs`: **12/12 mock/static checks passed**.
+- `tests/checkout-flow.test.cjs`: **12/12 mock/static checks passed**.
+- Live Stripe product, prices and existing subscription records were not modified.
+- **Pending:** actual in-page QA checkout, signed test webhook delivery, access-unlock verification, trial renewal and cancellation behavior.
+
+Run source checks with Node.js 20+:
+
+```bash
+node --test tests/qa-isolation.test.cjs tests/checkout-flow.test.cjs
+```
+
+## After first connected test
+
+Verify failed/declined simulated payments, trial expiry (Stripe test clocks), paid-period cancellation, duplicate webhooks and access expiry. Then test the real production dashboard flow in a fully separate staging project before public launch. Review Stripe's [subscription tax guidance](https://docs.stripe.com/billing/taxes/collect-taxes) and tax registration requirements before enabling automatic collection on live billing.
+
+## Remaining separate production security findings
+
+Supabase's security advisor reports unrelated existing warnings: public `SECURITY DEFINER` function access and leaked-password protection disabled. These weren't changed for QA; review them before launch: https://supabase.com/docs/guides/database/database-linter.
