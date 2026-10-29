@@ -15,6 +15,16 @@ Deno.serve(async(req)=>{
  if(!membership)return reply(200,{allowed:false,reason:"setup_required",next:"onboarding.html"});
  const {data:sub,error:subError}=await db.from("gatebrook_subscriptions").select("status,current_period_end,cancel_at_period_end,trial_end,plan").eq("business_id",membership.business_id).maybeSingle();
  if(subError)return reply(503,{error:"Could not check subscription status"});
+ // Preserve access to the seeded Northstar demo workspace, which predates billing
+ // and intentionally has no Stripe subscription record. This exception is scoped
+ // to the active demo slug; all other businesses remain subscription-gated.
+ if(!sub){
+   const {data:business,error:businessError}=await db.from("businesses").select("slug,active").eq("id",membership.business_id).maybeSingle();
+   if(businessError)return reply(503,{error:"Could not check workspace status"});
+   if(business?.active===true&&business.slug==="flowos-demo"){
+     return reply(200,{allowed:true,business_id:membership.business_id,role:membership.role,status:"demo",plan:null,trial_end:null,current_period_end:null,cancel_at_period_end:false});
+   }
+ }
  const periodValid=!sub?.current_period_end||Date.parse(sub.current_period_end)>Date.now();
  const allowed=!!sub&&["active","trialing"].includes(sub.status)&&periodValid;
  if(!allowed)return reply(200,{allowed:false,reason:sub?.status||"setup_required",next:sub&&sub.status!=="incomplete"&&sub.status!=="incomplete_expired"?"billing.html":"onboarding.html",status:sub?.status??null});
