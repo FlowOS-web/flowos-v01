@@ -7,7 +7,7 @@ const URL=Deno.env.get("SUPABASE_URL")!;
 const SERVICE=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND=Deno.env.get("RESEND_API_KEY")||"";
 const FROM=Deno.env.get("BILLING_FROM_EMAIL")||
- Deno.env.get("FROM_EMAIL")||"Gatebrook <onboarding@resend.dev>";
+ Deno.env.get("FROM_EMAIL")||"";
 const db=createClient(URL,SERVICE,{auth:{persistSession:false,autoRefreshToken:false}});
 const origins=new Set(["https://gatebrook.work","https://flowos-web.github.io"]);
 const types=new Set(["trial_welcome","trial_3_day","trial_1_day","trial_converted","trial_expired","reactivated"]);
@@ -38,7 +38,7 @@ Deno.serve(async req=>{
  const kind=body?.kind;
  if(typeof kind!=="string"||!types.has(kind))
   return result(400,{error:"Choose a valid example email."},origin);
- if(!RESEND)return result(503,{error:"The Gatebrook email provider is not configured."},origin);
+ if(!RESEND||!FROM||FROM.includes("@resend.dev"))return result(503,{error:"A verified Gatebrook email sender is not configured."},origin);
  const day=new Date().toISOString().slice(0,10);
  const existing=await db.from("gatebrook_billing_email_previews")
   .select("status,attempts").eq("user_id",user.id).eq("kind",kind)
