@@ -52,7 +52,7 @@ test("final reminders explicitly say how to avoid the first charge",()=>{
   const f=render();
   for(const kind of ["trial_3_day","trial_1_day"]){
     const item=f(kind,{businessName:"QA",trialEnd:"2026-11-06T00:02:50Z",plan:"monthly"});
-    assert.match(item.text,/cancel before your trial ends/i);
+    assert.match(item.text,/cancel before (?:your|the) trial ends/i);
     assert.match(item.text,/\$149\/month/);
   }
 });
