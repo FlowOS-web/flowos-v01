@@ -48,7 +48,7 @@
       show("qaSelect",false);show("qaAuth",false);show("qaVerified",true);
       show("qaPaymentContainer",false);
       $("qaStatusValue").textContent=data.status==="trialing"?"Trial active":"Sandbox subscription active";
-      $("qaStatusPlan").textContent=data.plan==="annual"?"Annual":data.plan==="trial"?"7-day trial":"Monthly";
+      $("qaStatusPlan").textContent=data.plan==="annual"?"Annual":data.plan==="trial"&&data.status==="trialing"?"7-day trial":"Monthly";
       $("qaWorkspaceName").textContent=data.workspace_name||"QA Workspace";
       const date=data.status==="trialing"?data.trial_end:data.current_period_end;
       $("qaStatusUntil").textContent=date?new Date(date).toLocaleString():"Not available";
