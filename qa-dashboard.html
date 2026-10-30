@@ -27,7 +27,7 @@ select{background:#0d1711;border:1px solid #54705c;color:#eaf7ec;border-radius:1
 </head>
 <body>
 <main>
-<nav><a href="index.html"><strong>Gb · Gatebrook</strong></a><a href="qa.html">Back to QA checkout</a></nav>
+<nav><a href="index.html"><strong>Gb · Gatebrook</strong></a><a href="qa-dashboard.html">Main QA workspace</a></nav>
 <h1>Sandbox dashboard</h1>
 <span class="tag">Testing only — production access unchanged</span>
 <div class="panel" id="qaLocked">
@@ -76,16 +76,37 @@ select{background:#0d1711;border:1px solid #54705c;color:#eaf7ec;border-radius:1
 (()=>{
   const db=window.supabase.createClient("https://mxyikhxpzijrdrgowmxr.supabase.co","sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09");
   const $=id=>document.getElementById(id);
+  // Optional QA-only selector, always checked against the signed-in owner
+  // by gatebrook-qa-status. Omitting it preserves the original workspace.
+  const QA_WORKSPACE_ID=new URLSearchParams(location.search).get("workspace_id");
+  const QA_SUPABASE_URL="https://mxyikhxpzijrdrgowmxr.supabase.co";
+  const QA_PUBLISHABLE_KEY="sb_publishable_U-8BQS5nOCZtDLiss5CRxg_s9ioHW09";
+  async function fetchQaStatus(){
+    if(!QA_WORKSPACE_ID)return db.functions.invoke("gatebrook-qa-status",{method:"GET"});
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(QA_WORKSPACE_ID))
+      throw Error("Invalid QA workspace link.");
+    const {data:{session}}=await db.auth.getSession();
+    if(!session?.access_token)throw Error("Sign in before viewing the test workspace.");
+    const endpoint=QA_SUPABASE_URL+"/functions/v1/gatebrook-qa-status?workspace_id="+encodeURIComponent(QA_WORKSPACE_ID);
+    const response=await fetch(endpoint,{method:"GET",headers:{
+      "Authorization":"Bearer "+session.access_token,"apikey":QA_PUBLISHABLE_KEY
+    }});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw Error(data.error||"Unable to check QA workspace.");
+    return {data,error:null};
+  }
   async function check(){
     $("qaCheck").disabled=true;
     try{
       const {data:{user}}=await db.auth.getUser();
       if(!user){$("qaHeading").textContent="Sign in required";$("qaMessage").textContent="Sign in at Gatebrook first, then return here.";return}
-      const {data,error}=await db.functions.invoke("gatebrook-qa-status",{method:"GET"});
+      const {data,error}=await fetchQaStatus();
       if(error||!data?.sandbox)throw Error("Could not verify Gatebrook QA status.");
       if(!data.allowed){
         $("qaHeading").textContent="QA subscription required";
-        $("qaMessage").textContent="No active, verified sandbox subscription has been recorded. Return to QA checkout and finish the test first.";
+        $("qaMessage").textContent=QA_WORKSPACE_ID
+          ?"This isolated workspace is restricted because Stripe has not confirmed an active paid subscription. The original J&J Plumbing QA workspace is unaffected."
+          :"No active, verified sandbox subscription has been recorded. Return to QA checkout and finish the test first.";
         return;
       }
       $("qaBusiness").textContent=data.workspace_name||"QA Workspace";
