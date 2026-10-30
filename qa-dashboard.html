@@ -40,6 +40,7 @@ select{background:#0d1711;border:1px solid #54705c;color:#eaf7ec;border-radius:1
 <span class="status">✓ Sandbox access verified</span>
 <h2 id="qaBusiness">QA Workspace</h2>
 <p>Your Stripe sandbox subscription is confirmed and QA-only access is active. The live Gatebrook workspace remains separate.</p>
+<p id="qaCancellationNotice" style="color:#bbebc5;border:1px solid #426a4c;background:#213d29;border-radius:10px;padding:13px 16px" hidden></p>
 <div class="grid">
 <div class="tile"><strong id="qaPlan">Trial</strong><span>Sandbox plan</span></div>
 <div class="tile"><strong id="qaState">Trialing</strong><span>Verified subscription state</span></div>
@@ -92,6 +93,14 @@ select{background:#0d1711;border:1px solid #54705c;color:#eaf7ec;border-radius:1
       $("qaState").textContent=data.status||"Active";
       const end=data.status==="trialing"?data.trial_end:data.current_period_end;
       $("qaEnd").textContent=end?new Date(end).toLocaleDateString():"Not available";
+      const notice=$("qaCancellationNotice");
+      const scheduled=data.status==="active" && data.cancel_at_period_end===true && !!end;
+      notice.hidden=!scheduled;
+      notice.textContent=scheduled
+        ?"Cancellation scheduled. Your QA subscription remains active until "+
+          new Date(end).toLocaleString("en-US",{dateStyle:"long",timeStyle:"short",timeZone:"America/Chicago"})+
+          " Central Time. No new renewal is scheduled after that."
+        :"";
       $("qaLocked").hidden=true;$("qaUnlocked").hidden=false;
     }catch(e){$("qaHeading").textContent="Unable to verify QA access";$("qaMessage").textContent=e.message||"Please try again."}
     finally{$("qaCheck").disabled=false}
