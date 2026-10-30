@@ -27,6 +27,21 @@
   let fields = [];
   let isLoading = false;
   let isDirty = false;
+  const coreDefaults = {notes:"optional",location:"optional",date:"optional"};
+  const coreStates = ["optional","required","hidden"];
+  function coreValues(value) {
+    const src = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    return Object.fromEntries(Object.keys(coreDefaults).map(k => [k,coreStates.includes(src[k]) ? src[k] : "optional"]));
+  }
+  function readCore() { return coreValues({notes:$("coreNotes").value,location:$("coreLocation").value,date:$("coreDate").value}); }
+  function showCore(config) {
+    const v=coreValues(config);
+    $("coreNotes").value=v.notes; $("coreLocation").value=v.location; $("coreDate").value=v.date;
+  }
+  function availableServices() {
+    try {const a=JSON.parse(root.dataset.serviceOptions||"[]");return Array.isArray(a) ? a.filter(x=>x&&typeof x.name==="string"&&/^[0-9a-f-]{36}$/i.test(x.id||"")):[];}
+    catch {return [];}
+  }
 
   function escapeText(s) { return String(s ?? ""); }
   function slugify(s) {
@@ -49,7 +64,8 @@
         type: f.type,
         required: f.required === true,
         placeholder: String(f.placeholder || "").slice(0, 120),
-        options: Array.isArray(f.options) ? f.options.map(x => String(x).slice(0, 80)).filter(Boolean).slice(0, 20) : []
+        options: Array.isArray(f.options) ? f.options.map(x => String(x).slice(0, 80)).filter(Boolean).slice(0, 20) : [],
+        show_for_services: Array.isArray(f.show_for_services) ? f.show_for_services.filter(x=>typeof x==="string"&&/^[0-9a-f-]{36}$/i.test(x)).slice(0,20):[]
       }));
   }
   function fieldOptions(type) { return ["select", "radio", "checkbox"].includes(type); }
@@ -61,10 +77,12 @@
       page_title: $("formPageTitle").value.trim(),
       page_description: String(root.dataset.businessTagline || "").trim(),
       submit_label: $("formSubmitLabel").value.trim(),
+      core_fields: readCore(),
       fields: fields.map(f => ({
         id: f.id, label: f.label.trim(), type: f.type, required: !!f.required,
         placeholder: (f.placeholder || "").trim(),
-        ...(fieldOptions(f.type) ? { options: (f.options || []).map(v => v.trim()).filter(Boolean) } : {})
+        ...(fieldOptions(f.type) ? { options: (f.options || []).map(v => v.trim()).filter(Boolean) } : {}),
+        ...(f.show_for_services?.length ? {show_for_services:f.show_for_services} : {})
       }))
     };
   }
@@ -164,10 +182,29 @@
       grid.appendChild(extra);
 
       const requiredLabel = document.createElement("label"); requiredLabel.className = "gb-required-toggle";
-      const required = document.createElement("input"); required.type = "checkbox"; required.checked = field.required; required.disabled = role !== "owner";
+      const required = document.createElement("input"); required.type = "checkbox"; required.checked = field.required; required.disabled = role !== "owner" || field.show_for_services.length > 0;
       required.addEventListener("change", () => { field.required = required.checked; setDirty(); renderPreview(); });
-      requiredLabel.append(required, document.createTextNode(" Require an answer"));
-      card.append(top, grid, requiredLabel);
+      requiredLabel.append(required, document.createTextNode(field.show_for_services.length ? " Service-specific questions are optional" : " Require an answer"));
+      const scope = document.createElement("details");
+      scope.className="gb-condition-editor";scope.open=field.show_for_services.length>0;
+      const summary=document.createElement("summary");summary.textContent="Show only for selected services (optional)";scope.appendChild(summary);
+      const hint=document.createElement("p");hint.textContent="Leave every option unchecked to ask all customers. Questions tied to services are optional.";scope.appendChild(hint);
+      const choices=document.createElement("div");choices.className="gb-condition-options";
+      for(const service of availableServices()){
+        const label=document.createElement("label");label.className="gb-condition-choice";
+        const check=document.createElement("input");check.type="checkbox";check.value=service.id;check.checked=field.show_for_services.includes(service.id);check.disabled=role!=="owner";
+        check.addEventListener("change",()=>{
+          const ids=new Set(field.show_for_services);
+          if(check.checked)ids.add(service.id);else ids.delete(service.id);
+          field.show_for_services=[...ids];if(field.show_for_services.length)field.required=false;
+          renderFieldEditor();renderPreview();setDirty();
+        });
+        const name=document.createElement("span");name.textContent=service.name;
+        label.append(check,name);choices.appendChild(label);
+      }
+      if(!choices.childElementCount){const n=document.createElement("p");n.textContent="Add a visible service in Step 1 to create service-specific questions.";choices.appendChild(n);}
+      scope.appendChild(choices);
+      card.append(top,grid,requiredLabel,scope);
       host.appendChild(card);
     });
   }
@@ -204,6 +241,8 @@
         pageTitle: base.page_title,
         submitLabel: base.submit_label,
         services,
+        serviceOptions: availableServices(),
+        coreFields: base.core_fields,
         fields: base.fields
       }
     }, window.location.origin);
@@ -245,11 +284,13 @@
         .eq("business_id", businessId).maybeSingle();
       if (error) throw error;
       if (data) {
+        showCore(data.core_fields);
         $("formTemplate").value = templates[data.template_key] ? data.template_key : "general";
         $("formPageTitle").value = data.page_title || "Request a Service";
         $("formSubmitLabel").value = data.submit_label || "Submit Request";
         fields = cloneFields(data.fields);
       } else {
+        showCore({});
         const industry = (root.dataset.industryHint || "").toLowerCase();
         const defaultKey = industry.includes("clean") ? "cleaning" : industry.includes("plumb") ? "plumbing" : industry.includes("detail") ? "auto_detailing" : industry.includes("landscap") ? "landscaping" : industry.includes("photo") ? "photography" : "general";
         $("formTemplate").value = defaultKey;
@@ -259,6 +300,7 @@
       }
       if (!canEdit) root.querySelectorAll("input,textarea,select,button").forEach(el => el.disabled = true);
       root.querySelectorAll("[data-builder-input]").forEach(el => el.addEventListener("input", () => { if (role === "owner") { setDirty(); renderPreview(); } }));
+      root.querySelectorAll("[data-core-option]").forEach(el => el.addEventListener("change", () => {if(role==="owner"){setDirty();renderPreview();}}));
       const taglineInput = document.getElementById("tagline");
       if (taglineInput) taglineInput.addEventListener("input", () => { root.dataset.businessTagline = taglineInput.value; renderPreview(); });
       $("formTemplate").addEventListener("change", () => {
@@ -269,7 +311,7 @@
       });
       $("addCustomField").addEventListener("click", () => {
         if (role !== "owner" || fields.length >= 20) return;
-        fields.push({ id: uniqueId("question_" + (fields.length + 1)), label: "New question", type: "text", required: false, placeholder: "", options: [] });
+        fields.push({ id: uniqueId("question_" + (fields.length + 1)), label: "New question", type: "text", required: false, placeholder: "", options: [], show_for_services: [] });
         renderFieldEditor(); renderPreview(); setDirty();
       });
       $("useEssentials").addEventListener("click", () => {
@@ -299,12 +341,15 @@
       if (base.page_description.length > 500) throw new Error("Keep the description under 500 characters.");
       if (!base.submit_label || base.submit_label.length > 40) throw new Error("Add a submit label up to 40 characters.");
       if (base.fields.length > 20) throw new Error("Use no more than 20 custom questions.");
+      if(Object.values(base.core_fields).some(v=>!coreStates.includes(v)))throw new Error("Invalid standard field option.");
       for (const f of base.fields) {
         if (!f.label || f.label.length > 80) throw new Error("Each question needs a label under 80 characters.");
         if (!/^[a-z][a-z0-9_]{0,39}$/.test(f.id) || seen.has(f.id)) throw new Error("Question IDs must be unique.");
         seen.add(f.id);
         if (fieldOptions(f.type) && (!f.options?.length || f.options.length > 20 || f.options.some(v => v.length > 80))) throw new Error("Choice fields need 1–20 choices, each under 80 characters.");
         if (f.placeholder.length > 120) throw new Error("Placeholders must be under 120 characters.");
+        if(f.show_for_services?.length && f.required)throw new Error("Service-specific questions must be optional.");
+        if(f.show_for_services?.some(id=>!availableServices().some(v=>v.id===id)))throw new Error("One of the selected services has been disabled or removed. Review this question.");
       }
       isLoading = true; saveButton.disabled = true; saveButton.textContent = "Saving…";
       const { error } = await client.from("business_request_forms").upsert({
