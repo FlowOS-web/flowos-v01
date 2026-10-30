@@ -644,6 +644,163 @@
         transition:none!important;
       }
     }
+
+    /* Surface hierarchy: a deep forest-graphite shell, distinct sage-charcoal sections,
+       and crisp inset controls. Scoped to Business Settings only. */
+    body.gb-brand-settings-page{
+      --settings-shell:#17241d;
+      --settings-section:#26392e;
+      --settings-border:#44604e;
+      --settings-inset:#15241b;
+      --settings-soft-border:rgba(142,187,151,.25);
+    }
+    body.gb-brand-settings-page .gb-settings-pane.card{
+      background:radial-gradient(ellipse at 100% 0%,rgba(76,132,91,.11),transparent 60%),
+                 linear-gradient(145deg,#1b2a21 0%,var(--settings-shell) 75%,#121c17 100%);
+      border-color:#3a5643;
+      box-shadow:0 18px 50px rgba(0,0,0,.22),inset 0 1px rgba(211,246,216,.035);
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step{
+      background:linear-gradient(145deg,#2b4133 0%,var(--settings-section) 70%,#203027 100%);
+      border-color:var(--settings-border);
+      box-shadow:0 7px 20px rgba(0,0,0,.11),inset 0 1px rgba(220,250,220,.04);
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step-title h3{color:#f1f7f2}
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span{
+      background:#1b3a27;
+      color:#b2dbbd;
+      border:1px solid #557e61;
+    }
+    body.gb-brand-settings-page .gb-settings-nav{
+      background:rgba(20,32,24,.96);
+      border-color:#3b5844;
+    }
+    body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{
+      background:#294633;
+      color:#f3f9f4;
+      border-color:#568263;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading,
+    body.gb-brand-settings-page #requestBuilder .service-row{
+      border-color:var(--settings-soft-border);
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-settings-add-service,
+    body.gb-brand-settings-page #requestBuilder .gb-core-settings,
+    body.gb-brand-settings-page #requestBuilder .gb-builder-essentials-action,
+    body.gb-brand-settings-page #requestBuilder .gb-simple-disclosure,
+    body.gb-brand-settings-page #requestBuilder .gb-custom-field-row,
+    body.gb-brand-settings-page #requestBuilder .gb-condition-editor,
+    body.gb-brand-settings-page #businessProfile .gb-simple-disclosure,
+    body.gb-brand-settings-page #sharePage .gb-settings-share-note{
+      background:var(--settings-inset);
+      border-color:#4c6f55;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-question-review-item,
+    body.gb-brand-settings-page #requestBuilder .gb-condition-choice{
+      background:rgba(8,24,14,.3);
+      border-color:var(--settings-soft-border);
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select){
+      background:#111e17;
+      border-color:#486651;
+      color:#f0f7f0;
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select):focus{
+      border-color:#a0d0ac;
+      box-shadow:0 0 0 3px rgba(119,191,143,.21);
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea)::placeholder{color:#a2b3a5}
+    body.gb-brand-settings-page #requestBuilder .gb-save-dock{
+      background:linear-gradient(120deg,#1e3827,#192d21);
+      border-color:#668e70;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary{
+      background:#dcecdf;
+      color:#183020;
+      border-color:#dcecdf;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled){
+      background:#f0f7f1;
+      border-color:#f0f7f1;
+    }
+    /* A lighter version of the same hierarchy, without gray-on-gray panels. */
+    html[data-gb-theme="light"] body.gb-brand-settings-page{
+      --settings-shell:#fff;
+      --settings-section:#e7f1e9;
+      --settings-border:#bbd4c1;
+      --settings-inset:#f7fbf7;
+      --settings-soft-border:#ccdccc;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-pane.card{
+      background:linear-gradient(145deg,#fff,#f9fbf9);
+      border-color:#c3d7c8;
+      box-shadow:0 16px 40px rgba(28,65,41,.075);
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step{
+      background:linear-gradient(145deg,#f0f7f1,var(--settings-section));
+      border-color:var(--settings-border);
+      box-shadow:0 6px 18px rgba(40,86,53,.04);
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step-title h3{color:#1e402b}
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span{
+      background:#dbeadd;
+      border-color:#b3d3ba;
+      color:#285c3f;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-nav{
+      background:rgba(249,252,248,.97);
+      border-color:#c6d9c9;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{
+      background:#ddede1;
+      border-color:#a9cbb1;
+      color:#234b34;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-settings-add-service,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-core-settings,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-essentials-action,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-simple-disclosure,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-custom-field-row,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-editor,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #businessProfile .gb-simple-disclosure,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #sharePage .gb-settings-share-note{
+      background:var(--settings-inset);
+      border-color:#bfd6c4;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-question-review-item,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-choice{
+      background:#fff;
+      border-color:#c7dbcd;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select){
+      background:#fff;
+      border-color:#bad1c1;
+      color:#1f3929;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea)::placeholder{color:#647c6b}
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-save-dock{
+      background:#e4f0e7;
+      border-color:#b2d1ba;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary{
+      background:#275c3d;
+      color:#fff;
+      border-color:#275c3d;
+    }
+
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-advanced-settings>summary,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-editor>summary{
+      color:#27563a;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-core-heading span,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading span{
+      color:#286443;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled){
+      background:#34734d;
+      border-color:#34734d;
+      color:#fff;
+    }
 </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
