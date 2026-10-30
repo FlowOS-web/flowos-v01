@@ -70,7 +70,7 @@ button{color:white;background:#2d6740;border:1px solid #6ba378;padding:12px 18px
         return;
       }
       $("qaBusiness").textContent=data.workspace_name||"QA Workspace";
-      $("qaPlan").textContent=data.plan==="annual"?"Annual":data.plan==="trial"?"7-day trial":"Monthly";
+      $("qaPlan").textContent=data.plan==="annual"?"Annual":data.plan==="trial"&&data.status==="trialing"?"7-day trial":"Monthly";
       $("qaState").textContent=data.status||"Active";
       const end=data.status==="trialing"?data.trial_end:data.current_period_end;
       $("qaEnd").textContent=end?new Date(end).toLocaleDateString():"Not available";
