@@ -162,3 +162,78 @@ test("verified trial unlocks only the QA preview",async()=>{
   assert.equal(h.nodes.qaSelect.hidden,true);
   assert.equal(h.nodes.qaStatusValue.textContent,"Trial active");
 });
+
+
+// Exercise the actual plan-switch branch with a Stripe sandbox stub. No network calls.
+function qaPlanSwitchHarness({storedPlan="annual",requestedPlan="trial",status="open",
+   paymentStatus="unpaid",subscription=null,owner="test-user",
+   workspace="test-workspace",expirationOk=true,metadataOwner=owner}={}) {
+  const markerStart='    if(old.livemode!==false)return reply(409,{error:"Unsafe checkout mode detected."},origin);';
+  const markerEnd='  const form=new URLSearchParams();';
+  const start=sources.checkout.indexOf(markerStart);
+  const end=sources.checkout.indexOf(markerEnd,start);
+  assert.ok(start>=0&&end>start,"Expected the actual QA plan-switch block");
+  const branch=sources.checkout.slice(start,end);
+  const calls=[];
+  const sessionId="cs_test_existing";
+  const stripe=async (endpoint, options)=>{
+    calls.push({endpoint,options});
+    assert.equal(endpoint,"checkout/sessions/"+sessionId+"/expire");
+    assert.equal(options.method,"POST");
+    return {ok:expirationOk,value:expirationOk?
+      {id:sessionId,livemode:false,status:"expired"}:
+      {error:{message:"Cannot expire session"}}};
+  };
+  const old={
+    id:sessionId,livemode:false,status,mode:"subscription",ui_mode:"embedded_page",
+    payment_status:paymentStatus,subscription,client_secret:"cs_test_mock_secret",
+    client_reference_id:owner,
+    metadata:{qa_env:"gatebrook_qa",qa_owner_user_id:metadataOwner,
+      qa_workspace_id:workspace,qa_plan:storedPlan}
+  };
+  const context={
+    old, oldSessionId:sessionId, user:{id:owner},workspaceId:workspace,
+    prior:{plan:storedPlan},plan:requestedPlan,STRIPE_PUBLIC_TEST:"pk_test_mock",
+    reply:(code,data)=>({code,data}),origin:null,stripe,encodeURIComponent
+  };
+  const wrapped="(async function(){\n"+branch+"\nreturn {code:200,data:{next:'create'}};\n})()";
+  return Promise.resolve(vm.runInNewContext(wrapped,context)).then(result=>({result,calls}));
+}
+test("switching plans expires only an open unpaid sandbox session",async()=>{
+  const x=await qaPlanSwitchHarness();
+  assert.equal(x.result.code,200);
+  assert.equal(x.result.data.next,"create");
+  assert.equal(x.calls.length,1);
+});
+test("reopening the same plan reuses its embedded client secret",async()=>{
+  const x=await qaPlanSwitchHarness({storedPlan:"trial",requestedPlan:"trial"});
+  assert.equal(x.result.code,200);
+  assert.equal(x.result.data.reused,true);
+  assert.equal(x.calls.length,0);
+});
+test("checkout for another owner cannot be expired by the plan switch",async()=>{
+  const x=await qaPlanSwitchHarness({metadataOwner:"someone-else"});
+  assert.equal(x.result.code,409);
+  assert.equal(x.calls.length,0);
+});
+test("a completed sandbox checkout cannot be expired",async()=>{
+  const x=await qaPlanSwitchHarness({status:"complete"});
+  assert.equal(x.result.code,409);
+  assert.equal(x.calls.length,0);
+});
+test("a potentially paid sandbox checkout cannot be expired",async()=>{
+  const x=await qaPlanSwitchHarness({paymentStatus:"paid"});
+  assert.equal(x.result.code,409);
+  assert.equal(x.calls.length,0);
+});
+test("an unsuccessful Stripe expiration cannot create the replacement checkout",async()=>{
+  const x=await qaPlanSwitchHarness({expirationOk:false});
+  assert.equal(x.result.code,409);
+  assert.equal(x.calls.length,1);
+});
+test("already expired checkout can be replaced without extra Stripe mutation",async()=>{
+  const x=await qaPlanSwitchHarness({status:"expired"});
+  assert.equal(x.result.code,200);
+  assert.equal(x.result.data.next,"create");
+  assert.equal(x.calls.length,0);
+});
