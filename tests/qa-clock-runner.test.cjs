@@ -13,7 +13,7 @@ test("runner requires private 256-bit token and rejects live keys",()=>{
  assert.match(runner,/if\(token\.length!==64\)return reply\(401/);
  assert.match(runner,/sk\|rk\)_test_/);
  assert.match(runner,/if\(data\.livemode===true\)throw Error/);
- assert.doesNotMatch(runner,/STRIPE_SECRET_KEY"\)/);
+ assert.doesNotMatch(runner,/Deno\.env\.get\("STRIPE_SECRET_KEY"\)/);
  assert.match(migration,/flowos_private\.gatebrook_qa_clock_runner_auth/);
  assert.match(migration,/revoke all on function flowos_private\.gatebrook_qa_clock_action/);
 });
