@@ -1149,6 +1149,18 @@
       refreshButton.disabled = true;
       dashboardError.classList.add("hidden");
       try {
+        // Re-check entitlement on refresh: the UI switches to read-only when
+        // a trial expires, and back to editable after verified reactivation.
+        const {data:access,error:accessError}=await supabaseClient.functions.invoke("gatebrook-access",{method:"GET"});
+        if(!isCurrent())return;
+        if(accessError||!access)throw new Error("Subscription status could not be verified. Please retry.");
+        if(!access.allowed&&!access.read_only){
+          location.replace(access.next||"billing.html");
+          return;
+        }
+        if(access.business_id!==businessId)throw new Error("Workspace subscription ownership mismatch.");
+        currentReadOnly=access.read_only===true&&!access.allowed;
+        document.getElementById("readOnlyNotice").classList.toggle("hidden",!currentReadOnly);
         const rows = [];
         let expectedCount = null;
         let offset = 0;
