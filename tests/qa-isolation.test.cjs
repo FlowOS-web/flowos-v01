@@ -237,3 +237,12 @@ test("already expired checkout can be replaced without extra Stripe mutation",as
   assert.equal(x.result.data.next,"create");
   assert.equal(x.calls.length,0);
 });
+
+test("paid renewal shows Monthly instead of expired 7-day trial",async()=>{
+  const h=harness({allowed:true,status:"active"});
+  await h.settle();
+  assert.equal(h.nodes.qaVerified.hidden,false);
+  assert.equal(h.nodes.qaStatusValue.textContent,"Sandbox subscription active");
+  assert.equal(h.nodes.qaStatusPlan.textContent,"Monthly");
+  assert.match(sources.dashboard,/data\.plan==="trial"&&data\.status==="trialing"\?"7-day trial":"Monthly"/);
+});
