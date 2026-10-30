@@ -645,45 +645,46 @@
       }
     }
 
-    /* Surface hierarchy: a deep forest-graphite shell, distinct sage-charcoal sections,
-       and crisp inset controls. Scoped to Business Settings only. */
-    body.gb-brand-settings-page{
-      --settings-shell:#17241d;
-      --settings-section:#26392e;
-      --settings-border:#44604e;
-      --settings-inset:#15241b;
-      --settings-soft-border:rgba(142,187,151,.25);
+    /* Settings palette: layered neutral graphite, with green reserved for active details.
+       Contrast comes from luminance and outlines, not large colored surfaces. */
+    body.gb-brand-settings-page {
+      --settings-shell:#171c21;
+      --settings-section:#2c343d;
+      --settings-inset:#181e24;
+      --settings-border:#52606b;
+      --settings-soft-border:rgba(175,193,205,.22);
+      --settings-accent:#83b999;
     }
-    body.gb-brand-settings-page .gb-settings-pane.card{
-      background:radial-gradient(ellipse at 100% 0%,rgba(76,132,91,.11),transparent 60%),
-                 linear-gradient(145deg,#1b2a21 0%,var(--settings-shell) 75%,#121c17 100%);
-      border-color:#3a5643;
-      box-shadow:0 18px 50px rgba(0,0,0,.22),inset 0 1px rgba(211,246,216,.035);
+    body.gb-brand-settings-page .gb-settings-pane.card {
+      background:linear-gradient(150deg,#1c2228 0%,var(--settings-shell) 70%,#14191e 100%);
+      border-color:#46515b;
+      box-shadow:0 18px 48px rgba(0,0,0,.24),inset 0 1px rgba(232,239,241,.035);
     }
-    body.gb-brand-settings-page #requestBuilder .gb-builder-step{
-      background:linear-gradient(145deg,#2b4133 0%,var(--settings-section) 70%,#203027 100%);
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step {
+      background:linear-gradient(145deg,#313a44 0%,var(--settings-section) 80%,#29313a 100%);
       border-color:var(--settings-border);
-      box-shadow:0 7px 20px rgba(0,0,0,.11),inset 0 1px rgba(220,250,220,.04);
+      box-shadow:0 7px 19px rgba(0,0,0,.15),inset 0 1px rgba(246,249,252,.045);
     }
-    body.gb-brand-settings-page #requestBuilder .gb-builder-step-title h3{color:#f1f7f2}
-    body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span{
-      background:#1b3a27;
-      color:#b2dbbd;
-      border:1px solid #557e61;
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step-title h3 { color:#f2f5f5; }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span {
+      background:#252d34;
+      color:#a2c6ae;
+      border:1px solid #647a70;
+      box-shadow:none;
     }
-    body.gb-brand-settings-page .gb-settings-nav{
-      background:rgba(20,32,24,.96);
-      border-color:#3b5844;
+    body.gb-brand-settings-page .gb-settings-nav {
+      background:rgba(20,24,29,.97);
+      border-color:#49555d;
     }
-    body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{
-      background:#294633;
-      color:#f3f9f4;
-      border-color:#568263;
+    body.gb-brand-settings-page .gb-settings-tab[aria-selected=true] {
+      background:#343d46;
+      color:#f4f6f7;
+      border-color:#667780;
+      box-shadow:inset 0 -2px #78af92;
     }
+    body.gb-brand-settings-page .gb-settings-tab .gb-tab-icon { color:#91b8a0; }
     body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading,
-    body.gb-brand-settings-page #requestBuilder .service-row{
-      border-color:var(--settings-soft-border);
-    }
+    body.gb-brand-settings-page #requestBuilder .service-row { border-color:var(--settings-soft-border); }
     body.gb-brand-settings-page #requestBuilder .gb-settings-add-service,
     body.gb-brand-settings-page #requestBuilder .gb-core-settings,
     body.gb-brand-settings-page #requestBuilder .gb-builder-essentials-action,
@@ -691,70 +692,76 @@
     body.gb-brand-settings-page #requestBuilder .gb-custom-field-row,
     body.gb-brand-settings-page #requestBuilder .gb-condition-editor,
     body.gb-brand-settings-page #businessProfile .gb-simple-disclosure,
-    body.gb-brand-settings-page #sharePage .gb-settings-share-note{
+    body.gb-brand-settings-page #sharePage .gb-settings-share-note {
       background:var(--settings-inset);
-      border-color:#4c6f55;
+      border-color:#495761;
     }
     body.gb-brand-settings-page #requestBuilder .gb-question-review-item,
-    body.gb-brand-settings-page #requestBuilder .gb-condition-choice{
-      background:rgba(8,24,14,.3);
+    body.gb-brand-settings-page #requestBuilder .gb-condition-choice {
+      background:#222a31;
       border-color:var(--settings-soft-border);
     }
-    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select){
-      background:#111e17;
-      border-color:#486651;
-      color:#f0f7f0;
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select) {
+      background:#10161b;
+      border-color:#56636d;
+      color:#f2f5f5;
     }
-    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select):focus{
-      border-color:#a0d0ac;
-      box-shadow:0 0 0 3px rgba(119,191,143,.21);
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select):focus {
+      border-color:#91b9a0;
+      box-shadow:0 0 0 3px rgba(131,185,153,.16);
     }
-    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea)::placeholder{color:#a2b3a5}
-    body.gb-brand-settings-page #requestBuilder .gb-save-dock{
-      background:linear-gradient(120deg,#1e3827,#192d21);
-      border-color:#668e70;
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea)::placeholder { color:#a0adb6; }
+    body.gb-brand-settings-page #requestBuilder .gb-save-dock {
+      background:linear-gradient(125deg,#283039,#222a31);
+      border-color:#53636c;
     }
-    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary{
-      background:#dcecdf;
-      color:#183020;
-      border-color:#dcecdf;
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary {
+      background:#edf0ef;
+      color:#1c2625;
+      border-color:#edf0ef;
     }
-    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled){
-      background:#f0f7f1;
-      border-color:#f0f7f1;
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled) {
+      background:#fff;
+      border-color:#fff;
     }
-    /* A lighter version of the same hierarchy, without gray-on-gray panels. */
-    html[data-gb-theme="light"] body.gb-brand-settings-page{
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step>summary:hover,
+    body.gb-brand-settings-page #requestBuilder .gb-simple-disclosure>summary:hover {
+      background:rgba(221,230,235,.06);
+    }
+    /* Light mode: white parent surfaces, contrasting cool-silver inner cards. */
+    html[data-gb-theme="light"] body.gb-brand-settings-page {
       --settings-shell:#fff;
-      --settings-section:#e7f1e9;
-      --settings-border:#bbd4c1;
-      --settings-inset:#f7fbf7;
-      --settings-soft-border:#ccdccc;
+      --settings-section:#e7edf0;
+      --settings-inset:#fff;
+      --settings-border:#aebdc6;
+      --settings-soft-border:#c4d1d7;
+      --settings-accent:#3b7855;
     }
-    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-pane.card{
-      background:linear-gradient(145deg,#fff,#f9fbf9);
-      border-color:#c3d7c8;
-      box-shadow:0 16px 40px rgba(28,65,41,.075);
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-pane.card {
+      background:linear-gradient(145deg,#fff,#f8fafb);
+      border-color:#c1cbd0;
+      box-shadow:0 16px 42px rgba(30,41,52,.08);
     }
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step{
-      background:linear-gradient(145deg,#f0f7f1,var(--settings-section));
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step {
+      background:linear-gradient(145deg,#edf2f5,var(--settings-section));
       border-color:var(--settings-border);
-      box-shadow:0 6px 18px rgba(40,86,53,.04);
+      box-shadow:0 5px 16px rgba(36,54,67,.06);
     }
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step-title h3{color:#1e402b}
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span{
-      background:#dbeadd;
-      border-color:#b3d3ba;
-      color:#285c3f;
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step-title h3 { color:#24313b; }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span {
+      background:#e1e8eb;
+      border-color:#b6c5c9;
+      color:#366449;
     }
-    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-nav{
-      background:rgba(249,252,248,.97);
-      border-color:#c6d9c9;
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-nav {
+      background:rgba(250,251,252,.97);
+      border-color:#bbc7cd;
     }
-    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{
-      background:#ddede1;
-      border-color:#a9cbb1;
-      color:#234b34;
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-tab[aria-selected=true] {
+      background:#e2e9ed;
+      border-color:#adbfc7;
+      color:#24343f;
+      box-shadow:inset 0 -2px #47815c;
     }
     html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-settings-add-service,
     html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-core-settings,
@@ -763,42 +770,37 @@
     html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-custom-field-row,
     html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-editor,
     html[data-gb-theme="light"] body.gb-brand-settings-page #businessProfile .gb-simple-disclosure,
-    html[data-gb-theme="light"] body.gb-brand-settings-page #sharePage .gb-settings-share-note{
+    html[data-gb-theme="light"] body.gb-brand-settings-page #sharePage .gb-settings-share-note {
       background:var(--settings-inset);
-      border-color:#bfd6c4;
+      border-color:#b8c7cf;
     }
     html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-question-review-item,
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-choice{
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-choice {
+      background:#f7f9fa;
+      border-color:#c2cfd5;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select) {
       background:#fff;
-      border-color:#c7dbcd;
+      border-color:#b7c5cc;
+      color:#23333b;
     }
-    html[data-gb-theme="light"] body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select){
-      background:#fff;
-      border-color:#bad1c1;
-      color:#1f3929;
+    html[data-gb-theme="light"] body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea)::placeholder { color:#65757e; }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-save-dock {
+      background:#edf1f3;
+      border-color:#becbd1;
     }
-    html[data-gb-theme="light"] body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea)::placeholder{color:#647c6b}
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-save-dock{
-      background:#e4f0e7;
-      border-color:#b2d1ba;
-    }
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary{
-      background:#275c3d;
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary {
+      background:#273740;
+      border-color:#273740;
       color:#fff;
-      border-color:#275c3d;
     }
-
     html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-advanced-settings>summary,
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-editor>summary{
-      color:#27563a;
-    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-condition-editor>summary { color:#344b59; }
     html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-core-heading span,
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading span{
-      color:#286443;
-    }
-    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled){
-      background:#34734d;
-      border-color:#34734d;
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading span { color:#34634a; }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled) {
+      background:#344650;
+      border-color:#344650;
       color:#fff;
     }
 </style>
