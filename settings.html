@@ -218,8 +218,8 @@
   </header>
 
   <main class="container">
-    <h1>Business Settings</h1>
-    <div class="subtitle">Manage the customer-facing profile, notification email, and services for your Gatebrook workspace.</div>
+    <h1>Business settings</h1>
+    <div class="subtitle">Keep your business details up to date, and shape the experience customers see when they request your services.</div>
 
     <div id="readOnlySettingsNotice" class="gb-read-only-banner hidden" role="status">
       <strong>Read-only settings — subscription inactive</strong>
@@ -231,9 +231,14 @@
     <div id="ownerOnly" class="owner-only-note hidden">Only the business owner can change these settings.</div>
 
     <section id="settingsContent" class="grid hidden">
-      <div class="card">
+      <nav class="gb-settings-nav" aria-label="Business settings sections">
+        <a href="#businessProfile"><strong>Business profile</strong><span>Your public details and private notifications</span></a>
+        <a href="#requestBuilder"><strong>Customer experience</strong><span>Services, questions, and a live preview</span></a>
+      </nav>
+      <div class="card gb-settings-profile-card" id="businessProfile">
+        <div class="gb-settings-eyebrow">BUSINESS INFORMATION</div>
         <h2>Business profile</h2>
-        <p>This information powers your customer request experience.</p>
+        <p>Update the details customers see, plus where new request notifications are delivered.</p>
 
         <form id="profileForm">
           <label for="businessName">Business name</label>
@@ -260,45 +265,60 @@
           <label for="logoUrl">Logo image URL</label>
           <input id="logoUrl" type="url" maxlength="500" placeholder="https://...">
 
-          <label for="ownerEmail">Lead notification email (private)</label>
-          <input id="ownerEmail" type="email" maxlength="200">
+          <div class="gb-settings-private">
+            <h3>Private notifications</h3>
+            <p>This email receives new customer request alerts and is never shown on your public request page.</p>
+            <label for="ownerEmail">Lead notification email</label>
+            <input id="ownerEmail" type="email" maxlength="200">
+          </div>
 
-          <button class="btn primary" type="submit" style="margin-top:18px">Save profile</button>
+          <button class="btn primary" type="submit" style="margin-top:18px">Save business profile</button>
           <div id="profileFeedback" class="feedback"></div>
         </form>
       </div>
 
-      <div class="card">
-        <h2>Customer request link</h2>
-        <p>Use this link from the business website, social profiles, or anywhere customers request service.</p>
+      <div class="card gb-settings-share-card">
+        <div class="gb-settings-eyebrow">READY TO SHARE</div>
+        <h2>Your customer request link</h2>
+        <p>Put this link on your website, social profiles, or messages so customers can request a service.</p>
+        <label for="requestLink">Public request page</label>
         <div class="request-link">
           <input id="requestLink" readonly>
-          <button id="copyLinkButton" type="button" class="btn">Copy</button>
+          <button id="copyLinkButton" type="button" class="btn">Copy link</button>
         </div>
-
-        <h2 style="margin-top:28px">Services</h2>
-        <p>Add, rename, enable, disable, or remove the services customers can choose from.</p>
-
-        <form id="newServiceForm">
-          <div class="request-link">
-            <input id="newServiceName" maxlength="120" placeholder="New service name" required>
-            <button class="btn primary" type="submit">Add</button>
-          </div>
-        </form>
-
-        <div id="serviceList" style="margin-top:14px"></div>
-        <div id="serviceFeedback" class="feedback"></div>
+        <div class="gb-settings-share-actions">
+          <a id="viewRequestPage" class="btn" href="request.html" target="_blank" rel="noopener noreferrer">Open customer page ↗</a>
+        </div>
+        <p class="gb-settings-share-note">Your link stays the same when you update your services or questions.</p>
+        <div id="linkFeedback" class="feedback" role="status" aria-live="polite"></div>
       </div>
 
       <div class="card gb-simple-builder" id="requestBuilder" style="grid-column:1 / -1">
         <div class="gb-builder-intro">
           <p class="gb-builder-kicker">CUSTOMER EXPERIENCE</p>
-          <h2>Build your request page</h2>
-          <p>Choose what customers see, add any extra questions, then save. Your existing customer link will keep working.</p>
+          <h2>Customize your request page</h2>
+          <p>Manage the services customers can choose, tailor your questions, and preview everything in one place.</p>
         </div>
 
+        <section class="gb-builder-step gb-builder-services-step" aria-labelledby="gb-step-services">
+          <div class="gb-builder-step-title"><span>1</span><div><h3 id="gb-step-services">Services customers can request</h3><p>Add or edit your offerings. Only services marked visible will appear as choices on the customer request page.</p></div></div>
+          <div class="gb-service-manager">
+            <div class="gb-service-manager-heading"><strong>Your services</strong><span id="serviceCount" aria-live="polite">Loading services…</span></div>
+            <div id="serviceList" class="gb-settings-service-list"></div>
+            <form id="newServiceForm" class="gb-settings-add-service">
+              <label for="newServiceName">Add a service</label>
+              <div class="request-link">
+                <input id="newServiceName" maxlength="120" placeholder="e.g. Drain cleaning" required>
+                <button class="btn primary" type="submit">+ Add service</button>
+              </div>
+            </form>
+            <p class="gb-field-help">Services save immediately when you add, save, or remove them. Your customer preview updates to match.</p>
+            <div id="serviceFeedback" class="feedback" role="status" aria-live="polite"></div>
+          </div>
+        </section>
+
         <section class="gb-builder-step" aria-labelledby="gb-step-one">
-          <div class="gb-builder-step-title"><span>1</span><div><h3 id="gb-step-one">Choose your starting point</h3><p>Pick the closest match. We’ll suggest useful questions for your business.</p></div></div>
+          <div class="gb-builder-step-title"><span>2</span><div><h3 id="gb-step-one">Set up your page</h3><p>Choose a starting template and the heading customers will see.</p></div></div>
           <label for="formTemplate">Business type</label>
           <select id="formTemplate">
             <option value="general">General service business</option>
@@ -321,7 +341,7 @@
         </section>
 
         <section class="gb-builder-step" aria-labelledby="gb-step-two">
-          <div class="gb-builder-step-title"><span>2</span><div><h3 id="gb-step-two">Ask only what you need</h3><p>Name, contact details, service, and description are already included. Add extra questions only when they help you prepare or give an estimate.</p></div></div>
+          <div class="gb-builder-step-title"><span>3</span><div><h3 id="gb-step-two">Ask only what you need</h3><p>Name, contact details, service, and description are already included. Add extra questions only when they help you prepare or give an estimate.</p></div></div>
           <div class="gb-builder-question-summary"><strong>Your suggested questions</strong><span id="fieldCount" class="feedback"></span></div>
           <div id="questionReviewList" class="gb-question-review-list" aria-live="polite"></div>
           <details class="gb-advanced-settings gb-question-customize">
@@ -333,7 +353,7 @@
         </section>
 
         <section class="gb-builder-step gb-builder-preview-step" aria-labelledby="gb-step-three">
-          <div class="gb-builder-step-title"><span>3</span><div><h3 id="gb-step-three">Preview and save</h3><p>Check how the page will look to customers. Your changes won’t go live until you save.</p></div></div>
+          <div class="gb-builder-step-title"><span>4</span><div><h3 id="gb-step-three">Preview and save</h3><p>Review your customer page below. Page headings and question changes go live after you select Save request page.</p></div></div>
           <div class="gb-preview-shell">
             <div class="gb-preview-heading"><h3>Customer preview</h3><span>What customers will see</span></div>
             <div id="requestPreview" class="gb-request-preview"></div>
@@ -379,6 +399,37 @@
     .gb-simple-builder .gb-preview-heading span{font-size:12px;color:var(--muted,#b8bdc4)}
     .gb-simple-builder .gb-preview-shell{margin-top:6px}
     .gb-simple-builder .gb-save-request{width:100%;margin-top:20px;min-height:48px;font-weight:700}
+    .gb-settings-nav{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:4px}
+    .gb-settings-nav a{display:flex;flex-direction:column;gap:5px;padding:16px 18px;border:1px solid var(--border);border-radius:13px;background:var(--panel);transition:border-color .16s ease,transform .16s ease}
+    .gb-settings-nav a:hover{border-color:var(--ok);transform:translateY(-1px)}
+    .gb-settings-nav strong{font-size:14px;color:var(--text)}
+    .gb-settings-nav span{font-size:12px;line-height:1.5;color:var(--muted)}
+    #businessProfile,#requestBuilder{scroll-margin-top:96px}
+    .gb-settings-eyebrow{color:var(--ok);font-size:11px;font-weight:750;letter-spacing:.13em;margin-bottom:9px}
+    .gb-settings-profile-card,.gb-settings-share-card{min-height:100%}
+    .gb-settings-private{margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+    .gb-settings-private h3{font-size:15px;margin:0 0 5px}
+    .gb-settings-private p{font-size:12px;margin:0 0 11px;line-height:1.6}
+    .gb-settings-share-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 16px}
+    .gb-settings-share-actions .btn{display:inline-flex;align-items:center;justify-content:center}
+    .gb-settings-share-card .gb-settings-share-note{padding:13px 14px;margin-top:22px;border:1px solid var(--border);background:var(--panel2);border-radius:10px;font-size:12px}
+    .gb-simple-builder .gb-service-manager{padding:17px 18px;border:1px solid var(--border);border-radius:12px;background:var(--panel2)}
+    .gb-service-manager-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .gb-service-manager-heading strong{font-size:14px}
+    .gb-service-manager-heading span{color:var(--ok);font-size:12px}
+    .gb-simple-builder .gb-settings-service-list{margin:8px 0 18px}
+    .gb-simple-builder .service-row{grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)}
+    .gb-simple-builder .service-row .service-name{width:100%}
+    .gb-simple-builder .service-row>div{display:flex;gap:8px;align-items:center}
+    .gb-simple-builder .service-row .toggle{white-space:normal;line-height:1.35;max-width:155px}
+    .gb-simple-builder .gb-settings-add-service{padding-top:4px}
+    .gb-simple-builder .gb-settings-add-service label{font-size:13px;margin:0 0 8px}
+    .gb-simple-builder .gb-settings-add-service .request-link input{flex:1}
+    .gb-simple-builder .gb-service-manager .gb-field-help{margin:12px 0 0}
+    .gb-simple-builder .gb-service-manager .feedback{margin-top:9px}
+    :root[data-gb-theme="light"] .gb-settings-nav a{background:var(--panel)}
+    @media(max-width:900px){.gb-simple-builder .service-row{grid-template-columns:minmax(0,1fr) auto}.gb-simple-builder .service-row>div{grid-column:1/-1;justify-content:flex-end}}
+    @media(max-width:620px){.gb-settings-nav{grid-template-columns:1fr}.gb-simple-builder .gb-service-manager{padding:14px}.gb-simple-builder .service-row{grid-template-columns:1fr}.gb-simple-builder .service-row .toggle{max-width:none}.gb-simple-builder .service-row>div{grid-column:auto;justify-content:flex-start;flex-wrap:wrap}.gb-simple-builder .gb-settings-add-service .request-link{flex-direction:column;align-items:stretch}.gb-settings-add-service .btn{width:100%}}
     .gb-simple-builder #builderFeedback{margin-top:10px}
     @media(max-width:620px){
       .gb-simple-builder .gb-builder-step{padding:20px 0}
@@ -475,7 +526,18 @@
     const profileForm = document.getElementById("profileForm");
     const profileFeedback = document.getElementById("profileFeedback");
     const serviceFeedback = document.getElementById("serviceFeedback");
+    const linkFeedback = document.getElementById("linkFeedback");
     const serviceList = document.getElementById("serviceList");
+
+    function syncServiceExperience(refreshPreview=true){
+      const root = document.getElementById("requestBuilder");
+      if (!root) return;
+      const visible = services.filter(service => service.active === true);
+      root.dataset.services = JSON.stringify(visible.map(service => service.name));
+      const counter = document.getElementById("serviceCount");
+      if(counter) counter.textContent = visible.length + (visible.length === 1 ? " visible service" : " visible services");
+      if(refreshPreview && window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.refreshPreview();
+    }
 
     function showError(message){
       errorBox.textContent = message;
@@ -548,6 +610,7 @@
         document.getElementById("logoUrl").value = profile.logo_url || "";
         document.getElementById("ownerEmail").value = business.owner_email || "";
         document.getElementById("requestLink").value = new URL("request.html?b=" + encodeURIComponent(slug), location.href).href;
+        document.getElementById("viewRequestPage").href = document.getElementById("requestLink").value;
 
         if(role !== "owner"){
           ownerOnly.textContent=isReadOnly
@@ -560,6 +623,7 @@
 
         if(isReadOnly) document.getElementById("copyLinkButton").disabled=true;
         renderServices();
+        syncServiceExperience(false);
         if (window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.init({ supabaseClient, businessId, role });
         loading.classList.add("hidden");
         settingsContent.classList.remove("hidden");
@@ -572,7 +636,7 @@
     function renderServices(){
       serviceList.innerHTML = "";
       if(!services.length){
-        serviceList.innerHTML = '<div class="feedback">No services yet.</div>';
+        serviceList.innerHTML = '<div class="feedback">No services yet. Add one below so customers know what they can request.</div>';
         return;
       }
       services.forEach(service => {
@@ -581,7 +645,7 @@
         row.dataset.id = service.id;
         row.innerHTML = `
           <input class="service-name" maxlength="120" value="${escapeHtml(service.name)}" ${role !== "owner" ? "disabled" : ""}>
-          <label class="toggle"><input class="service-active" type="checkbox" ${service.active ? "checked" : ""} ${role !== "owner" ? "disabled" : ""}> Active</label>
+          <label class="toggle"><input class="service-active" type="checkbox" ${service.active ? "checked" : ""} ${role !== "owner" ? "disabled" : ""}> Show to customers</label>
           <div>
             <button type="button" class="btn service-save" ${role !== "owner" ? "disabled" : ""}>Save</button>
             <button type="button" class="btn danger service-delete" ${role !== "owner" ? "disabled" : ""}>Delete</button>
@@ -604,7 +668,8 @@
             if(error) throw error;
             if(!data || data.business_id !== businessId) throw new Error("Service was not updated.");
             services = services.map(s => s.id === id ? data : s);
-            setFeedback(serviceFeedback,"Service saved.",true);
+            syncServiceExperience();
+            setFeedback(serviceFeedback,"Service saved. Customer preview updated.",true);
           }catch(error){ setFeedback(serviceFeedback,error.message || "Unable to save service."); }
           finally{ button.disabled = false; }
         });
@@ -623,7 +688,8 @@
             if(error) throw error;
             services = services.filter(s => s.id !== id);
             renderServices();
-            setFeedback(serviceFeedback,"Service removed.",true);
+            syncServiceExperience();
+            setFeedback(serviceFeedback,"Service removed. Customer preview updated.",true);
           }catch(error){ setFeedback(serviceFeedback,error.message || "Unable to remove service."); button.disabled = false; }
         });
       });
@@ -676,16 +742,18 @@
         services.push(data);
         document.getElementById("newServiceName").value = "";
         renderServices();
-        setFeedback(serviceFeedback,"Service added.",true);
+        syncServiceExperience();
+        setFeedback(serviceFeedback,"Service added. Customer preview updated.",true);
       }catch(error){ setFeedback(serviceFeedback,error.message || "Unable to add service."); }
     });
 
     document.getElementById("copyLinkButton").addEventListener("click", async () => {
       try{
         await navigator.clipboard.writeText(document.getElementById("requestLink").value);
-        setFeedback(serviceFeedback,"Request link copied.",true);
+        setFeedback(linkFeedback,"Request link copied.",true);
       }catch{
         document.getElementById("requestLink").select();
+        setFeedback(linkFeedback,"Select and copy the highlighted link.",false);
       }
     });
 
