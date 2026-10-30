@@ -341,15 +341,19 @@
         </section>
 
         <section class="gb-builder-step" aria-labelledby="gb-step-two">
-          <div class="gb-builder-step-title"><span>3</span><div><h3 id="gb-step-two">Ask only what you need</h3><p>Name, contact details, service, and description are already included. Add extra questions only when they help you prepare or give an estimate.</p></div></div>
-          <div class="gb-builder-question-summary"><strong>Your suggested questions</strong><span id="fieldCount" class="feedback"></span></div>
+          <div class="gb-builder-step-title"><span>3</span><div><h3 id="gb-step-two">Ask only what you need</h3><p>Name, contact details, service, description, and optional scheduling are built in. Extra questions are only useful when they provide new information.</p></div></div>
+          <div class="gb-builder-question-summary"><strong>Extra questions (optional)</strong><span id="fieldCount" class="feedback"></span></div>
           <div id="questionReviewList" class="gb-question-review-list" aria-live="polite"></div>
+          <div class="gb-builder-essentials-action">
+            <div><strong>Prefer a shorter form?</strong><p>Use just the essentials. This previews the simplified page first; your saved questions stay live until you save the request page.</p></div>
+            <button id="useEssentials" type="button" class="btn">Use essentials only</button>
+          </div>
           <details class="gb-advanced-settings gb-question-customize">
             <summary>Edit or add questions <span>Optional</span></summary>
             <div id="customFieldList"></div>
             <button id="addCustomField" type="button" class="btn">+ Add a question</button>
           </details>
-          <p class="gb-field-help">Start with the suggestions. You can customize them whenever you need to.</p>
+          <p class="gb-field-help">Extra questions are optional, and you can customize them at any time. Choose <strong>Save request page</strong> below to publish changes.</p>
         </section>
 
         <section class="gb-builder-step gb-builder-preview-step" aria-labelledby="gb-step-three">
@@ -449,6 +453,12 @@
     .gb-simple-builder .gb-question-review-check{background:rgba(111,184,154,.16);color:#a7e1c5}
     .gb-simple-builder .gb-question-review-item{border-color:rgba(255,255,255,.09);background:rgba(0,0,0,.12)}
     .gb-simple-builder .gb-question-review-item:hover{border-color:var(--gb-evergreen-line)}
+    .gb-simple-builder .gb-builder-essentials-action{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid var(--gb-evergreen-line);border-radius:12px;padding:15px 16px;background:var(--gb-evergreen-soft);margin:14px 0 6px}
+    .gb-simple-builder .gb-builder-essentials-action>div{flex:1 1 260px}
+    .gb-simple-builder .gb-builder-essentials-action strong{display:block;font-size:13px}
+    .gb-simple-builder .gb-builder-essentials-action p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+    .gb-simple-builder .gb-builder-essentials-action button{white-space:nowrap}
+    :root[data-gb-theme="light"] .gb-simple-builder .gb-builder-essentials-action{background:rgba(50,108,76,.065)}
     .gb-simple-builder .gb-builder-step input:focus-visible,
     .gb-simple-builder .gb-builder-step select:focus-visible,
     .gb-simple-builder .gb-builder-step textarea:focus-visible,
