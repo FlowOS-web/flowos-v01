@@ -59,9 +59,9 @@ select{background:#0d1711;border:1px solid #54705c;color:#eaf7ec;border-radius:1
 <option value="trial_expired">Access expired</option>
 <option value="reactivated">Subscription reactivated</option>
 </select>
-<button id="qaSendPreview" type="button">Send test email</button>
+<button id="qaSendPreview" type="button">Send updated test email</button>
 </div>
-<p id="qaEmailPreviewMessage" role="status" aria-live="polite">You can send one example of each template per UTC day.</p>
+<p id="qaEmailPreviewMessage" role="status" aria-live="polite">A corrected QA preview version is available. You can send each template one more time today; older emails will not change.</p>
 </div>
 <div class="panel">
 <h2>Dashboard gate passed</h2>
@@ -109,7 +109,7 @@ select{background:#0d1711;border:1px solid #54705c;color:#eaf7ec;border-radius:1
         throw new Error(details?.error||error.message||"Unable to send email");
       }
       if(!data?.ok||!data.provider_accepted)throw new Error("Mail provider did not accept this preview");
-      $("qaEmailPreviewMessage").textContent="Resend accepted the test email for your confirmed QA login inbox. Check that inbox and spam folder; acceptance does not guarantee delivery.";
+      $("qaEmailPreviewMessage").textContent="Resend accepted the updated test email for your confirmed QA inbox. Its links open the QA dashboard. Check your inbox and spam folder; acceptance does not guarantee delivery.";
     }catch(e){
       $("qaEmailPreviewMessage").textContent=e.message||"Unable to send preview.";
     }finally{$("qaSendPreview").disabled=false}
