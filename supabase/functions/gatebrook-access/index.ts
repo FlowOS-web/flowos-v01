@@ -13,7 +13,7 @@ Deno.serve(async(req)=>{
  const {data:membership,error:memberError}=await db.from("business_users").select("business_id,role").eq("user_id",user.id).order("business_id").limit(1).maybeSingle();
  if(memberError)return reply(503,{error:"Could not check workspace access"});
  if(!membership)return reply(200,{allowed:false,reason:"setup_required",next:"onboarding.html"});
- const {data:sub,error:subError}=await db.from("gatebrook_subscriptions").select("status,current_period_end,cancel_at_period_end,trial_end,plan").eq("business_id",membership.business_id).maybeSingle();
+ const {data:sub,error:subError}=await db.from("gatebrook_subscriptions").select("status,current_period_end,cancel_at_period_end,trial_end,plan,stripe_subscription_id").eq("business_id",membership.business_id).maybeSingle();
  if(subError)return reply(503,{error:"Could not check subscription status"});
  // Preserve access to the seeded Northstar demo workspace, which predates billing
  // and intentionally has no Stripe subscription record. This exception is scoped
@@ -33,6 +33,16 @@ Deno.serve(async(req)=>{
  const periodValid=(Number.isFinite(periodEnd)&&periodEnd>now)||
    (sub?.status==="trialing"&&Number.isFinite(trialEnd)&&trialEnd>now);
  const allowed=!!sub&&["active","trialing"].includes(sub.status)&&periodValid;
- if(!allowed)return reply(200,{allowed:false,reason:sub?.status||"setup_required",next:sub&&sub.status!=="incomplete"&&sub.status!=="incomplete_expired"?"billing.html":"onboarding.html",status:sub?.status??null});
+ // Previously subscribed users retain owner-scoped READ access even when
+ // billing is inactive. Unpaid initial checkout never grants read-only access.
+ const readOnly=!allowed&&!!sub?.stripe_subscription_id&&
+   ["trialing","active","past_due","unpaid","paused","canceled"].includes(sub.status);
+ if(!allowed)return reply(200,{
+   allowed:false,read_only:readOnly,business_id:readOnly?membership.business_id:null,
+   role:readOnly?membership.role:null,reason:sub?.status||"setup_required",
+   next:readOnly?"dashboard.html":sub&&sub.status!=="incomplete"&&sub.status!=="incomplete_expired"?"billing.html":"onboarding.html",
+   status:sub?.status??null,plan:sub?.plan??null,trial_end:sub?.trial_end??null,
+   current_period_end:sub?.current_period_end??null,cancel_at_period_end:sub?.cancel_at_period_end===true
+ });
  return reply(200,{allowed:true,business_id:membership.business_id,role:membership.role,status:sub.status,plan:sub.plan,trial_end:sub.trial_end,current_period_end:sub.current_period_end,cancel_at_period_end:sub.cancel_at_period_end});
 });
