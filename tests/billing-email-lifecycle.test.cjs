@@ -225,3 +225,20 @@ test("production templates retain real billing links while QA preview changes li
   assert.match(preview,/prepareBillingPreview\(sample\)/);
   assert.match(page,/Test-email links lead back to this QA dashboard/);
 });
+
+const previewRevisionMigration=read("supabase/migrations/202610300001_gatebrook_qa_email_preview_revisions.sql");
+test("corrected QA previews use server-controlled revision 2 and a new Resend idempotency key",()=>{
+  assert.match(preview,/const PREVIEW_REVISION=2;/);
+  assert.match(preview,/\.eq\("template_revision",PREVIEW_REVISION\)\.maybeSingle\(\)/);
+  assert.match(preview,/template_revision:PREVIEW_REVISION,attempts:1/);
+  assert.match(preview,/"-v"\+PREVIEW_REVISION/);
+  assert.match(preview,/template_revision:PREVIEW_REVISION,provider_accepted:true/);
+  assert.doesNotMatch(preview,/body\.template_revision|body\.revision/);
+});
+test("the previous preview emails remain intact and versioned primary key allows one corrected copy",()=>{
+  assert.match(previewRevisionMigration,/add column if not exists template_revision integer not null default 1/);
+  assert.match(previewRevisionMigration,/primary key \(user_id,kind,preview_day,template_revision\)/);
+  assert.doesNotMatch(previewRevisionMigration,/\bdelete from\b|\btruncate\b/i);
+  assert.match(page,/Send updated test email/);
+  assert.match(page,/older emails will not change/i);
+});
