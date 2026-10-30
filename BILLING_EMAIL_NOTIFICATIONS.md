@@ -48,7 +48,7 @@ All templates include the actual plan price ($149/month or $1,490/year), trial e
 5. Check the email's appearance and links in the inbox/spam folder. The preview includes a prominent TEST PREVIEW banner and test subject line.
 6. In Supabase, verify the preview journal has `status='sent'` and a `resend_email_id`. Confirm inbox delivery separately.
 
-You can preview each of the six templates once per UTC day. A preview is rate-limited, requires a valid Auth session and a tester allowlist entry, and never lets the caller choose another recipient.
+You can preview each of the six templates once per **revision** per UTC day. When a tested template revision is released, the server increments `PREVIEW_REVISION`, preserving the earlier audit rows and allowing one fresh test of the corrected content that same day. Resend idempotency keys include the revision so the updated email is not mistaken for the original. The current revision is **2**, with QA-only links to `qa-dashboard.html`. A preview is rate-limited, requires a valid Auth session and a tester allowlist entry, and never lets the caller choose another recipient.
 
 ## Monitoring
 
