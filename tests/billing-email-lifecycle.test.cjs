@@ -207,6 +207,9 @@ test("all six QA email previews link only to the QA dashboard, never live billin
     assert.doesNotMatch(email.text,/https:\/\/gatebrook\.work\/billing\.html/);
     assert.match(email.text,/not a real billing notice/i);
     assert.match(email.html,/not a real billing notice/i);
+    assert.match(email.html,/View QA dashboard/);
+    assert.match(email.text,/View QA dashboard: https:\/\/gatebrook\.work\/qa-dashboard\.html/);
+    assert.doesNotMatch(email.html,/>Billing<\/a>/);
   }
 });
 test("production templates retain real billing links while QA preview changes links",()=>{
