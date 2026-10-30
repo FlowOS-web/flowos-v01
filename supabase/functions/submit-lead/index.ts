@@ -735,17 +735,59 @@ const handler =
       server-side before the atomic intake RPC accepts any request.
       */
       const { data: requestForm, error: requestFormError } = await ctx.supabaseAdmin
-        .from("business_request_forms").select("fields").eq("business_id", businessId).maybeSingle();
+        .from("business_request_forms").select("fields,core_fields").eq("business_id", businessId).maybeSingle();
       if (requestFormError) {
         console.error("Request form configuration lookup failed:", requestFormError);
         return Response.json({ error: "This request form is temporarily unavailable." }, { status: 503 });
       }
       const configuredFields = Array.isArray(requestForm?.fields) ? requestForm.fields : [];
+      // The core contact/service fields stay required for every business.
+      // Optional standard fields may be marked required or hidden by the owner.
+      const core = requestForm?.core_fields && typeof requestForm.core_fields === "object" && !Array.isArray(requestForm.core_fields)
+        ? requestForm.core_fields as Record<string, unknown> : {};
+      const mode = (key: string) => ["required", "optional", "hidden"].includes(String(core[key]))
+        ? String(core[key]) : "optional";
+      for (const [key, value, label] of [
+        ["notes", notes, "description"],
+        ["location", serviceLocation, "service location"],
+        ["date", preferredDate, "preferred date"]
+      ] as const) {
+        if (mode(key) === "required" && !value) {
+          return Response.json({ error: "Please provide the " + label + " before submitting." }, { status: 400 });
+        }
+        if (mode(key) === "hidden" && value) {
+          return Response.json({ error: "This request form has changed. Please refresh and try again." }, { status: 400 });
+        }
+      }
+
       const rawAnswers = body.custom_answers === undefined ? {} : body.custom_answers;
       if (!rawAnswers || typeof rawAnswers !== "object" || Array.isArray(rawAnswers)) {
         return Response.json({ error: "Invalid custom request answers." }, { status: 400 });
       }
       const customAnswers = rawAnswers as Record<string, unknown>;
+      // Service-specific questions must not leak answers from an unrelated service.
+      // These questions are optional; the original SQL validator still checks
+      // every known answer key, type, size and configured option.
+      for (const field of configuredFields) {
+        const scoped = field && Array.isArray(field.show_for_services)
+          ? field.show_for_services : [];
+        if (!scoped.length) continue;
+        if (field.required === true) {
+          console.warn("Required conditional field is not supported for this form.");
+          return Response.json({ error: "This request form needs an update. Please contact the business." }, { status: 503 });
+        }
+        if (scoped.length > 20 || scoped.some((id: unknown) => typeof id !== "string")) {
+          return Response.json({ error: "This request form needs an update. Please contact the business." }, { status: 503 });
+        }
+        if (!scoped.includes(validService.id)) {
+          const hiddenAnswer = customAnswers[String(field.id)];
+          if (hiddenAnswer !== undefined && hiddenAnswer !== null && hiddenAnswer !== "" &&
+              !(Array.isArray(hiddenAnswer) && hiddenAnswer.length === 0)) {
+            return Response.json({ error: "A service-specific answer does not match the selected service. Please refresh and try again." }, { status: 400 });
+          }
+        }
+      }
+
       const { data: answersValid, error: answersValidationError } = await ctx.supabaseAdmin.rpc(
         "gatebrook_validate_request_fields",
         { p_fields: configuredFields, p_answers: customAnswers }

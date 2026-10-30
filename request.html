@@ -553,7 +553,7 @@
   let turnstileToken = null;
 
   let turnstileWidgetId = null;
-  let requestFormConfig = { template_key: "general", page_title: "Request a Service", page_description: "Tell us what you need and we will follow up.", submit_label: "Submit Request", fields: [] };
+  let requestFormConfig = { template_key: "general", page_title: "Request a Service", page_description: "Tell us what you need and we will follow up.", submit_label: "Submit Request", fields: [], core_fields: {} };
   let requestCustomFields = [];
   const isPreviewMode = new URLSearchParams(window.location.search).has("preview");
 
@@ -809,6 +809,45 @@
     }
   }
 
+  function applyCoreSettings(settings) {
+    const rows=[
+      {key:"notes",container:".gb-request-description",id:"notes",label:"Tell us about your request"},
+      {key:"location",container:".gb-request-location",id:"service_location",label:"Service address or location"},
+      {key:"date",container:".gb-request-schedule",id:"preferred_date",label:"Preferred date"}
+    ];
+    for(const row of rows){
+      const wrapper=document.querySelector(row.container), input=document.getElementById(row.id);
+      const state=["optional","required","hidden"].includes(settings?.[row.key]) ? settings[row.key] : "optional";
+      wrapper.classList.toggle("hidden",state==="hidden");
+      input.disabled=state==="hidden";
+      input.required=state==="required";
+      if(state==="hidden")input.value="";
+      const label=wrapper.querySelector('label[for="'+row.id+'"]');
+      if(label)label.textContent=row.label+(state==="required" ? " *" : "");
+      if(row.key==="date"){
+        if(state==="required")wrapper.open=true;
+        const caption=wrapper.querySelector("summary span");
+        if(caption)caption.textContent=state==="required" ? "Required" : "Optional";
+      }
+    }
+  }
+  function updateConditionalQuestions() {
+    const selectedId=serviceSelect.selectedOptions[0]?.dataset.serviceId || "";
+    document.querySelectorAll("[data-custom-field]").forEach(wrapper=>{
+      let allowed=[];
+      try{allowed=JSON.parse(wrapper.dataset.visibleForServices||"[]");}catch{}
+      const shown=!allowed.length || Boolean(selectedId && allowed.includes(selectedId));
+      wrapper.classList.toggle("hidden",!shown);
+      wrapper.querySelectorAll("input,select,textarea").forEach(input=>{
+        input.disabled=!shown;
+        if(!shown){
+          if(input.type==="checkbox"||input.type==="radio")input.checked=false;
+          else input.value="";
+        }
+      });
+    });
+  }
+  serviceSelect.addEventListener("change",updateConditionalQuestions);
   function renderCustomFields(fields) {
     const host = document.getElementById("customFields");
     host.replaceChildren();
@@ -827,6 +866,7 @@
       const wrapper = document.createElement("div");
       wrapper.className = "custom-question" + (field.type === "textarea" ? " full" : "");
       wrapper.dataset.customField = field.id;
+      wrapper.dataset.visibleForServices=JSON.stringify(Array.isArray(field.show_for_services)?field.show_for_services.filter(x=>typeof x==="string"):[]);
       const label = document.createElement("label");
       label.textContent = field.label + (field.required ? " *" : "");
       wrapper.appendChild(label);
@@ -860,6 +900,7 @@
       if (hint) { const p=document.createElement("div"); p.className="custom-field-hint"; p.textContent=hint; wrapper.appendChild(p); }
       host.appendChild(wrapper);
     }
+    updateConditionalQuestions();
   }
 
   function setupPreviewMode() {
@@ -895,11 +936,12 @@
       empty.textContent = "Select a service";
       serviceSelect.appendChild(empty);
       const services = Array.isArray(data.services) ? data.services : [];
-      services.forEach(name => {
-        if (typeof name !== "string" || !name.trim()) return;
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
+      const options=Array.isArray(data.serviceOptions)?data.serviceOptions:services.map(name=>({name,id:""}));
+      options.forEach(service => {
+        if (!service || typeof service.name !== "string" || !service.name.trim()) return;
+        const option=document.createElement("option");
+        option.value=service.name;option.textContent=service.name;
+        if(typeof service.id==="string")option.dataset.serviceId=service.id;
         serviceSelect.appendChild(option);
       });
       if (!services.length) {
@@ -918,6 +960,8 @@
       };
       requestCustomFields = requestFormConfig.fields;
       renderCustomFields(requestCustomFields);
+      applyCoreSettings(data.coreFields);
+      updateConditionalQuestions();
       profile.contact_phone = safeText(data.phone);
       profile.public_email = safeText(data.email);
       profile.website_url = safeText(data.website);
@@ -1049,6 +1093,7 @@
       tagline.textContent = requestFormConfig.page_description || profile.tagline || "Submit your request and we will get back to you.";
       submitButton.textContent = requestFormConfig.submit_label || "Submit Request";
       renderCustomFields(requestFormConfig.fields || []);
+      applyCoreSettings(requestFormConfig.core_fields);
 
 
       if (
@@ -1090,6 +1135,7 @@
       showBusinessContact(profile);
 
       await loadServices();
+      updateConditionalQuestions();
 
 
       loading.classList.add(
@@ -1201,6 +1247,7 @@
 
       option.value =
         service.name;
+      option.dataset.serviceId=service.id;
 
 
       option.textContent =

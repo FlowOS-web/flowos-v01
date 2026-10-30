@@ -338,6 +338,14 @@
             <input id="formSubmitLabel" data-builder-input maxlength="40" value="Submit Request">
           </details>
           <p class="gb-field-help">The short description comes from your <strong>Customer-facing tagline</strong> in Business Profile.</p>
+          <div class="gb-core-settings">
+            <div class="gb-core-heading"><strong>What should customers provide?</strong><span>Essential details stay simple</span></div>
+            <p>Name, a way to contact the customer, and a service choice are always included. Customize the additional standard fields below.</p>
+            <div class="gb-core-row"><div><label for="coreNotes">Request description</label><small>What the customer needs help with</small></div><select id="coreNotes" data-core-option><option value="optional">Show · Optional</option><option value="required">Show · Required</option><option value="hidden">Hide</option></select></div>
+            <div class="gb-core-row"><div><label for="coreLocation">Service address or location</label><small>Where the work will take place</small></div><select id="coreLocation" data-core-option><option value="optional">Show · Optional</option><option value="required">Show · Required</option><option value="hidden">Hide</option></select></div>
+            <div class="gb-core-row"><div><label for="coreDate">Preferred date</label><small>Ask about the customer's preferred schedule</small></div><select id="coreDate" data-core-option><option value="optional">Show · Optional</option><option value="required">Show · Required</option><option value="hidden">Hide</option></select></div>
+            <p class="gb-field-help">Your selection updates the preview immediately. Publish these choices with <strong>Save request page</strong>.</p>
+          </div>
         </section>
 
         <section class="gb-builder-step" aria-labelledby="gb-step-two">
@@ -394,6 +402,24 @@
     .gb-simple-builder .gb-question-review-copy{min-width:0}
     .gb-simple-builder .gb-question-review-copy strong{display:block;font-size:13px;font-weight:600;overflow-wrap:anywhere}
     .gb-simple-builder .gb-question-review-copy span{display:block;margin-top:3px;font-size:11px;color:var(--muted,#b8bdc4)}
+    .gb-simple-builder .gb-core-settings{margin-top:25px;padding:19px;border:1px solid var(--gb-evergreen-line);border-radius:13px;background:rgba(111,184,154,.045)}
+    .gb-simple-builder .gb-core-heading{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:7px}
+    .gb-simple-builder .gb-core-heading strong{font-size:15px}
+    .gb-simple-builder .gb-core-heading span{font-size:11px;color:var(--gb-evergreen)}
+    .gb-simple-builder .gb-core-settings>p{color:var(--muted);font-size:12px;line-height:1.55;margin:0 0 12px}
+    .gb-simple-builder .gb-core-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,195px);gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+    .gb-simple-builder .gb-core-row label{display:block;margin:0 0 4px}
+    .gb-simple-builder .gb-core-row small{color:var(--muted);line-height:1.5}
+    .gb-simple-builder .gb-core-settings .gb-field-help{margin-top:12px}
+    .gb-simple-builder .gb-condition-editor{margin-top:16px;padding:12px 14px;background:rgba(111,184,154,.04);border:1px solid var(--gb-evergreen-line);border-radius:10px}
+    .gb-simple-builder .gb-condition-editor summary{cursor:pointer;color:var(--text);font-size:13px;font-weight:650}
+    .gb-simple-builder .gb-condition-editor p{font-size:12px;color:var(--muted);line-height:1.55;margin:11px 0}
+    .gb-simple-builder .gb-condition-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:7px}
+    .gb-simple-builder .gb-condition-choice{display:flex;gap:8px;align-items:center;margin:0;padding:9px;border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:12px}
+    .gb-simple-builder .gb-condition-choice input{width:auto;margin:0;accent-color:var(--gb-evergreen)}
+    :root[data-gb-theme="light"] .gb-simple-builder .gb-core-settings,
+    :root[data-gb-theme="light"] .gb-simple-builder .gb-condition-editor{background:rgba(50,108,76,.055)}
+    @media(max-width:620px){.gb-simple-builder .gb-core-settings{padding:13px}.gb-simple-builder .gb-core-row{grid-template-columns:1fr}.gb-simple-builder .gb-core-row select{width:100%}}
     .gb-simple-builder .gb-question-customize{margin-top:12px}
     .gb-simple-builder .gb-question-customize #customFieldList{margin-top:14px}
     .gb-simple-builder .gb-question-customize .gb-custom-field-row{margin-top:10px}
@@ -544,9 +570,10 @@
       if (!root) return;
       const visible = services.filter(service => service.active === true);
       root.dataset.services = JSON.stringify(visible.map(service => service.name));
+      root.dataset.serviceOptions = JSON.stringify(visible.map(service => ({id:service.id,name:service.name})));
       const counter = document.getElementById("serviceCount");
       if(counter) counter.textContent = visible.length + (visible.length === 1 ? " visible service" : " visible services");
-      if(refreshPreview && window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.refreshPreview();
+      if(refreshPreview && window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.refreshServiceChoices();
     }
 
     function showError(message){
@@ -609,7 +636,7 @@
         slug = profile.slug || business.slug;
         services = serviceRows || [];
         const builderRoot = document.getElementById("requestBuilder");
-        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); builderRoot.dataset.businessLogo = String(profile.logo_url || ""); builderRoot.dataset.businessPhone = String(profile.contact_phone || ""); builderRoot.dataset.businessEmail = String(profile.public_email || ""); builderRoot.dataset.businessWebsite = String(profile.website_url || ""); builderRoot.dataset.services = JSON.stringify((serviceRows || []).filter(service => service.active).map(service => service.name)); }
+        if (builderRoot) { builderRoot.dataset.industryHint = String(business.industry || profile.industry || "").toLowerCase(); builderRoot.dataset.businessTagline = String(profile.tagline || ""); builderRoot.dataset.businessName = String(profile.display_name || business.name || "Your business"); builderRoot.dataset.businessLogo = String(profile.logo_url || ""); builderRoot.dataset.businessPhone = String(profile.contact_phone || ""); builderRoot.dataset.businessEmail = String(profile.public_email || ""); builderRoot.dataset.businessWebsite = String(profile.website_url || ""); builderRoot.dataset.services = JSON.stringify((serviceRows || []).filter(service => service.active).map(service => service.name)); builderRoot.dataset.serviceOptions = JSON.stringify((serviceRows || []).filter(service=>service.active).map(service=>({id:service.id,name:service.name}))); }
 
         document.getElementById("businessName").value = business.name || "";
         document.getElementById("tagline").value = profile.tagline || "";
