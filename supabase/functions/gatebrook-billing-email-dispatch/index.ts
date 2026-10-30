@@ -7,7 +7,7 @@ const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const STRIPE_KEY = Deno.env.get("STRIPE_SECRET_KEY") || "";
 const RESEND_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const FROM_EMAIL = Deno.env.get("BILLING_FROM_EMAIL") ||
-  Deno.env.get("FROM_EMAIL") || "Gatebrook <onboarding@resend.dev>";
+  Deno.env.get("FROM_EMAIL") || "";
 const db=createClient(URL,SERVICE,{auth:{persistSession:false,autoRefreshToken:false}});
 const nowIso=()=>new Date().toISOString();
 const out=(code:number,value:unknown)=>new Response(JSON.stringify(value),{
@@ -36,22 +36,24 @@ async function scan(row:SubscriptionRow) {
     .select("last_status,last_trial_end,stripe_subscription_id,transition_seq")
     .eq("business_id",row.business_id).maybeSingle();
   if(oldError)throw new Error("Unable to read prior email state");
-  const first=!prior||prior.stripe_subscription_id!==row.stripe_subscription_id;
-  const prevStatus=first?null:prior.last_status;
-  const seq=(prior?.transition_seq||0)+(prevStatus&&prevStatus!==row.status?1:0)+(prior&&!first?0:first&&prior?1:0);
+  const newSubscription=!prior||prior.stripe_subscription_id!==row.stripe_subscription_id;
+  const prevStatus=prior?.last_status||null;
+  const sameSubscription=!newSubscription;
+  const seq=(prior?.transition_seq||0)+(prevStatus&&prevStatus!==row.status?1:0)+(newSubscription&&prior?1:0);
   const trial=ms(row.trial_end);
   const cycle=trial?new Date(trial).toISOString():"no-trial";
   if(row.status==="trialing"&&trial&&trial>Date.now()){
-    // Welcome is only useful for a genuinely new trial; never backfill it weeks later.
+    // New customers receive welcome; returning customers receive reactivation.
     const created=ms(row.created_at);
-    if(first&&created&&Date.now()-created<24*3600e3)
+    if(newSubscription&&(!prevStatus||!inactive.has(prevStatus))&&
+       created&&Date.now()-created<24*3600e3)
       await enqueue(row,"trial_welcome",cycle,nowIso());
     await enqueue(row,"trial_3_day",cycle,new Date(trial-3*864e5).toISOString());
     await enqueue(row,"trial_1_day",cycle,new Date(trial-864e5).toISOString());
   }
-  if(prevStatus==="trialing"&&row.status==="active"&&trial&&trial<=Date.now())
+  if(sameSubscription&&prevStatus==="trialing"&&row.status==="active"&&trial&&trial<=Date.now())
     await enqueue(row,"trial_converted",cycle,nowIso());
-  if(prevStatus&&!inactive.has(prevStatus)&&inactive.has(row.status))
+  if(sameSubscription&&prevStatus&&!inactive.has(prevStatus)&&inactive.has(row.status))
     await enqueue(row,"trial_expired","transition-"+seq,nowIso());
   if(prevStatus&&inactive.has(prevStatus)&&["active","trialing"].includes(row.status))
     await enqueue(row,"reactivated","transition-"+seq,nowIso());
@@ -160,7 +162,8 @@ Deno.serve(async req=>{
   const {data:authorized,error:authError}=await db.rpc("gatebrook_billing_verify_job_token",{p_token:token});
   if(authError||authorized!==true)return out(401,{error:"Unauthorized"});
   // Never let the dispatcher send sandbox notifications or use test Stripe credentials.
-  if(!/^(sk|rk)_live_[A-Za-z0-9_-]+$/.test(STRIPE_KEY)||!RESEND_KEY)
+  if(!/^(sk|rk)_live_[A-Za-z0-9_-]+$/.test(STRIPE_KEY)||!RESEND_KEY||
+     !FROM_EMAIL||FROM_EMAIL.includes("@resend.dev"))
     return out(503,{error:"Production billing mail provider is not configured"});
   let scanned=0,claimed=0,sent=0,errors=0;
   try{
