@@ -93,3 +93,15 @@ Verify failed/declined simulated payments, trial expiry (Stripe test clocks), pa
 ## Remaining separate production security findings
 
 Supabase's security advisor reports unrelated existing warnings: public `SECURITY DEFINER` function access and leaked-password protection disabled. These weren't changed for QA; review them before launch: https://supabase.com/docs/guides/database/database-linter.
+
+
+## 2026-10-29 — isolated failed-payment sandbox test
+
+- Created an independent **Stripe Gatebrook QA sandbox-only** customer (no email) and an independent $149/month subscription with Stripe's `pm_card_chargeCustomerFail` payment method. This fixture is intentionally **not connected** to the J&J Plumbing QA workspace.
+- Stripe attempted the first $149 invoice once, collected **$0**, left invoice **open**, and subscription **incomplete**.
+- The signed `invoice.payment_failed` event (`evt_1UW4CVH6B0zVSPUK1zoWluY4`) completed delivery to the QA webhook. QA webhook correctly did not activate an unrelated workspace.
+- The preexisting QA workspace remained **active** and scheduled to cancel at its paid period end. The production subscription was unchanged.
+- Found and corrected a **production webhook compatibility bug**: invoices from Stripe's newer API shape use `parent.subscription_details.subscription`, not necessarily top-level `invoice.subscription`. Deployed production `gatebrook-stripe-webhook` version 12 with modern/legacy invoice resolution for both `invoice.paid` and `invoice.payment_failed`, plus a live-mode event guard. No live event or payment was generated.
+- Added `tests/stripe-invoice-webhook.test.cjs`; **9/9** tests passed using the sandbox-observed invoice shape and validating that unpaid/incomplete/past-due/canceled states fail the access predicate.
+
+**Still pending:** a failed **renewal** of a previously active, mapped QA workspace, followed by payment-method recovery and verified dashboard restoration. The independent fixture proves the processor decline and webhook delivery, but does not constitute that full app-level recovery test. It must be performed using a separate approved QA workspace/account so the existing scheduled-cancellation test remains untouched.
