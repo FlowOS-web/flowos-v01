@@ -44,6 +44,9 @@ Documentation: https://docs.stripe.com/tax/set-up
 ### 5. Final production smoke tests
 Using an authorized live account/payment method, explicitly verify real self-service signup, confirmation, payment capture, cancellation and period-end access; confirm production email delivery and support/contact processes. Do not claim a successful live transaction until completed. The real account currently has **no active paid subscriptions**, so live checkout remains unproven.
 
+### 6. Separate QA from production infrastructure — **recommended before scaling**
+Gatebrook QA currently uses separate tables/functions and a different Stripe sandbox, but **shares the same Supabase project and Auth tenant as production**. The QA clock runner and preview endpoints are deployed alongside live business endpoints. They require server-held secrets and allowlisted QA accounts, but a separate Supabase staging project would reduce blast radius further. Plan migration of QA to isolated staging credentials and review whether temporary test functions should remain deployed in the production project after launch.
+
 ## Reviewed Supabase advisor warnings
 
 - **Public SECURITY DEFINER request form RPC:** \`gatebrook_get_public_request_form\` is intentionally anonymous to display public form configuration. It returns non-secret form fields, now only for an entitled active workspace. Revoking anonymous EXECUTE immediately would break public request forms; keep its output minimized and watch for future fields accidentally carrying private data.
