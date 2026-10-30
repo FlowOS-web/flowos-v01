@@ -1238,6 +1238,16 @@
 
     function valueEditorHtml(lead) {
       if (!moneyFieldsAvailable) return "";
+      if (currentReadOnly) {
+        const estimate = moneyCents(lead.estimated_value);
+        const booked = moneyCents(lead.booked_revenue);
+        return '<div class="lead-grid" aria-label="Saved lead values">' +
+          '<div><div class="field-label">Estimated lead value</div><div class="field-value">' +
+          (estimate === null ? "Not set" : currency.format(estimate / 100)) +
+          '</div></div><div><div class="field-label">Booked job value</div><div class="field-value">' +
+          (booked === null ? "Not set" : currency.format(booked / 100)) +
+          "</div></div></div>";
+      }
       const id = escapeHtml(lead.id);
       const draft = leadValueDrafts.get(lead.id);
       return `<form class="lead-values" data-id="${id}">
@@ -1305,6 +1315,7 @@
               class="action-button ${next === "booked" ? "book-button" : next === "completed" ? "complete-button" : next === "lost" ? "lost-button" : ""}"
               data-id="${escapeHtml(lead.id)}" data-status="${next}">${next[0].toUpperCase() + next.slice(1)}</button>`).join("")}
           </div>`;
+        if (currentReadOnly) card.querySelector(".actions")?.remove();
         leadList.appendChild(card);
         if (pendingLeadIds.has(lead.id)) card.querySelectorAll("button, input").forEach(control => { control.disabled = true; });
       }
