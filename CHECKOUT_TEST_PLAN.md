@@ -105,3 +105,24 @@ Supabase's security advisor reports unrelated existing warnings: public `SECURIT
 - Added `tests/stripe-invoice-webhook.test.cjs`; **9/9** tests passed using the sandbox-observed invoice shape and validating that unpaid/incomplete/past-due/canceled states fail the access predicate.
 
 **Still pending:** a failed **renewal** of a previously active, mapped QA workspace, followed by payment-method recovery and verified dashboard restoration. The independent fixture proves the processor decline and webhook delivery, but does not constitute that full app-level recovery test. It must be performed using a separate approved QA workspace/account so the existing scheduled-cancellation test remains untouched.
+
+
+## 2026-10-29 — full isolated failed-renewal and recovery test
+
+**Completed successfully using a real Stripe test clock in the Gatebrook QA sandbox.**
+
+- Introduced a second QA-only workspace named **Automated Failed Renewal QA** with its own subscription and test customer. The approved existing tester owns both workspaces; the original J&J Plumbing QA checkout and dashboard remain the default. An explicitly selected secondary workspace is always authorized against the signed-in owner.
+- QA workspace: `0aaf0bb6-5eab-4c2c-a3ca-ffc4e4c05f5c`.
+- Test clock: `clock_1UW4XIH6B0zVSPUK1kDOI9z4`.
+- Subscription: `sub_1UW4XKH6B0zVSPUKnfK8ICZC`.
+- Original simulated trial-to-paid conversion produced a **paid $149 sandbox invoice** and an active QA subscription with access allowed.
+- Replaced the sandbox subscription's default payment method with Stripe's `pm_card_chargeCustomerFail` test card (last four `0341`), advanced to its next renewal, and observed an attempted but **unpaid $149 invoice** (`in_1UW4YmH6B0zVSPUKBBGVw6vt`).
+- Stripe emitted `invoice.payment_failed`; the signed QA webhook verified the subscription and changed the second QA workspace to **`past_due`**, causing its server-side access condition to return **denied**.
+- Restored the existing working sandbox Visa payment method, paid the specific open renewal invoice through Stripe's sandbox API, then verified an **`invoice.paid`** event, status **`active`**, and QA access **allowed** once again.
+- The protected run journal confirms `access_before=true`, `access_after_failure=false`, `access_after_recovery=true`, `stage='recovered'`.
+- Verified **J&J Plumbing QA** remains active with cancellation scheduled at period end. **Production** remains with zero active subscriptions and its existing incomplete subscription unchanged.
+- Private runner `gatebrook-qa-clock-runner` uses only sandbox keys and a secret retained in Postgres; it cannot send customer emails or write production subscription tables. QA-only webhook fixture authorization requires a matching test clock, customer, subscription, workspace and allowlisted owner. No real charges occurred.
+
+**Browser verification still required:** While signed in as the approved tester, open [Automated Failed Renewal QA dashboard](https://gatebrook.work/qa-dashboard.html?workspace_id=0aaf0bb6-5eab-4c2c-a3ca-ffc4e4c05f5c) to confirm the browser renders the recovered state. The internal runner deliberately did **not** sign in or impersonate a real tester. Server-side DB access conditions and signed webhooks were verified independently.
+
+Files: `tests/qa-clock-runner.test.cjs`, `supabase/functions/gatebrook-qa-clock-runner/index.ts`, `supabase/migrations/202610290004_gatebrook_qa_clock_test_run.sql`, `supabase/migrations/202610290005_gatebrook_qa_multi_workspace.sql`.
