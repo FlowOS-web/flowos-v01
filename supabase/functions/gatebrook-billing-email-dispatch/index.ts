@@ -22,7 +22,7 @@ type EmailJob={
   id:string;business_id:string;stripe_subscription_id:string;
   kind:BillingEmailKind;cycle_key:string;due_at:string;status:string;attempts:number;
 };
-const inactive=new Set(["canceled","paused","unpaid","incomplete_expired"]);
+const inactive=new Set(["canceled","paused","unpaid","past_due","incomplete_expired"]);
 function ms(v:string|null|undefined){const n=v?Date.parse(v):NaN;return Number.isFinite(n)?n:null}
 async function enqueue(row:SubscriptionRow,kind:BillingEmailKind,cycleKey:string,dueAt:string) {
   const {error}=await db.from("gatebrook_billing_email_jobs").upsert({
@@ -43,10 +43,10 @@ async function scan(row:SubscriptionRow) {
   const trial=ms(row.trial_end);
   const cycle=trial?new Date(trial).toISOString():"no-trial";
   if(row.status==="trialing"&&trial&&trial>Date.now()){
-    // New customers receive welcome; returning customers receive reactivation.
-    const created=ms(row.created_at);
+    // Welcome follows the real trial start, even if the initial business setup was old.
+    // Returning customers receive reactivation instead.
     if(newSubscription&&(!prevStatus||!inactive.has(prevStatus))&&
-       created&&Date.now()-created<24*3600e3)
+       trial>Date.now()+3*864e5)
       await enqueue(row,"trial_welcome",cycle,nowIso());
     await enqueue(row,"trial_3_day",cycle,new Date(trial-3*864e5).toISOString());
     await enqueue(row,"trial_1_day",cycle,new Date(trial-864e5).toISOString());
