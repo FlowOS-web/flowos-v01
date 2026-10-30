@@ -103,7 +103,7 @@ async function setup(){
     email,password:pwd,email_confirm:true,
     app_metadata:{gatebrook_qa_clock_fixture:true}
   });
-  if(created.error||!created.data.user)throw Error("Cannot create synthetic QA auth account");
+  if(created.error||!created.data.user)throw Error("Cannot create synthetic QA auth account: "+(created.error?.code||created.error?.status||"unknown"));
   const owner=created.data.user.id;
   const tester=await db.from("gatebrook_qa_testers").insert({user_id:owner});
   if(tester.error)throw Error("Cannot authorize synthetic QA tester");
