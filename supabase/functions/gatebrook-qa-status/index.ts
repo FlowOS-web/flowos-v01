@@ -29,8 +29,14 @@ Deno.serve(async req=>{
     .select("user_id").eq("user_id",user.id).maybeSingle();
   if(testerError) return response(503,{error:"QA authorization check failed."},origin);
   if(!tester) return response(403,{error:"This account has not been enabled for Gatebrook QA."},origin);
-  const {data:workspace,error:wsError}=await db.from("gatebrook_qa_workspaces")
-    .select("id,name").eq("owner_user_id",user.id).maybeSingle();
+  const workspaceId=new URL(req.url).searchParams.get("workspace_id");
+  if(workspaceId&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(workspaceId))
+    return response(400,{error:"Invalid QA workspace selector"},origin);
+  let wsQuery=db.from("gatebrook_qa_workspaces")
+    .select("id,name").eq("owner_user_id",user.id);
+  if(workspaceId) wsQuery=wsQuery.eq("id",workspaceId);
+  else wsQuery=wsQuery.order("created_at",{ascending:true}).limit(1);
+  const {data:workspace,error:wsError}=await wsQuery.maybeSingle();
   if(wsError) return response(503,{error:"QA workspace check failed."},origin);
   if(!workspace) return response(200,{sandbox:true,allowed:false,has_workspace:false,status:"not_started",account_email:user.email||null},origin);
   const {data:sub,error:subError}=await db.from("gatebrook_qa_subscriptions")
