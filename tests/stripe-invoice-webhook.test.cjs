@@ -11,7 +11,8 @@ const qaAccess=fs.readFileSync(path.join(root,"supabase/functions/gatebrook-qa-s
 
 function invoiceResolver(){
   const start=liveWebhook.indexOf("function subscriptionIdFromInvoice(");
-  const end=liveWebhook.indexOf("\nfunction epoch(",start);
+  const newGuardStart=liveWebhook.indexOf("\nasync function stripeCheckoutSession(",start);
+  const end=newGuardStart>=0?newGuardStart:liveWebhook.indexOf("\nfunction epoch(",start);
   assert.ok(start>=0&&end>start,"Invoice resolver exists in the deployed webhook source");
   const js=liveWebhook.slice(start,end)
     .replace("inv: Record<string, any>","inv")
