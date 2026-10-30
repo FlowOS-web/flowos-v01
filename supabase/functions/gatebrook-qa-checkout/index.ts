@@ -47,8 +47,11 @@ Deno.serve(async req=>{
   const plan=body.plan==="trial"?"trial":body.plan==="monthly"?"monthly":body.plan==="annual"?"annual":null;
   const name=typeof body.business_name==="string"?body.business_name.trim().slice(0,100):"Gatebrook QA Workspace";
   if(!plan||name.length<2)return reply(400,{error:"Choose a valid plan and business name."},origin);
+  // User-facing checkout always uses the original, oldest QA workspace.
+  // The separate billing-clock scenario cannot affect checkout routing.
   const {data:oldWorkspace,error:wsError}=await db.from("gatebrook_qa_workspaces")
-    .select("id").eq("owner_user_id",user.id).maybeSingle();
+    .select("id").eq("owner_user_id",user.id)
+    .order("created_at",{ascending:true}).limit(1).maybeSingle();
   if(wsError)return reply(503,{error:"Unable to check QA workspace."},origin);
   let workspaceId=oldWorkspace?.id;
   if(!workspaceId){
