@@ -12,6 +12,8 @@ const FROM=Deno.env.get("BILLING_FROM_EMAIL")||
 const db=createClient(URL,SERVICE,{auth:{persistSession:false,autoRefreshToken:false}});
 const origins=new Set(["https://gatebrook.work","https://flowos-web.github.io"]);
 const types=new Set(["trial_welcome","trial_3_day","trial_1_day","trial_converted","trial_expired","reactivated"]);
+// Bump only when a QA preview template or its links materially change.
+const PREVIEW_REVISION=2;
 function result(code:number,data:unknown,origin:string|null) {
  return new Response(JSON.stringify(data),{status:code,headers:{
   "Content-Type":"application/json","Cache-Control":"no-store",
@@ -43,7 +45,7 @@ Deno.serve(async req=>{
  const day=new Date().toISOString().slice(0,10);
  const existing=await db.from("gatebrook_billing_email_previews")
   .select("status,attempts").eq("user_id",user.id).eq("kind",kind)
-  .eq("preview_day",day).maybeSingle();
+  .eq("preview_day",day).eq("template_revision",PREVIEW_REVISION).maybeSingle();
  if(existing.error)return result(503,{error:"Unable to check QA email limits."},origin);
  if(existing.data?.status==="sent")return result(409,{error:"That example was already sent today. Select another email type."},origin);
  if(existing.data?.status==="pending")return result(409,{error:"A preview send is already in progress."},origin);
@@ -51,12 +53,12 @@ Deno.serve(async req=>{
  if(existing.data){
    const {data:retry,error}=await db.from("gatebrook_billing_email_previews")
     .update({status:"pending",attempts:existing.data.attempts+1,updated_at:new Date().toISOString()})
-    .eq("user_id",user.id).eq("kind",kind).eq("preview_day",day).eq("status","failed")
+    .eq("user_id",user.id).eq("kind",kind).eq("preview_day",day).eq("template_revision",PREVIEW_REVISION).eq("status","failed")
     .select("user_id").maybeSingle();
    if(error||!retry)return result(409,{error:"Another preview request is in progress."},origin);
  }else{
    const {error}=await db.from("gatebrook_billing_email_previews").insert({
-    user_id:user.id,kind,preview_day:day,attempts:1,status:"pending"
+    user_id:user.id,kind,preview_day:day,template_revision:PREVIEW_REVISION,attempts:1,status:"pending"
    });
    if(error)return result(error.code==="23505"?409:503,{error:"Unable to reserve QA preview."},origin);
  }
@@ -71,7 +73,7 @@ Deno.serve(async req=>{
    const response=await fetch("https://api.resend.com/emails",{
     method:"POST",headers:{
       "Authorization":"Bearer "+RESEND,"Content-Type":"application/json",
-      "Idempotency-Key":"gatebrook-preview-"+user.id+"-"+kind+"-"+day
+      "Idempotency-Key":"gatebrook-preview-"+user.id+"-"+kind+"-"+day+"-v"+PREVIEW_REVISION
     },
     body:JSON.stringify({from:FROM,to:[user.email],
       subject:example.subject,html:example.html,
@@ -81,13 +83,13 @@ Deno.serve(async req=>{
    if(!response.ok||typeof mail.id!=="string")throw Error("Email provider rejected the test message ("+response.status+").");
    const {error:saveError}=await db.from("gatebrook_billing_email_previews")
     .update({status:"sent",resend_email_id:mail.id,updated_at:new Date().toISOString()})
-    .eq("user_id",user.id).eq("kind",kind).eq("preview_day",day);
+    .eq("user_id",user.id).eq("kind",kind).eq("preview_day",day).eq("template_revision",PREVIEW_REVISION);
    if(saveError)throw Error("Email accepted but delivery journal could not be updated.");
-   return result(200,{ok:true,kind,provider_accepted:true},origin);
+   return result(200,{ok:true,kind,template_revision:PREVIEW_REVISION,provider_accepted:true},origin);
  }catch(e){
    await db.from("gatebrook_billing_email_previews").update({
      status:"failed",updated_at:new Date().toISOString()
-   }).eq("user_id",user.id).eq("kind",kind).eq("preview_day",day);
+   }).eq("user_id",user.id).eq("kind",kind).eq("preview_day",day).eq("template_revision",PREVIEW_REVISION);
    console.error("QA billing email preview failed",kind,e instanceof Error?e.message:"unknown");
    return result(503,{error:"Could not send the example email. Check Resend delivery configuration."},origin);
  }
