@@ -61,9 +61,11 @@ Deno.serve(async (req) => {
     // Do not let a customer turn an existing paid business into a different slug/name via a checkout retry.
     const { data: member } = await db.from("business_users").select("role").eq("business_id", businessId).eq("user_id", auth.user.id).maybeSingle();
     if (!member || member.role !== "owner") return reply(403, { error: "Business owner access is required." });
-    const { data: sub } = await db.from("gatebrook_subscriptions").select("status,stripe_checkout_session_id,plan").eq("business_id", businessId).maybeSingle();
+    const { data: sub } = await db.from("gatebrook_subscriptions").select("status,stripe_checkout_session_id,stripe_subscription_id,plan").eq("business_id", businessId).maybeSingle();
     previousCheckoutSessionId = sub?.stripe_checkout_session_id ?? null;
     if (sub && ["active","trialing","past_due"].includes(sub.status)) return reply(409, { error: "A subscription already exists for this workspace. Sign in to continue." });
+    if (sub?.status === "incomplete" && sub.stripe_subscription_id)
+      return reply(409, { error: "A subscription is already being activated. Check billing before starting another checkout.", next: "billing.html" });
     if (sub?.status === "incomplete" && sub.stripe_checkout_session_id) {
       // Old accounts might have an open Stripe-hosted Checkout session.
       // When they explicitly start the in-page checkout, expire the old,
@@ -85,25 +87,30 @@ Deno.serve(async (req) => {
         next: "billing.html"
       });
       if (prior.status === "open") {
-        if (prior.metadata && typeof prior.metadata === "object" &&
-            (prior.metadata as Record<string, unknown>).checkout_option !== plan) {
-          return reply(409, { error: "A checkout session is already open for a different plan. Finish or let that session expire before choosing another plan." });
-        }
-        if (prior.ui_mode === "embedded" && typeof prior.client_secret === "string") {
-          return reply(200, { mode: "embedded", client_secret: prior.client_secret, publishable_key: PUBLISHABLE_KEY });
-        }
-        if (prior.ui_mode !== "hosted") {
-          return reply(409, { error: "An existing checkout cannot be reopened. Please contact support." });
-        }
+        // Never expire or reuse an unrelated checkout. Require the complete,
+        // signed-in user/business linkage and make sure no payment or Stripe
+        // subscription exists. We only replace unfinished, unpaid checkout.
         const metadata = prior.metadata as Record<string, unknown> | null;
-        if (prior.mode !== "subscription" ||
+        if (prior.livemode !== (keyMode === "live") ||
+            prior.id !== sub.stripe_checkout_session_id ||
+            prior.mode !== "subscription" ||
             prior.payment_status === "paid" ||
-            typeof prior.subscription === "string" ||
+            Boolean(prior.subscription) ||
             metadata?.business_id !== businessId ||
             metadata?.user_id !== auth.user.id ||
             prior.client_reference_id !== auth.user.id) {
           return reply(409, { error: "Your existing Stripe checkout needs review before it can be replaced. Please contact support." });
         }
+        // Stripe returns 'embedded_page' on retrieval, including for
+        // sessions created with ui_mode='embedded'. Reuse same-plan sessions
+        // to avoid duplicate sessions on refresh or rapid retries.
+        if (metadata?.checkout_option === plan &&
+            ["embedded_page","embedded"].includes(String(prior.ui_mode)) &&
+            typeof prior.client_secret === "string") {
+          return reply(200, { mode: "embedded", client_secret: prior.client_secret, publishable_key: PUBLISHABLE_KEY });
+        }
+        // A changed plan or an older hosted session is safe to replace only
+        // after Stripe confirms the old, unpaid session is EXPIRED.
         let expired: Record<string, unknown>;
         try {
           const expiry = await fetch(
@@ -114,7 +121,7 @@ Deno.serve(async (req) => {
               headers: {
                 Authorization: "Bearer " + STRIPE_KEY,
                 "Stripe-Version": STRIPE_API_VERSION,
-                "Idempotency-Key": "gatebrook-migrate-hosted-" + auth.user.id + "-" + sub.stripe_checkout_session_id
+                "Idempotency-Key": "gatebrook-replace-embedded-" + auth.user.id + "-" + sub.stripe_checkout_session_id
               }
             }
           );
@@ -125,9 +132,8 @@ Deno.serve(async (req) => {
         } catch {
           return reply(503, { error: "We could not confirm the old checkout was closed. Refresh and try again." });
         }
-        if (expired.status !== "expired") return reply(409, {
-          error: "The previous checkout is still active. Please refresh and try again."
-        });
+        if (expired.id !== sub.stripe_checkout_session_id || expired.status !== "expired")
+          return reply(409, { error: "The previous checkout is still active. Please refresh and try again." });
       } else if (prior.status !== "expired") {
         return reply(409, { error: "Your previous checkout is in an unexpected state. Please contact support." });
       }
@@ -159,7 +165,7 @@ Deno.serve(async (req) => {
     form.set("payment_method_collection", "always");
     form.set("subscription_data[trial_settings][end_behavior][missing_payment_method]", "cancel");
   }
-  const retryKey = previousCheckoutSessionId ? previousCheckoutSessionId : "initial";
+  const retryKey = (previousCheckoutSessionId ? previousCheckoutSessionId : "initial") + "-" + plan;
   const headers: Record<string, string> = {
     "Authorization": "Bearer " + STRIPE_KEY,
     "Stripe-Version": STRIPE_API_VERSION,
