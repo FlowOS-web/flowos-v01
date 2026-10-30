@@ -98,7 +98,7 @@ async function setup(){
   }
   // The account name is reserved under .invalid: no accidental real recipient.
   const email="qa-clock-"+run.id.replaceAll("-","")+"@example.invalid";
-  const pwd=crypto.randomUUID()+crypto.randomUUID();
+  const pwd="Gatebrook-QA!9-"+crypto.randomUUID()+crypto.randomUUID();
   const created=await db.auth.admin.createUser({
     email,password:pwd,email_confirm:true,
     app_metadata:{gatebrook_qa_clock_fixture:true}
