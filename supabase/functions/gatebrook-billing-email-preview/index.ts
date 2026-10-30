@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
 import { renderBillingEmail, type BillingEmailKind } from "./email-template.ts";
+import { prepareBillingPreview } from "./preview-links.ts";
 
 // Sandbox tester-controlled mail preview. It NEVER creates a checkout, changes
 // subscription status or accepts arbitrary recipients.
@@ -66,18 +67,15 @@ Deno.serve(async req=>{
    const sample=renderBillingEmail(kind as BillingEmailKind,{
     businessName:"Gatebrook QA Test Workspace",plan:"monthly",trialEnd:fakeEnd
    });
-   const previewHtml=sample.html.replace(
-    '<table role="presentation" width="100%"',
-    '<div style="background:#2c563c;color:#fff;text-align:center;padding:12px;font:700 13px Arial,sans-serif">TEST PREVIEW — No subscription or charge has changed</div><table role="presentation" width="100%"'
-   );
+   const example=prepareBillingPreview(sample);
    const response=await fetch("https://api.resend.com/emails",{
     method:"POST",headers:{
       "Authorization":"Bearer "+RESEND,"Content-Type":"application/json",
       "Idempotency-Key":"gatebrook-preview-"+user.id+"-"+kind+"-"+day
     },
     body:JSON.stringify({from:FROM,to:[user.email],
-      subject:"[Gatebrook QA test] "+sample.subject,html:previewHtml,
-      text:"TEST PREVIEW — No subscription or charge has changed\n\n"+sample.text})
+      subject:example.subject,html:example.html,
+      text:example.text})
    });
    const mail=await response.json().catch(()=>({}));
    if(!response.ok||typeof mail.id!=="string")throw Error("Email provider rejected the test message ("+response.status+").");
