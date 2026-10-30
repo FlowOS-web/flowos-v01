@@ -17,10 +17,11 @@ test("runner requires private 256-bit token and rejects live keys",()=>{
  assert.match(migration,/flowos_private\.gatebrook_qa_clock_runner_auth/);
  assert.match(migration,/revoke all on function flowos_private\.gatebrook_qa_clock_action/);
 });
-test("runner creates only synthetic invalid email addresses without sending mail",()=>{
- assert.match(runner,/@example\.invalid"/);
- assert.match(runner,/db\.auth\.admin\.createUser/);
- assert.match(runner,/email_confirm:true/);
+test("runner reuses only approved QA owner and never creates or impersonates auth users",()=>{
+ assert.match(runner,/\.eq\("name","J&J Plumbing QA"\)/);
+ assert.match(runner,/gatebrook_qa_testers/);
+ assert.match(runner,/Automated Failed Renewal QA/);
+ assert.doesNotMatch(runner,/admin\.createUser|admin\.generateLink|auth\.verifyOtp/);
  assert.doesNotMatch(runner,/api\.resend\.com|smtp|notify-new-lead/);
  assert.match(runner,/qa_env\]":ACCOUNT/);
 });
@@ -53,11 +54,12 @@ test("recovery uses previous working test method and retries the exact unpaid in
  assert.match(runner,/if\(local\?\.status!=="past_due"&&local\?\.status!=="unpaid"\)/);
  assert.match(runner,/stage="recovered"/);
 });
-test("runner verifies the real authenticated QA gate, not merely SQL access predicates",()=>{
- assert.match(runner,/db\.auth\.admin\.generateLink/);
- assert.match(runner,/auth\.verifyOtp/);
- assert.match(runner,/\/functions\/v1\/gatebrook-qa-status/);
+test("runner preserves browser-authenticated gate and requires ownership-selected workspace",()=>{
+ assert.doesNotMatch(runner,/auth\.admin\.generateLink|auth\.verifyOtp/);
  assert.match(runner,/result\.authenticated_gate=await statusViaAuth\(run\)/);
+ assert.match(qaStatus,/workspaceId=new URL\(req\.url\)\.searchParams\.get\("workspace_id"\)/);
+ assert.match(qaStatus,/wsQuery=wsQuery\.eq\("id",workspaceId\)/);
+ assert.match(qaStatus,/\.eq\("owner_user_id",user\.id\)/);
  assert.match(qaStatus,/\["trialing","active"\]\.includes\(status\)/);
 });
 test("run journal has no unauthenticated client grants and is synthetic-only",()=>{
@@ -65,4 +67,16 @@ test("run journal has no unauthenticated client grants and is synthetic-only",()
  assert.match(migration,/revoke all on public\.gatebrook_qa_clock_runs from public, anon, authenticated/);
  assert.match(migration,/create table if not exists flowos_private\.gatebrook_qa_clock_runner_auth/);
  assert.match(migration,/not in \('setup','activate','prepare_failure','fail_renewal','recover','inspect'\)/);
+});
+
+test("existing QA checkout uses oldest workspace and cannot switch billing workspace via query",()=>{
+ const source=read("supabase/functions/gatebrook-qa-checkout/index.ts");
+ assert.match(source,/\.order\("created_at",\{ascending:true\}\)\.limit\(1\)\.maybeSingle\(\)/);
+ assert.doesNotMatch(source,/body\.workspace_id|req\.url\.searchParams/);
+});
+test("selected QA dashboard asks status service with a real signed-in user token",()=>{
+ const page=read("qa-dashboard.html");
+ assert.match(page,/QA_WORKSPACE_ID=new URLSearchParams\(location\.search\)\.get\("workspace_id"\)/);
+ assert.match(page,/auth\.getSession\(\)/);
+ assert.match(page,/Authorization":"Bearer "\+session\.access_token/);
 });
