@@ -5,11 +5,13 @@ Status: **Not yet cleared for live customer acquisition.**
 
 This audit examined the deployed Supabase Edge Functions, database RLS/privileges and subscription-gated SQL RPCs, the Gatebrook GitHub source, and the connected **live** Stripe account. It did not impersonate an existing customer, perform a live payment, or alter any real subscription.
 
+**Update (October 29, 2026):** Live billing portal is configured and read-only database/dashboard mode has been implemented. Live customer checkout and read-only browser tests are still pending.
+
 ## Security hardening completed and deployed
 
 1. **Fail-closed customer intake:** The public request form and both customer-request DB handlers now require \`flowos_private.gatebrook_business_has_access\`. Cached \`businesses.active\` flags are not sufficient on their own. Review approval is also blocked when the business has no current entitlement. Applied migration \`202610300002_gatebrook_request_subscription_enforcement.sql\`. Verified all four functions contain the guard, and an incomplete live business returns no request form.
 2. **Stripe webhook stale-event protection:** \`gatebrook-stripe-webhook\` version **13** now verifies the Stripe subscription is live, the metadata matches an authenticated business owner, and that a replacement subscription is linked to a **completed Stripe Checkout session** for that owner. Older canceled/failed subscriptions cannot overwrite a newer active subscription. Failed event-journal lookup returns a temporary error rather than bypassing duplicate checks.
-3. **Dashboard access:** \`gatebrook-access\` version **12** now rejects missing/invalid subscription period dates. Only a currently active paid period or unexpired trial grants access (plus the existing deliberately seeded demo exemption). This aligns the Edge Function more closely with the database RLS check.
+3. **Dashboard access:** \`gatebrook-access\` version **13** now rejects missing/invalid subscription period dates. Only a currently active paid period or unexpired trial grants access (plus the existing deliberately seeded demo exemption). This aligns the Edge Function more closely with the database RLS check.
 4. **Regression coverage:** \`tests/gatebrook-launch-security.test.cjs\` **11/11 passed** and \`tests/stripe-invoice-webhook.test.cjs\` **9/9 passed**. The source-inspection/mocked tests are not a substitute for live event delivery or a penetration test.
 
 ## Existing protections verified
@@ -23,14 +25,13 @@ This audit examined the deployed Supabase Edge Functions, database RLS/privilege
 
 ## Open launch blockers
 
-### 1. Stripe self-service billing portal — **high priority**
-The connected live Stripe account returned **zero billing-portal configurations**. Gatebrook's billing portal Edge Function creates portal sessions but does not specify a configuration. Configure and activate a **live** customer portal, explicitly permitting cancellation and selecting **end of paid period** as the cancellation timing. Test access to the portal after creating a legitimate test customer. Do not assume users can currently cancel through the app.
-Dashboard: https://dashboard.stripe.com/settings/billing/portal
-Documentation: https://docs.stripe.com/customer-management/configure-portal
+### 1. Stripe self-service billing portal — **configured and verified**
+The live Gatebrook.work account now has an **active default portal configuration** (`bpc_1UW51MQV8SarFWvZax82vpTr`). Verified: update payment methods enabled, invoice history enabled, cancellation enabled at **end of the paid period**, no cancellation proration. Actual end-to-end use by a paying live customer remains untested; do not claim a live portal session was completed.
 
-### 2. Expired-user read-only mode — **product blocker**
-The intended policy is: retain customer/business data and allow an expired subscriber to view it, but prevent edits, new requests and premium actions. Actual current implementation redirects an expired subscriber away from their workspace, and \`businesses\` / \`leads\` RLS SELECT policies require \`gatebrook_business_has_access\`, which becomes false after subscription expiration. This is not read-only access. Implement a separate view-versus-write entitlement model and dedicated expired-state UI; keep request creation and writes blocked. Regression-test a canceled/exhausted trial user against both SELECT and UPDATE.
-**Do not simply remove the RLS entitlement gates without replacing them with owner-scoped policies.**
+### 2. Expired-user read-only mode — **implemented; browser verification pending**
+Applied `202610300003_gatebrook_read_only_subscriptions.sql`. An owner or authorized member of a previously subscribed business can read existing business data and leads after a paid period expires, while the original write policies still require an active subscription. Initial incomplete Checkout records with **no Stripe subscription ID** remain inaccessible. Live `gatebrook-access` version **13** returns a separate `read_only` flag. Dashboard and settings show read-only notices, hide or disable edits, and offer a Billing link; Billing now links back to the saved read-only workspace.
+
+Database permission check passed inside a rolled-back transaction: expired owner could SELECT their own business, owner UPDATE returned no rows, and an unrelated session could not SELECT that business. Production subscription records were re-checked and remain unchanged. **12/12** read-only regression tests passed. A genuine previously paid account's full signed-in browser experience still needs testing; don't claim production end-to-end verification yet.
 
 ### 3. Password security — **recommended**
 Supabase's security advisor reports **leaked-password protection disabled**. Supabase documentation says this specific feature requires Pro or higher; check the Supabase project's eligibility. At minimum, enforce strong password length/complexity, review MFA and password-reset/reauthentication behavior. If available, turn on breached-password checks.
@@ -56,9 +57,9 @@ Gatebrook QA currently uses separate tables/functions and a different Stripe san
 
 ## Recommended next development sequence
 
-1. Configure the **live Stripe customer portal** and verify cancellation timing with a controlled test.
-2. Implement **read-only access after subscription expiry**, with owner-scoped SELECT policies and no write access.
-3. Review tax registrations, password-protection settings and support/notification delivery.
-4. Run a final authorized end-to-end production checkout and cancellation smoke test; document evidence before public launch.
+1. Complete an approved signed-in browser check for an expired, previously subscribed Gatebrook account. Verify saved records are readable, editing is blocked, and Billing/reauthentication work.
+2. Review tax registrations, password-protection settings and customer-support/notification delivery.
+3. Run the first authorized live checkout and cancellation test, including portal access and timing.
+4. After launch readiness is proven, consider separating Gatebrook QA into its own Supabase staging project.
 
 No keys or signing secrets should be added to GitHub, client JavaScript or this document.
