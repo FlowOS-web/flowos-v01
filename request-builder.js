@@ -4,25 +4,18 @@
   const templates = {
     general: { label: "General service business", fields: [] },
     cleaning: { label: "Cleaning company", fields: [
-      { id: "property_type", label: "What type of property needs cleaning?", type: "select", required: true, options: ["House", "Apartment", "Office", "Move-in / move-out", "Other"] },
-      { id: "cleaning_frequency", label: "How often do you need cleaning?", type: "select", required: false, options: ["One-time", "Weekly", "Biweekly", "Monthly", "Not sure"] }
+      { id: "property_type", label: "Type of property", type: "select", required: false, options: ["House", "Apartment", "Office", "Other"] }
     ] },
-    plumbing: { label: "Plumbing company", fields: [
-      { id: "plumbing_issue", label: "What plumbing issue do you need help with?", type: "select", required: true, options: ["Leak", "Clog", "Water heater", "Fixture installation", "Inspection", "Other"] },
-      { id: "urgency", label: "How urgent is the issue?", type: "select", required: true, options: ["Emergency", "As soon as possible", "Within a week", "Planning ahead"] }
-    ] },
+    // Service type and scheduling are already part of Gatebrook's core form.
+    // No automatic duplicate "What plumbing issue?" or urgency questions.
+    plumbing: { label: "Plumbing company", fields: [] },
     auto_detailing: { label: "Auto detailing", fields: [
-      { id: "vehicle_details", label: "Vehicle year, make, and model", type: "text", required: true, placeholder: "2022 Toyota Camry" },
-      { id: "detailing_package", label: "Which service are you interested in?", type: "select", required: true, options: ["Interior", "Exterior", "Full detail", "Paint correction", "Ceramic coating", "Not sure"] }
+      { id: "vehicle_details", label: "Vehicle year, make, and model", type: "text", required: false, placeholder: "2022 Toyota Camry" }
     ] },
     landscaping: { label: "Landscaping company", fields: [
-      { id: "project_type", label: "What kind of landscaping do you need?", type: "select", required: true, options: ["Lawn care", "Cleanup", "Design / installation", "Hardscaping", "Snow / seasonal service", "Other"] },
       { id: "property_size", label: "Approximate property size or area", type: "text", required: false, placeholder: "Small yard, 1 acre, front garden..." }
     ] },
-    photography: { label: "Photography", fields: [
-      { id: "session_type", label: "What type of session do you need?", type: "select", required: true, options: ["Portrait", "Family", "Wedding", "Event", "Commercial", "Other"] },
-      { id: "event_date", label: "Event or preferred session date", type: "date", required: false }
-    ] }
+    photography: { label: "Photography", fields: [] }
   };
 
   const supportedTypes = ["text", "textarea", "select", "radio", "checkbox", "date", "number"];
@@ -82,7 +75,7 @@
     if (!fields.length) {
       const empty = document.createElement("p");
       empty.className = "gb-field-help";
-      empty.textContent = "No extra questions for this starter. That’s fine — the standard contact and service fields are already included.";
+      empty.textContent = "Your essential questions are already included: contact details, service, description, and optional scheduling. You can keep the form this simple.";
       host.appendChild(empty);
       return;
     }
@@ -109,12 +102,14 @@
   function renderFieldEditor() {
     const host = $("customFieldList");
     host.replaceChildren();
-    $("fieldCount").textContent = fields.length + " suggested";
+    $("fieldCount").textContent = fields.length + (fields.length === 1 ? " extra question" : " extra questions");
+    const essentialsButton = $("useEssentials");
+    if (essentialsButton) essentialsButton.disabled = role !== "owner" || fields.length === 0;
     renderQuestionSummary();
     if (!fields.length) {
       const empty = document.createElement("p");
       empty.className = "feedback";
-      empty.textContent = "This template has no extra questions yet. Add your first question below.";
+      empty.textContent = "No extra questions are needed. Add one only if it helps you prepare for the job.";
       host.appendChild(empty);
       return;
     }
@@ -236,7 +231,7 @@
 
   function renderTemplateDescription() {
     const tpl = templates[$("formTemplate").value] || templates.general;
-    $("templateDescription").textContent = tpl.label + " starter questions can be edited, removed, reordered, or expanded.";
+    $("templateDescription").textContent = tpl.label + ": the essentials are already included. Any suggested extra questions are optional and can be changed or removed.";
   }
 
   async function init(options) {
@@ -276,6 +271,14 @@
         if (role !== "owner" || fields.length >= 20) return;
         fields.push({ id: uniqueId("question_" + (fields.length + 1)), label: "New question", type: "text", required: false, placeholder: "", options: [] });
         renderFieldEditor(); renderPreview(); setDirty();
+      });
+      $("useEssentials").addEventListener("click", () => {
+        if (role !== "owner" || !fields.length) return;
+        if (!window.confirm("Remove the extra questions from this draft? Your live customer page will not change until you click Save request page.")) return;
+        fields = [];
+        renderFieldEditor();
+        renderPreview();
+        setDirty();
       });
       $("saveRequestForm").addEventListener("click", save);
       renderTemplateDescription(); renderFieldEditor(); renderPreview();
