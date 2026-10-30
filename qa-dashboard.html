@@ -20,6 +20,7 @@ p{color:#b3c7b7;line-height:1.7}
 .tile{background:#0d1711;border:1px solid #344e3c;border-radius:13px;padding:19px}
 .tile strong{display:block;font-size:22px;letter-spacing:-.035em}.tile span{display:block;color:#a3b6a8;font-size:12px;margin-top:7px}
 button{color:white;background:#2d6740;border:1px solid #6ba378;padding:12px 18px;border-radius:10px;cursor:pointer;font:inherit}
+select{background:#0d1711;border:1px solid #54705c;color:#eaf7ec;border-radius:10px;padding:12px 14px;font:inherit;max-width:100%;margin:6px 10px 12px 0}button:disabled{opacity:.65;cursor:not-allowed}
 #qaUnlocked[hidden],#qaLocked[hidden]{display:none!important}
 @media(max-width:700px){.grid{grid-template-columns:1fr}}
 </style>
@@ -44,6 +45,23 @@ button{color:white;background:#2d6740;border:1px solid #6ba378;padding:12px 18px
 <div class="tile"><strong id="qaState">Trialing</strong><span>Verified subscription state</span></div>
 <div class="tile"><strong id="qaEnd">—</strong><span>Trial or billing period ends</span></div>
 </div>
+</div>
+<div class="panel" id="qaEmailPreviewPanel">
+<h2>Preview your billing emails</h2>
+<p>Select one of the original Gatebrook subscription notifications. Only your own confirmed QA account email can receive the preview. This will not change your subscription or trigger a payment.</p>
+<label for="qaEmailKind">Choose email template</label>
+<div>
+<select id="qaEmailKind">
+<option value="trial_welcome">Trial welcome</option>
+<option value="trial_3_day">3-day reminder</option>
+<option value="trial_1_day">1-day reminder</option>
+<option value="trial_converted">Trial converted to paid</option>
+<option value="trial_expired">Access expired</option>
+<option value="reactivated">Subscription reactivated</option>
+</select>
+<button id="qaSendPreview" type="button">Send test email</button>
+</div>
+<p id="qaEmailPreviewMessage" role="status" aria-live="polite">You can send one example of each template per UTC day.</p>
 </div>
 <div class="panel">
 <h2>Dashboard gate passed</h2>
@@ -78,6 +96,24 @@ button{color:white;background:#2d6740;border:1px solid #6ba378;padding:12px 18px
     }catch(e){$("qaHeading").textContent="Unable to verify QA access";$("qaMessage").textContent=e.message||"Please try again."}
     finally{$("qaCheck").disabled=false}
   }
+  $("qaSendPreview").addEventListener("click",async()=>{
+    $("qaSendPreview").disabled=true;
+    $("qaEmailPreviewMessage").textContent="Sending your example through Resend…";
+    try{
+      const {data,error}=await db.functions.invoke("gatebrook-billing-email-preview",{
+        body:{kind:$("qaEmailKind").value}
+      });
+      if(error){
+        let details=null;
+        try{details=await error.context?.json()}catch{}
+        throw new Error(details?.error||error.message||"Unable to send email");
+      }
+      if(!data?.ok||!data.provider_accepted)throw new Error("Mail provider did not accept this preview");
+      $("qaEmailPreviewMessage").textContent="Resend accepted the test email for your confirmed QA login inbox. Check that inbox and spam folder; acceptance does not guarantee delivery.";
+    }catch(e){
+      $("qaEmailPreviewMessage").textContent=e.message||"Unable to send preview.";
+    }finally{$("qaSendPreview").disabled=false}
+  });
   $("qaCheck").addEventListener("click",check);check();
 })();
 </script>
