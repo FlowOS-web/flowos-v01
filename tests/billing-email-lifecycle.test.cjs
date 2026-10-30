@@ -183,12 +183,13 @@ test("both production sender and QA preview reject unverified sender fallback",(
   assert.match(preview,/FROM\.includes\("@resend\.dev"\)/);
 });
 
+
 const previewLinks=read("supabase/functions/gatebrook-billing-email-preview/preview-links.ts");
 function renderQaPreview(){
   const javascript=previewLinks
     .replace(/export const /g,"const ")
-    .replace(/export type PreviewMessage = \\{[\\s\\S]*?\\};\\n/,"")
-    .replace(/export function prepareBillingPreview\\(sample: PreviewMessage\\): PreviewMessage/,
+    .replace(/export type PreviewMessage = \{[\s\S]*?\};\n/,"")
+    .replace(/export function prepareBillingPreview\(sample: PreviewMessage\): PreviewMessage/,
              "function prepareBillingPreview(sample)");
   return new Function(javascript+"; return prepareBillingPreview;")();
 }
@@ -199,11 +200,11 @@ test("all six QA email previews link only to the QA dashboard, never live billin
     const sample=compose(kind,{businessName:"QA Plumbing",
       trialEnd:"2026-11-06T00:02:50Z",plan:"monthly"});
     const email=prepare(sample);
-    assert.match(email.subject,/^\\[Gatebrook QA test\\]/);
-    assert.match(email.html,/https:\\/\\/gatebrook\\.work\\/qa-dashboard\\.html/);
-    assert.match(email.text,/https:\\/\\/gatebrook\\.work\\/qa-dashboard\\.html/);
-    assert.doesNotMatch(email.html,/https:\\/\\/gatebrook\\.work\\/billing\\.html/);
-    assert.doesNotMatch(email.text,/https:\\/\\/gatebrook\\.work\\/billing\\.html/);
+    assert.match(email.subject,/^\[Gatebrook QA test\]/);
+    assert.match(email.html,/https:\/\/gatebrook\.work\/qa-dashboard\.html/);
+    assert.match(email.text,/https:\/\/gatebrook\.work\/qa-dashboard\.html/);
+    assert.doesNotMatch(email.html,/https:\/\/gatebrook\.work\/billing\.html/);
+    assert.doesNotMatch(email.text,/https:\/\/gatebrook\.work\/billing\.html/);
     assert.match(email.text,/not a real billing notice/i);
     assert.match(email.html,/not a real billing notice/i);
   }
@@ -215,9 +216,9 @@ test("production templates retain real billing links while QA preview changes li
     businessName:"QA Plumbing",trialEnd:"2026-11-06T00:02:50Z",plan:"monthly"
   });
   const previewEmail=prepare(original);
-  assert.match(original.text,/https:\\/\\/gatebrook\\.work\\/billing\\.html/);
-  assert.doesNotMatch(original.text,/qa-dashboard\\.html/);
-  assert.match(previewEmail.text,/qa-dashboard\\.html/);
-  assert.match(preview,/prepareBillingPreview\\(sample\\)/);
+  assert.match(original.text,/https:\/\/gatebrook\.work\/billing\.html/);
+  assert.doesNotMatch(original.text,/qa-dashboard\.html/);
+  assert.match(previewEmail.text,/qa-dashboard\.html/);
+  assert.match(preview,/prepareBillingPreview\(sample\)/);
   assert.match(page,/Test-email links lead back to this QA dashboard/);
 });
