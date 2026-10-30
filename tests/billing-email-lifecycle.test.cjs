@@ -163,3 +163,22 @@ test("QA email preview is limited to approved account and its own address",()=>{
  assert.doesNotMatch(preview,/body\.to|body\.email/);
  assert.match(page,/gatebrook-billing-email-preview/);
 });
+
+test("returning customer with a new Stripe subscription gets reactivation instead of a second welcome",async()=>{
+  const h=scanHarness({
+    last_status:"canceled",last_trial_end:"2026-10-28T00:00:00Z",
+    stripe_subscription_id:"sub_previous",transition_seq:2
+  });
+  await h.scan(makeRow({
+    stripe_subscription_id:"sub_reactivated",
+    status:"trialing",
+    trial_end:new Date(Date.now()+7*864e5).toISOString()
+  }));
+  assert.ok(h.jobs.some(x=>x.kind==="reactivated"));
+  assert.ok(!h.jobs.some(x=>x.kind==="trial_welcome"));
+  assert.ok(h.jobs.some(x=>x.kind==="trial_3_day"));
+});
+test("both production sender and QA preview reject unverified sender fallback",()=>{
+  assert.match(worker,/FROM_EMAIL\.includes\("@resend\.dev"\)/);
+  assert.match(preview,/FROM\.includes\("@resend\.dev"\)/);
+});
