@@ -32,7 +32,7 @@ test("Lead and business SELECT policies remain membership-scoped",()=>{
 });
 test("Read-only mode adds SELECT but never relaxes write policy conditions",()=>{
  for(const table of ["business_request_forms","lead_custom_answers"]){
-   assert.match(migration,new RegExp("on public\\\\."+table+"\\\\s+for select to authenticated"));
+   assert.match(migration,new RegExp(String.raw`on public\.${table}\s+for select to authenticated`));
  }
  assert.doesNotMatch(migration,/for (?:insert|update|delete|all) to authenticated/i);
  assert.match(intake,/if not flowos_private\.gatebrook_business_has_access\(p_business_id\)/);
