@@ -50,7 +50,7 @@ function getPeriod(sub:any) {
 }
 async function persistVerifiedSubscription(id:string,checkCheckoutId?:string) {
   const sub=await getStripe("subscriptions/"+encodeURIComponent(id));
-  if(sub.livemode!==false||sub.metadata?.qa_env!=="gatebrook_qa")return "ignored";
+  if(sub.livemode!==false||!["gatebrook_qa","gatebrook_qa_clocktest"].includes(sub.metadata?.qa_env))return "ignored";
   const workspaceId=sub.metadata?.qa_workspace_id;
   const ownerId=sub.metadata?.qa_owner_user_id;
   if(typeof workspaceId!=="string"||typeof ownerId!=="string")return "ignored";
@@ -66,18 +66,37 @@ async function persistVerifiedSubscription(id:string,checkCheckoutId?:string) {
     .select("workspace_id,owner_user_id,stripe_checkout_session_id,stripe_subscription_id")
     .eq("workspace_id",workspaceId).maybeSingle();
   if(recordError)throw Error("Could not check QA subscription record");
-  if(!record||record.owner_user_id!==ownerId||!record.stripe_checkout_session_id)return "ignored";
-  if(checkCheckoutId&&checkCheckoutId!==record.stripe_checkout_session_id)return "ignored";
+  if(!record||record.owner_user_id!==ownerId)return "ignored";
   if(record.stripe_subscription_id&&record.stripe_subscription_id!==sub.id)return "ignored";
-  const session=await getStripe("checkout/sessions/"+encodeURIComponent(record.stripe_checkout_session_id));
-  const sessionSub=typeof session.subscription==="string"?session.subscription:session.subscription?.id;
-  if(session.livemode!==false||session.id!==record.stripe_checkout_session_id||
-    sessionSub!==sub.id||session.mode!=="subscription"||
-    session.metadata?.qa_env!=="gatebrook_qa"||session.metadata?.qa_workspace_id!==workspaceId)return "ignored";
-  // A signed but early event cannot activate unpaid checkout. Stripe retries
-  // the event; subsequent paid/subscription events will reconcile the state.
-  if(session.status!=="complete")throw Error("Sandbox checkout not complete yet");
-  if(session.payment_status==="unpaid"&&sub.status!=="trialing")return "pending";
+  const clockFixture=sub.metadata?.qa_env==="gatebrook_qa_clocktest";
+  if(clockFixture){
+    // Explicit, server-generated synthetic fixture only. No checkout bypass
+    // for the normal Gatebrook QA customer enrollment path.
+    if(checkCheckoutId||record.stripe_checkout_session_id!==null||
+       record.stripe_subscription_id!==sub.id)return "ignored";
+    const runId=sub.metadata?.qa_run_id;
+    if(typeof runId!=="string")return "ignored";
+    const {data:run,error:runError}=await db.from("gatebrook_qa_clock_runs")
+      .select("id,workspace_id,owner_user_id,stripe_clock_id,stripe_customer_id,stripe_subscription_id")
+      .eq("id",runId).maybeSingle();
+    if(runError)throw Error("Could not verify QA clock test");
+    const stripeCustomerId=typeof sub.customer==="string"?sub.customer:sub.customer?.id;
+    if(!run||run.workspace_id!==workspaceId||run.owner_user_id!==ownerId||
+       run.stripe_subscription_id!==sub.id||run.stripe_customer_id!==stripeCustomerId||
+       !run.stripe_clock_id)return "ignored";
+    const customer=await getStripe("customers/"+encodeURIComponent(stripeCustomerId));
+    if(customer.livemode!==false||customer.test_clock!==run.stripe_clock_id)return "ignored";
+  }else{
+    if(!record.stripe_checkout_session_id)return "ignored";
+    if(checkCheckoutId&&checkCheckoutId!==record.stripe_checkout_session_id)return "ignored";
+    const session=await getStripe("checkout/sessions/"+encodeURIComponent(record.stripe_checkout_session_id));
+    const sessionSub=typeof session.subscription==="string"?session.subscription:session.subscription?.id;
+    if(session.livemode!==false||session.id!==record.stripe_checkout_session_id||
+      sessionSub!==sub.id||session.mode!=="subscription"||
+      session.metadata?.qa_env!=="gatebrook_qa"||session.metadata?.qa_workspace_id!==workspaceId)return "ignored";
+    if(session.status!=="complete")throw Error("Sandbox checkout not complete yet");
+    if(session.payment_status==="unpaid"&&sub.status!=="trialing")return "pending";
+  }
   const status=["incomplete","incomplete_expired","trialing","active","past_due","unpaid","canceled","paused"]
     .includes(sub.status)?sub.status:"incomplete";
   const plan=sub.metadata?.qa_plan==="annual"?"annual":sub.metadata?.qa_plan==="trial"?"trial":"monthly";
@@ -87,7 +106,9 @@ async function persistVerifiedSubscription(id:string,checkCheckoutId?:string) {
     trial_end:timestamp(sub.trial_end),current_period_end:timestamp(getPeriod(sub)),
     cancel_at_period_end:sub.cancel_at_period_end===true,
     updated_at:new Date().toISOString()
-  }).eq("workspace_id",workspaceId).eq("stripe_checkout_session_id",record.stripe_checkout_session_id);
+  }).eq("workspace_id",workspaceId)
+    .eq(clockFixture?"stripe_subscription_id":"stripe_checkout_session_id",
+        clockFixture?sub.id:record.stripe_checkout_session_id);
   if(saveError)throw Error("Unable to persist sandbox subscription");
   return "updated";
 }
