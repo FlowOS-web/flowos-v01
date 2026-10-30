@@ -231,6 +231,21 @@
         font-size: 29px;
       }
     }
+
+    /* Calm, essentials-first request form; optional scheduling stays available. */
+    body.gb-request-page .gb-request-description textarea { min-height:108px; }
+    body.gb-request-page .gb-optional-label { margin-left:5px;font-size:11px;font-weight:500;color:var(--gb-secondary,#b6c0bd); }
+    body.gb-request-page .gb-request-schedule { overflow:hidden;border:1px solid var(--gb-border,rgba(200,214,206,.24));border-radius:10px;background:rgba(255,255,255,.018); }
+    body.gb-request-page .gb-request-schedule summary { display:flex;align-items:center;gap:9px;cursor:pointer;list-style:none;padding:15px 16px;color:var(--text);font-size:13px;font-weight:650; }
+    body.gb-request-page .gb-request-schedule summary::-webkit-details-marker { display:none; }
+    body.gb-request-page .gb-request-schedule summary::before { content:"+";display:inline-grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border:1px solid var(--gb-border);border-radius:6px;color:#9dbea9;font-size:16px;line-height:1; }
+    body.gb-request-page .gb-request-schedule[open] summary::before { content:"−"; }
+    body.gb-request-page .gb-request-schedule summary span { color:var(--gb-secondary);font-weight:500;font-size:11px; }
+    body.gb-request-page .gb-request-schedule summary:focus-visible { outline:2px solid #8bb39b;outline-offset:-3px; }
+    body.gb-request-page .gb-request-schedule-body { padding:0 16px 16px; }
+    body.gb-request-page .gb-request-schedule-body label { margin:0 0 8px; }
+    body.gb-request-page .gb-custom-fields-heading { margin:8px 0 2px;padding-top:10px;border-top:1px solid var(--gb-border);color:var(--text);font-size:15px;font-weight:700;letter-spacing:-.01em; }
+    :root[data-gb-theme="light"] body.gb-request-page .gb-request-schedule {background:rgba(39,94,59,.025);}
   </style>
 
 <link rel="stylesheet" href="theme.css?v=1">
@@ -359,44 +374,23 @@
           </div>
 
 
-          <div>
-            <label for="preferred_date">
-              Preferred Date
-            </label>
-
-            <input
-              id="preferred_date"
-              type="date"
-            >
+          <div class="full gb-request-description">
+            <label for="notes">Tell us about your request</label>
+            <textarea id="notes" maxlength="2000" placeholder="Briefly describe what you need help with."></textarea>
           </div>
 
-
-          <div>
-            <label for="service_location">
-              Service Address / Location
-            </label>
-
-            <input
-              id="service_location"
-              type="text"
-              maxlength="300"
-              placeholder="Address or service location"
-            >
+          <div class="full gb-request-location">
+            <label for="service_location">Service address or location <span class="gb-optional-label">Optional</span></label>
+            <input id="service_location" type="text" maxlength="300" placeholder="Address or service area">
           </div>
 
-
-          <div class="full">
-            <label for="notes">
-              Tell us what you need
-            </label>
-
-            <textarea
-              id="notes"
-              maxlength="2000"
-              placeholder="Describe the job, problem, project, or anything the business should know."
-            ></textarea>
-          </div>
-
+          <details class="full gb-request-schedule">
+            <summary>Preferred date <span>Optional</span></summary>
+            <div class="gb-request-schedule-body">
+              <label for="preferred_date">When would you like service?</label>
+              <input id="preferred_date" type="date">
+            </div>
+          </details>
 
           <div id="customFields" class="full custom-fields"></div>
 
@@ -818,6 +812,12 @@
   function renderCustomFields(fields) {
     const host = document.getElementById("customFields");
     host.replaceChildren();
+    if (fields.length) {
+      const heading = document.createElement("h3");
+      heading.className = "gb-custom-fields-heading";
+      heading.textContent = "A few more details";
+      host.appendChild(heading);
+    }
     for (const field of fields) {
       if (!field || !/^[a-z][a-z0-9_]{0,39}$/.test(field.id || "") ||
           typeof field.label !== "string" || !field.label.trim() ||
