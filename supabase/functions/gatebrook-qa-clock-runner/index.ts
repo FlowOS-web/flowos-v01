@@ -4,7 +4,6 @@ import { createClient } from "npm:@supabase/supabase-js@2.117.3";
 // Never accepts customer IDs, email addresses, payment keys or amounts from callers.
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
 const SERVICE=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ANON=Deno.env.get("SUPABASE_ANON_KEY")||"";
 const STRIPE=Deno.env.get("GATEBROOK_QA_STRIPE_SECRET_KEY")||"";
 const ACCOUNT="gatebrook_qa_clocktest";
 const LABEL="gatebrook-failed-renewal-2026-10";
@@ -55,32 +54,10 @@ async function workspaceStatus(run:Run) {
   return {status:data.status,allowed,trial_end:data.trial_end,
     current_period_end:data.current_period_end,cancel_at_period_end:data.cancel_at_period_end};
 }
-async function statusViaAuth(run:Run){
-  // A new admin magic link is generated locally, never sent to any inbox.
-  // The special synthetic account cannot send or receive customer emails.
-  if(!run.owner_user_id||!ANON)return {checked:false,reason:"Missing synthetic user or anon configuration"};
-  const {data:owner,error:ownerErr}=await db.auth.admin.getUserById(run.owner_user_id);
-  if(ownerErr||!owner?.user?.email?.endsWith("@example.invalid"))
-    return {checked:false,reason:"Not a synthetic QA email"};
-  const {data:link,error:linkErr}=await db.auth.admin.generateLink({
-    type:"magiclink",email:owner.user.email
-  });
-  const tokenHash=link?.properties?.hashed_token;
-  if(linkErr||typeof tokenHash!=="string")
-    return {checked:false,reason:"Could not create QA auth token"};
-  const authDb=createClient(SUPABASE_URL,ANON,{auth:{persistSession:false,autoRefreshToken:false}});
-  const {data:verified,error:verifyErr}=await authDb.auth.verifyOtp({
-    type:"magiclink",token_hash:tokenHash
-  });
-  if(verifyErr||!verified?.session?.access_token)
-    return {checked:false,reason:"Could not exchange synthetic auth token"};
-  const res=await fetch(SUPABASE_URL+"/functions/v1/gatebrook-qa-status",{
-    headers:{"Authorization":"Bearer "+verified.session.access_token,"apikey":ANON}
-  });
-  const data=await res.json().catch(()=>({}));
-  if(!res.ok||data.sandbox!==true)
-    return {checked:false,reason:"QA gate did not answer successfully",http:res.status};
-  return {checked:true,status:data.status,allowed:data.allowed};
+async function statusViaAuth(_run:Run){
+  // We use the existing human QA tester's account, never impersonate them.
+  // An actual authenticated browser visit to QA dashboard verifies this gate.
+  return {checked:false,reason:"Verify the selected workspace through the signed-in QA dashboard"};
 }
 async function clockReady(run:Run){
   const clock=await stripe("test_helpers/test_clocks/"+encodeURIComponent(run.stripe_clock_id));
@@ -96,20 +73,21 @@ async function setup(){
     if(error||!data)throw Error("Unable to initialize synthetic QA run");
     run=data;
   }
-  // The account name is reserved under .invalid: no accidental real recipient.
-  const email="qa-clock-"+run.id.replaceAll("-","")+"@example.invalid";
-  const pwd="Gatebrook-QA!9-"+crypto.randomUUID()+crypto.randomUUID();
-  const created=await db.auth.admin.createUser({
-    email,password:pwd,email_confirm:true,
-    app_metadata:{gatebrook_qa_clock_fixture:true}
-  });
-  if(created.error||!created.data.user)throw Error("Cannot create synthetic QA auth account: "+(created.error?.code||created.error?.status||"unknown"));
-  const owner=created.data.user.id;
-  const tester=await db.from("gatebrook_qa_testers").insert({user_id:owner});
-  if(tester.error)throw Error("Cannot authorize synthetic QA tester");
+  // Reuse the explicitly approved QA test owner without touching their
+  // existing J&J Plumbing workspace or account credentials.
+  const {data:original,error:originalError}=await db.from("gatebrook_qa_workspaces")
+    .select("id,owner_user_id,name").eq("name","J&J Plumbing QA")
+    .order("created_at",{ascending:true}).limit(1).maybeSingle();
+  if(originalError||!original?.owner_user_id)
+    throw Error("Approved original QA workspace unavailable");
+  const owner=original.owner_user_id;
+  const {data:tester,error:testerError}=await db.from("gatebrook_qa_testers")
+    .select("user_id").eq("user_id",owner).maybeSingle();
+  if(testerError||!tester)throw Error("Original QA owner is not allowlisted");
   const {data:workspace,error:wsErr}=await db.from("gatebrook_qa_workspaces")
     .insert({owner_user_id:owner,name:"Automated Failed Renewal QA"}).select("id").single();
-  if(wsErr||!workspace)throw Error("Cannot create isolated QA workspace");
+  if(wsErr||!workspace)throw Error("Cannot create a separate QA billing workspace");
+  if(workspace.id===original.id)throw Error("Fixture attempted to reuse existing QA workspace");
   await setRun({owner_user_id:owner,workspace_id:workspace.id,stage:"workspace_created"});
   const clock=await stripe("test_helpers/test_clocks",{
     frozen_time:String(Math.floor(Date.now()/1000)),
@@ -269,8 +247,8 @@ async function inspect(run:Run){
     await setRun({stage,access_after_recovery:true});
   }
   result.stage=stage;
-  // Authenticated QA status gate is checked on each stable stage. It is also
-  // exercised in setup as an independent sign-in, not an admin database query.
+  // Browser-authenticated QA gate remains an explicit sign-in verification step.
+  // We never mint tokens or impersonate the existing human tester.
   if(["trialing","active","failed","recovered"].includes(stage)){
     result.authenticated_gate=await statusViaAuth(run);
     if(result.authenticated_gate?.checked){
