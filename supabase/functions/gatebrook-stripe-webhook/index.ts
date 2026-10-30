@@ -42,12 +42,64 @@ function subscriptionIdFromInvoice(inv: Record<string, any>): string | null {
   }
   return null;
 }
+async function stripeCheckoutSession(id: string) {
+  const res=await fetch("https://api.stripe.com/v1/checkout/sessions/"+encodeURIComponent(id),{
+    headers:{Authorization:"Bearer "+STRIPE_KEY}
+  });
+  if(!res.ok)throw Error("Unable to verify completed Stripe checkout");
+  return await res.json() as Record<string, any>;
+}
+
+// A signed webhook is not, by itself, authority to assign a Stripe subscription
+// to an arbitrary business. Check current ownership and the Checkout session.
+// Most importantly, ignore delayed events for a subscription that has since
+// been replaced: otherwise its canceled/failed state could revoke new access.
+async function subscriptionMatchesEnrollment(sub: Record<string, any>): Promise<boolean> {
+  const businessId=sub.metadata?.business_id;
+  const userId=sub.metadata?.user_id;
+  if(sub.livemode!==true||typeof sub.id!=="string"||!sub.id.startsWith("sub_")||
+     typeof businessId!=="string"||typeof userId!=="string")return false;
+  const {data:membership,error:memberError}=await db.from("business_users")
+    .select("role").eq("business_id",businessId).eq("user_id",userId).maybeSingle();
+  if(memberError)throw Error("Could not verify business owner");
+  if(!membership||membership.role!=="owner")return false;
+  const {data:existing,error:recordError}=await db.from("gatebrook_subscriptions")
+    .select("user_id,status,stripe_subscription_id,stripe_checkout_session_id")
+    .eq("business_id",businessId).maybeSingle();
+  if(recordError)throw Error("Could not verify current subscription record");
+  if(!existing||existing.user_id!==userId)return false;
+  if(existing.stripe_subscription_id===sub.id){
+    // An in-progress replacement checkout can still retain the old canceled ID.
+    if(existing.status==="incomplete"&&sub.status==="canceled"&&
+       existing.stripe_checkout_session_id){
+      const pending=await stripeCheckoutSession(existing.stripe_checkout_session_id);
+      const linked=typeof pending.subscription==="string"?pending.subscription:pending.subscription?.id;
+      if(linked!==sub.id)return false;
+    }
+    return true;
+  }
+  // A different *active* subscription is already linked: late events from an
+  // older subscription must never overwrite or deactivate the new one.
+  if(existing.stripe_subscription_id &&
+     !["incomplete","incomplete_expired","canceled"].includes(existing.status))return false;
+  const checkoutId=existing.stripe_checkout_session_id;
+  if(typeof checkoutId!=="string"||!checkoutId.startsWith("cs_live_"))return false;
+  const checkout=await stripeCheckoutSession(checkoutId);
+  const checkoutSub=typeof checkout.subscription==="string"?checkout.subscription:checkout.subscription?.id;
+  return checkout.livemode===true && checkout.status==="complete"&&
+    checkout.mode==="subscription"&&checkoutSub===sub.id&&
+    checkout.client_reference_id===userId&&
+    checkout.metadata?.business_id===businessId&&checkout.metadata?.user_id===userId;
+}
 function epoch(v: unknown) { return typeof v === "number" && Number.isFinite(v) ? new Date(v*1000).toISOString() : null; }
 function periodValue(sub: Record<string, any>, key: "current_period_start" | "current_period_end") { return sub[key] ?? sub.items?.data?.[0]?.[key] ?? null; }
 async function persistSubscription(sub: Record<string, any>, eventId: string) {
   const businessId = sub.metadata?.business_id;
   const userId = sub.metadata?.user_id;
   if (typeof businessId !== "string" || typeof userId !== "string") throw new Error("Subscription metadata missing");
+  // If this is a stale or unmatched event, acknowledge it without mutating
+  // another subscriber's state. Stripe retries only actual processing errors.
+  if(!await subscriptionMatchesEnrollment(sub))return;
   const status = ["incomplete","incomplete_expired","trialing","active","past_due","canceled","unpaid","paused"].includes(sub.status) ? sub.status : "incomplete";
   const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
   const { error } = await db.from("gatebrook_subscriptions").upsert({
@@ -76,7 +128,8 @@ Deno.serve(async (req) => {
   try { event = JSON.parse(raw); } catch { return json(400,{error:"Invalid event body"}); }
   if (event.livemode !== true || typeof event.id !== "string" || typeof event.type !== "string" || !event.data?.object)
     return json(400,{error:"Invalid live Stripe event"});
-  const { data: seen } = await db.from("gatebrook_stripe_events").select("event_id").eq("event_id",event.id).maybeSingle();
+  const { data: seen, error: seenError } = await db.from("gatebrook_stripe_events").select("event_id").eq("event_id",event.id).maybeSingle();
+  if(seenError)return json(503,{error:"Could not verify Stripe event history"});
   if (seen) return json(200,{received:true,duplicate:true});
   try {
     const obj = event.data.object as Record<string, any>;
