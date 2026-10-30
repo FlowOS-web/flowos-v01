@@ -1529,7 +1529,9 @@
       reviewList.replaceChildren();
       const intro = document.createElement("p");
       intro.className = "gb-review-intro";
-      intro.textContent = "These requests need a human check before entering the lead pipeline. Approve genuine inquiries or dismiss unwanted ones. Requests here never trigger individual new-lead emails.";
+      intro.textContent = currentReadOnly
+        ? "These saved requests remain available to review. Approving or dismissing requests is paused until your subscription is reactivated."
+        : "These requests need a human check before entering the lead pipeline. Approve genuine inquiries or dismiss unwanted ones. Requests here never trigger individual new-lead emails.";
       reviewList.appendChild(intro);
       if (!pendingReviews.length) {
         const empty = document.createElement("div");
