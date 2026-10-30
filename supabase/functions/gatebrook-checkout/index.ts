@@ -51,18 +51,72 @@ Deno.serve(async (req) => {
     // Do not let a customer turn an existing paid business into a different slug/name via a checkout retry.
     const { data: member } = await db.from("business_users").select("role").eq("business_id", businessId).eq("user_id", auth.user.id).maybeSingle();
     if (!member || member.role !== "owner") return reply(403, { error: "Business owner access is required." });
-    const { data: sub } = await db.from("gatebrook_subscriptions").select("status,stripe_checkout_session_id,plan").eq("business_id", businessId).maybeSingle();
+    const { data: sub } = await db.from("gatebrook_subscriptions").select("status,stripe_checkout_session_id,stripe_subscription_id,plan").eq("business_id", businessId).maybeSingle();
     previousCheckoutSessionId = sub?.stripe_checkout_session_id ?? null;
     if (sub && ["active","trialing","past_due"].includes(sub.status)) return reply(409, { error: "A subscription already exists for this workspace. Sign in to continue." });
+    if (sub?.status === "incomplete" && sub.stripe_subscription_id)
+      return reply(409, { error: "A subscription is already being activated. Check billing before starting another checkout.", next: "billing.html" });
     if (sub?.status === "incomplete" && sub.stripe_checkout_session_id) {
+      // Old incomplete sessions must be reconciled before creating a fresh
+      // subscription checkout. Do not create another checkout on Stripe errors.
+      let prior: Record<string, unknown>;
       try {
-        const priorResponse = await fetch("https://api.stripe.com/v1/checkout/sessions/" + encodeURIComponent(sub.stripe_checkout_session_id), { headers: { Authorization: "Bearer " + STRIPE_KEY } });
-        const prior = await priorResponse.json();
-        if (priorResponse.ok && prior.status === "open" && typeof prior.url === "string") {
-          if (prior.metadata?.checkout_option !== plan) return reply(409, { error: "A checkout session is already open for a different plan. Finish or let that session expire before choosing another plan." });
+        const priorResponse = await fetch(
+          "https://api.stripe.com/v1/checkout/sessions/" + encodeURIComponent(sub.stripe_checkout_session_id),
+          { headers: { Authorization: "Bearer " + STRIPE_KEY } }
+        );
+        if (!priorResponse.ok) return reply(503, { error: "Could not verify the previous checkout. Please try again." });
+        prior = await priorResponse.json();
+      } catch {
+        return reply(503, { error: "Could not contact Stripe to verify the previous checkout. Please try again." });
+      }
+      if (prior.status === "complete") return reply(409, {
+        error: "Your previous checkout was completed. Please check billing status instead of starting another subscription.",
+        next: "billing.html"
+      });
+      if (prior.status === "open") {
+        const metadata = prior.metadata as Record<string, unknown> | null;
+        if (prior.livemode !== true ||
+            prior.id !== sub.stripe_checkout_session_id ||
+            prior.mode !== "subscription" ||
+            prior.payment_status === "paid" ||
+            Boolean(prior.subscription) ||
+            metadata?.business_id !== businessId ||
+            metadata?.user_id !== auth.user.id ||
+            prior.client_reference_id !== auth.user.id) {
+          return reply(409, { error: "Your existing Stripe checkout needs review before it can be replaced. Please contact support." });
+        }
+        if (metadata?.checkout_option === plan &&
+            prior.ui_mode === "hosted" && typeof prior.url === "string") {
           return reply(200, { url: prior.url });
         }
-      } catch { /* An expired/unavailable session can be recreated below. */ }
+        // The customer explicitly chose a different plan or switched from
+        // embedded to hosted Checkout. Expire ONLY the verified unpaid session.
+        let expired: Record<string, unknown>;
+        try {
+          const expiry = await fetch(
+            "https://api.stripe.com/v1/checkout/sessions/" +
+              encodeURIComponent(sub.stripe_checkout_session_id) + "/expire",
+            {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + STRIPE_KEY,
+                "Idempotency-Key": "gatebrook-replace-hosted-" + auth.user.id + "-" + sub.stripe_checkout_session_id
+              }
+            }
+          );
+          if (!expiry.ok) return reply(409, {
+            error: "The previous checkout could not be closed safely. Refresh and try again."
+          });
+          expired = await expiry.json();
+        } catch {
+          return reply(503, { error: "We could not confirm the old checkout was closed. Refresh and try again." });
+        }
+        if (expired.id !== sub.stripe_checkout_session_id || expired.status !== "expired")
+          return reply(409, { error: "The previous checkout is still active. Refresh and try again." });
+      } else if (prior.status !== "expired") {
+        return reply(409, { error: "Your previous checkout is in an unexpected state. Please contact support." });
+      }
     }
     const { error: updateError } = await db.from("businesses").update({ name, slug, industry, owner_email: auth.user.email ?? null, active: false }).eq("id", businessId);
     if (updateError) return reply(409, { error: "Could not update this setup. Check whether the public link is available." });
@@ -90,7 +144,7 @@ Deno.serve(async (req) => {
     form.set("payment_method_collection", "always");
     form.set("subscription_data[trial_settings][end_behavior][missing_payment_method]", "cancel");
   }
-  const retryKey = previousCheckoutSessionId ? previousCheckoutSessionId : "initial";
+  const retryKey = (previousCheckoutSessionId ? previousCheckoutSessionId : "initial") + "-" + plan;
   const headers: Record<string, string> = { "Authorization": "Bearer " + STRIPE_KEY, "Content-Type": "application/x-www-form-urlencoded", "Idempotency-Key": "gatebrook-" + auth.user.id + "-" + businessId + "-" + retryKey };
   let session: Record<string, unknown>;
   try {
