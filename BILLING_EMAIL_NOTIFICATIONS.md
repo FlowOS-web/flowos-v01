@@ -43,7 +43,7 @@ All templates include the actual plan price ($149/month or $1,490/year), trial e
 
 1. Sign in with the existing approved Gatebrook QA tester account.
 2. Open [QA Dashboard](https://gatebrook.work/qa-dashboard.html).
-3. Under **Preview your billing emails**, select **1-day reminder**, then click **Send test email**.
+3. Under **Preview your billing emails**, select an email template, then click **Send test email**. All test-email buttons and footers say **View QA dashboard** and point to `https://gatebrook.work/qa-dashboard.html` rather than live `billing.html`; the original production templates still point to live Billing. Previously sent emails do not change after a fix.
 4. This sends only to the signed-in tester's **confirmed** email. It does **not** create a new subscription, change trial dates, or charge money.
 5. Check the email's appearance and links in the inbox/spam folder. The preview includes a prominent TEST PREVIEW banner and test subject line.
 6. In Supabase, verify the preview journal has `status='sent'` and a `resend_email_id`. Confirm inbox delivery separately.
