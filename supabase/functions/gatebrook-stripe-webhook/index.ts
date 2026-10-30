@@ -22,6 +22,26 @@ async function stripeSubscription(id: string) {
   if (!res.ok) throw new Error("Unable to retrieve subscription from Stripe");
   return data as Record<string, any>;
 }
+// Stripe invoices use both legacy invoice.subscription and newer
+// parent.subscription_details.subscription / line-item parent paths.
+// Resolve the subscribed resource, then re-fetch its current state from Stripe.
+function subscriptionIdFromInvoice(inv: Record<string, any>): string | null {
+  const candidates: unknown[] = [
+    inv.subscription,
+    inv.parent?.subscription_details?.subscription,
+    ...(Array.isArray(inv.lines?.data) ? inv.lines.data.flatMap((line: Record<string, any>) => [
+      line.subscription,
+      line.parent?.subscription_item_details?.subscription,
+      line.parent?.license_fee_subscription_details?.subscription
+    ]) : [])
+  ];
+  for (const value of candidates) {
+    if (typeof value === "string" && value.startsWith("sub_")) return value;
+    if (typeof value === "object" && value !== null && typeof (value as any).id === "string"
+       && (value as any).id.startsWith("sub_")) return (value as any).id;
+  }
+  return null;
+}
 function epoch(v: unknown) { return typeof v === "number" && Number.isFinite(v) ? new Date(v*1000).toISOString() : null; }
 function periodValue(sub: Record<string, any>, key: "current_period_start" | "current_period_end") { return sub[key] ?? sub.items?.data?.[0]?.[key] ?? null; }
 async function persistSubscription(sub: Record<string, any>, eventId: string) {
@@ -54,7 +74,8 @@ Deno.serve(async (req) => {
   if (!await verify(raw, signature, WEBHOOK_SECRET)) return json(400,{error:"Invalid Stripe signature"});
   let event: Record<string, any>;
   try { event = JSON.parse(raw); } catch { return json(400,{error:"Invalid event body"}); }
-  if (typeof event.id !== "string" || typeof event.type !== "string" || !event.data?.object) return json(400,{error:"Invalid event"});
+  if (event.livemode !== true || typeof event.id !== "string" || typeof event.type !== "string" || !event.data?.object)
+    return json(400,{error:"Invalid live Stripe event"});
   const { data: seen } = await db.from("gatebrook_stripe_events").select("event_id").eq("event_id",event.id).maybeSingle();
   if (seen) return json(200,{received:true,duplicate:true});
   try {
@@ -67,8 +88,8 @@ Deno.serve(async (req) => {
     } else if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const subscriptionId = typeof obj.subscription === "string" ? obj.subscription : obj.subscription?.id;
       if (subscriptionId) await persistSubscription(await stripeSubscription(subscriptionId),event.id);
-    } else if (event.type === "invoice.payment_failed") {
-      const subscriptionId = typeof obj.subscription === "string" ? obj.subscription : obj.subscription?.id;
+    } else if (event.type === "invoice.payment_failed" || event.type === "invoice.paid") {
+      const subscriptionId = subscriptionIdFromInvoice(obj);
       if (subscriptionId) await persistSubscription(await stripeSubscription(subscriptionId),event.id);
     }
     const { error: eventError } = await db.from("gatebrook_stripe_events").insert({event_id:event.id,event_type:event.type});
