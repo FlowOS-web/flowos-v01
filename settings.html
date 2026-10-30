@@ -533,7 +533,76 @@
       #requestPreview.gb-request-page .wrap { padding: 28px 16px 30px; }
       #requestPreview.gb-request-page .flowos { margin-bottom: 35px; }
     }
-  </style>
+  
+    /* Gatebrook Settings v2: three intentional areas instead of a long settings wall. */
+    body.gb-brand-settings-page .container{max-width:1100px;padding:35px 22px 85px}
+    body.gb-brand-settings-page h1{font-size:clamp(30px,4vw,42px);letter-spacing:-.045em}
+    body.gb-brand-settings-page .subtitle{font-size:14px;max-width:620px;line-height:1.6}
+    body.gb-brand-settings-page #settingsContent{display:block}
+    body.gb-brand-settings-page #settingsContent.hidden,body.gb-brand-settings-page .gb-settings-pane[hidden]{display:none!important}
+    body.gb-brand-settings-page .gb-settings-nav{position:sticky;top:72px;z-index:15;display:flex;grid-template-columns:none;gap:5px;width:100%;margin:0 0 20px;padding:6px;border:1px solid var(--border);border-radius:15px;background:rgba(20,24,23,.96);backdrop-filter:blur(15px);box-shadow:0 9px 25px rgba(0,0,0,.12)}
+    body.gb-brand-settings-page .gb-settings-tab{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-height:48px;padding:12px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:680;cursor:pointer}
+    body.gb-brand-settings-page .gb-settings-tab:hover{color:var(--text);background:rgba(90,153,105,.07)}
+    body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{color:var(--text);border-color:rgba(106,166,126,.32);background:var(--panel2)}
+    body.gb-brand-settings-page .gb-settings-tab .gb-tab-icon{font-size:17px;color:#87bda0}
+    body.gb-brand-settings-page .gb-settings-pane{width:100%;margin:0;min-width:0}
+    body.gb-brand-settings-page #requestBuilder{padding:clamp(20px,3.5vw,37px)}
+    body.gb-brand-settings-page #businessProfile,body.gb-brand-settings-page #sharePage{max-width:770px;padding:clamp(23px,4vw,38px)}
+    body.gb-brand-settings-page .gb-builder-intro{margin-bottom:25px}
+    body.gb-brand-settings-page .gb-builder-intro h2{font-size:clamp(25px,3.4vw,33px);letter-spacing:-.045em}
+    body.gb-brand-settings-page .gb-builder-intro>p:last-of-type{font-size:14px;max-width:670px}
+    body.gb-brand-settings-page .gb-settings-kicker{font-size:11px;letter-spacing:.16em;color:#8bbc9d;font-weight:750;margin:0 0 10px}
+    body.gb-brand-settings-page .gb-live-cue{display:inline-flex;gap:8px;align-items:center;font-size:11px;color:#b0d6bc;padding:8px 12px;border-radius:99px;background:rgba(54,115,70,.11);border:1px solid rgba(117,178,131,.22);margin-top:15px}
+    body.gb-brand-settings-page .gb-live-cue::before{content:"";width:7px;height:7px;border-radius:50%;background:#85c899;box-shadow:0 0 10px rgba(94,170,114,.4)}
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step{margin-top:12px;border:1px solid var(--border);border-radius:15px;background:var(--panel2);padding:22px 24px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title{margin-bottom:15px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title>span{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:10px;background:rgba(93,156,111,.13);color:#a6d0b5;font-size:12px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title h3{font-size:17px;margin:3px 0 5px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title p{font-size:12px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-service-manager{padding:0;border:0;background:transparent}
+    body.gb-brand-settings-page .gb-simple-builder .gb-service-manager-heading{border-bottom:1px solid var(--border);padding-bottom:12px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-settings-service-list{margin-top:2px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-settings-add-service{padding:15px;background:rgba(0,0,0,.07);border:1px dashed var(--border);border-radius:11px}
+    body.gb-brand-settings-page .gb-settings-fold{padding:0!important;overflow:hidden}
+    body.gb-brand-settings-page .gb-settings-fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:20px 23px}
+    body.gb-brand-settings-page .gb-settings-fold summary::-webkit-details-marker,body.gb-brand-settings-page .gb-simple-disclosure summary::-webkit-details-marker{display:none}
+    body.gb-brand-settings-page .gb-settings-fold>summary::after{content:"⌄";margin-left:auto;font-size:21px;color:var(--muted);transition:transform .18s}
+    body.gb-brand-settings-page .gb-settings-fold[open]>summary::after{transform:rotate(180deg)}
+    body.gb-brand-settings-page .gb-settings-fold[open]>summary{border-bottom:1px solid var(--border)}
+    body.gb-brand-settings-page .gb-settings-fold .gb-fold-body{padding:19px 23px 23px}
+    body.gb-brand-settings-page .gb-simple-disclosure{margin:15px 0;border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.07);overflow:hidden}
+    body.gb-brand-settings-page .gb-simple-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;cursor:pointer;list-style:none}
+    body.gb-brand-settings-page .gb-simple-disclosure>summary strong{display:block;font-size:13px}
+    body.gb-brand-settings-page .gb-simple-disclosure>summary small{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+    body.gb-brand-settings-page .gb-simple-disclosure>summary::after{content:"⌄";font-size:21px;color:var(--muted);transition:transform .18s}
+    body.gb-brand-settings-page .gb-simple-disclosure[open]>summary::after{transform:rotate(180deg)}
+    body.gb-brand-settings-page .gb-simple-disclosure .gb-advanced-content{padding:0 17px 17px;border-top:1px solid var(--border)}
+    body.gb-brand-settings-page .gb-simple-disclosure .gb-preview-shell{margin:10px 0 0;padding:10px 0 0;background:transparent;border:0}
+    body.gb-brand-settings-page .gb-save-dock{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:15px;margin-top:17px;padding:17px;background:rgba(51,104,66,.09);border:1px solid rgba(111,175,132,.35);border-radius:12px}
+    body.gb-brand-settings-page .gb-save-message{flex:1 1 195px}
+    body.gb-brand-settings-page .gb-save-message strong{display:block;font-size:14px;margin-bottom:5px}
+    body.gb-brand-settings-page .gb-save-message span{display:block;color:var(--muted);font-size:12px;line-height:1.6}
+    body.gb-brand-settings-page .gb-save-actions{flex:0 1 255px;min-width:210px}
+    body.gb-brand-settings-page .gb-simple-builder .gb-save-request{margin:0;width:100%}
+    body.gb-brand-settings-page .gb-simple-builder #builderFeedback{margin-top:8px;font-size:12px}
+    body.gb-brand-settings-page :is(.gb-settings-tab,.gb-settings-fold>summary,.gb-simple-disclosure>summary):focus-visible{outline:2px solid #a1d1ad;outline-offset:3px}
+    :root[data-gb-theme=light] body.gb-brand-settings-page .gb-settings-nav{background:rgba(250,252,249,.96)}
+    :root[data-gb-theme=light] body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{background:#e9f2e8;border-color:#b9d1bd}
+    :root[data-gb-theme=light] body.gb-brand-settings-page .gb-live-cue{color:#286343;background:#ecf7ee}
+    :root[data-gb-theme=light] body.gb-brand-settings-page .gb-simple-builder .gb-builder-step{background:#f6f9f6}
+    :root[data-gb-theme=light] body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title>span{color:#305c42}
+    @media(max-width:700px){
+      body.gb-brand-settings-page .container{padding:22px 14px 75px}
+      body.gb-brand-settings-page .gb-settings-nav{top:68px;padding:5px;gap:3px}
+      body.gb-brand-settings-page .gb-settings-tab{flex-direction:column;gap:3px;min-height:52px;font-size:11px;padding:9px 6px}
+      body.gb-brand-settings-page #requestBuilder{padding:18px 13px}
+      body.gb-brand-settings-page .gb-simple-builder .gb-builder-step{padding:17px 14px}
+      body.gb-brand-settings-page .gb-settings-fold{padding:0!important}
+      body.gb-brand-settings-page .gb-settings-fold>summary{padding:16px 14px}
+      body.gb-brand-settings-page .gb-settings-fold .gb-fold-body{padding:15px 14px}
+      body.gb-brand-settings-page .gb-save-actions{flex:1 1 100%;min-width:0}
+    }
+</style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
   <script src="request-builder.js?v=1"></script>
@@ -564,6 +633,125 @@
     const serviceFeedback = document.getElementById("serviceFeedback");
     const linkFeedback = document.getElementById("linkFeedback");
     const serviceList = document.getElementById("serviceList");
+
+
+    // Simplify the interface without moving saves, changing user permissions or calling APIs.
+    (function setupSettingsExperience(){
+      const root=document.getElementById("settingsContent");
+      const profile=document.getElementById("businessProfile");
+      const share=root.querySelector(".gb-settings-share-card");
+      const builder=document.getElementById("requestBuilder");
+      const nav=root.querySelector(".gb-settings-nav");
+      if(!root||!profile||!share||!builder||!nav)return;
+      nav.innerHTML="";
+      const configs=[
+        ["experience","Customer experience","✦",builder],
+        ["profile","Business details","◈",profile],
+        ["share","Share your page","↗",share]
+      ];
+      nav.setAttribute("role","tablist");
+      nav.setAttribute("aria-label","Business settings");
+      nav.classList.add("gb-settings-nav");
+      share.id="sharePage";
+      configs.forEach(([key,label,icon,pane])=>{
+        pane.classList.add("gb-settings-pane");
+        pane.dataset.settingsPane=key;
+        pane.setAttribute("role","tabpanel");
+        const tab=document.createElement("button");
+        tab.type="button";tab.className="gb-settings-tab";tab.dataset.settingsTab=key;
+        tab.setAttribute("role","tab");tab.id="settings-tab-"+key;
+        tab.setAttribute("aria-controls",pane.id);
+        pane.setAttribute("aria-labelledby",tab.id);
+        const symbol=document.createElement("span");symbol.className="gb-tab-icon";symbol.setAttribute("aria-hidden","true");symbol.textContent=icon;
+        tab.append(symbol,document.createTextNode(" "+label));nav.append(tab);
+      });
+      const titles={experience:builder,profile,share};
+      const current=()=>{
+        const hash=location.hash.slice(1);
+        if(titles[hash])return hash;
+        if(hash==="businessProfile")return "profile";
+        if(hash==="sharePage")return "share";
+        return "experience";
+      };
+      function setTab(key,writeHash=false){
+        if(!titles[key])key="experience";
+        nav.querySelectorAll("[data-settings-tab]").forEach(tab=>{
+          const active=tab.dataset.settingsTab===key;
+          tab.setAttribute("aria-selected",String(active));
+          tab.tabIndex=active?0:-1;
+        });
+        configs.forEach(([k,label,icon,pane])=>{pane.hidden=k!==key;});
+        if(writeHash)history.replaceState(null,"",location.pathname+location.search+"#"+key);
+      }
+      const buttons=[...nav.querySelectorAll("[data-settings-tab]")];
+      buttons.forEach((tab,index)=>{
+        tab.addEventListener("click",()=>setTab(tab.dataset.settingsTab,true));
+        tab.addEventListener("keydown",event=>{
+          if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+          event.preventDefault();
+          const pos=event.key==="Home"?0:event.key==="End"?buttons.length-1:(index+(event.key==="ArrowRight"?1:-1)+buttons.length)%buttons.length;
+          buttons[pos].focus();setTab(buttons[pos].dataset.settingsTab,true);
+        });
+      });
+      window.addEventListener("hashchange",()=>setTab(current()));
+      const heading=builder.querySelector(".gb-builder-intro");
+      if(heading){
+        heading.querySelector(".gb-builder-kicker").textContent="CUSTOMER EXPERIENCE";
+        heading.querySelector("h2").textContent="A better first impression.";
+        const p=heading.querySelector("p:last-child");
+        if(p)p.textContent="Make it effortless for customers to reach you. Start with your services and customize only what matters.";
+        const status=document.createElement("span");status.className="gb-live-cue";status.textContent="Connected to your customer request page";heading.append(status);
+      }
+      const servicesTitle=builder.querySelector("#gb-step-services");if(servicesTitle)servicesTitle.textContent="Your services";
+      const stepSections=[...builder.querySelectorAll(":scope > section.gb-builder-step")];
+      for(const [index,label,desc] of [[1,"Page details & fields","The essentials are ready. Adjust these only if needed."],[2,"Extra questions","Ask more only when it helps you prepare for the job."]]){
+        const section=stepSections[index];if(!section)continue;
+        const details=document.createElement("details");details.className="gb-builder-step gb-settings-fold";
+        const summary=document.createElement("summary");summary.className="gb-builder-step-title";
+        const title=section.querySelector(".gb-builder-step-title");
+        while(title.firstChild)summary.append(title.firstChild);
+        const h3=summary.querySelector("h3");if(h3)h3.textContent=label;
+        const p=summary.querySelector("p");if(p)p.textContent=desc;
+        const badge=summary.querySelector("span");if(badge)badge.textContent="0"+(index+1);
+        details.append(summary);
+        const body=document.createElement("div");body.className="gb-fold-body";
+        while(section.firstChild)body.append(section.firstChild);
+        details.append(body);section.replaceWith(details);
+      }
+      const previewStep=builder.querySelector(".gb-builder-preview-step");
+      if(previewStep){
+        const title=previewStep.querySelector(".gb-builder-step-title");
+        title.querySelector("h3").textContent="Review & publish";
+        title.querySelector("p").textContent="Preview the request page, then save changes.";
+        title.querySelector("span").textContent="04";
+        const preview=previewStep.querySelector(".gb-preview-shell");
+        const disclosure=document.createElement("details");disclosure.className="gb-simple-disclosure";
+        const summary=document.createElement("summary");
+        summary.innerHTML="<span><strong>Open customer preview</strong><small>See exactly what customers will see</small></span>";
+        disclosure.append(summary);preview.replaceWith(disclosure);disclosure.append(preview);
+        disclosure.addEventListener("toggle",()=>{if(disclosure.open&&window.GatebrookRequestBuilder)window.GatebrookRequestBuilder.refreshPreview()});
+        const save=previewStep.querySelector("#saveRequestForm"),feedback=previewStep.querySelector("#builderFeedback");
+        const dock=document.createElement("div");dock.className="gb-save-dock";
+        const message=document.createElement("div");message.className="gb-save-message";
+        message.innerHTML="<strong>Ready when you are</strong><span>Services save right away. Other changes publish when you save.</span>";
+        const controls=document.createElement("div");controls.className="gb-save-actions";
+        controls.append(save,feedback);dock.append(message,controls);previewStep.append(dock);
+      }
+      const form=document.getElementById("profileForm"),row=form.querySelector(".row"),privateInfo=form.querySelector(".gb-settings-private");
+      const advanced=document.createElement("details");advanced.className="gb-simple-disclosure";
+      const advancedSummary=document.createElement("summary");
+      advancedSummary.innerHTML="<span><strong>Contact details & branding</strong><small>Phone, website, public email, and logo</small></span>";
+      const content=document.createElement("div");content.className="gb-advanced-content";
+      content.append(row);
+      for(const id of ["publicEmail","logoUrl"]){
+        const label=form.querySelector('label[for="'+id+'"]'),input=document.getElementById(id);
+        if(label)content.append(label);if(input)content.append(input);
+        if(id==="publicEmail"){const hint=document.getElementById("publicEmailHint");if(hint)content.append(hint);}
+      }
+      advanced.append(advancedSummary,content);
+      form.insertBefore(advanced,privateInfo);
+      setTab(current());
+    })();
 
     function syncServiceExperience(refreshPreview=true){
       const root = document.getElementById("requestBuilder");
