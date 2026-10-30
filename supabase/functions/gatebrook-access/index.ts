@@ -25,7 +25,13 @@ Deno.serve(async(req)=>{
      return reply(200,{allowed:true,business_id:membership.business_id,role:membership.role,status:"demo",plan:null,trial_end:null,current_period_end:null,cancel_at_period_end:false});
    }
  }
- const periodValid=!sub?.current_period_end||Date.parse(sub.current_period_end)>Date.now();
+ // Require a confirmed future Stripe billing period (or an unexpired trial);
+ // a missing period date must never grant dashboard access.
+ const now=Date.now();
+ const periodEnd=sub?.current_period_end?Date.parse(sub.current_period_end):NaN;
+ const trialEnd=sub?.trial_end?Date.parse(sub.trial_end):NaN;
+ const periodValid=(Number.isFinite(periodEnd)&&periodEnd>now)||
+   (sub?.status==="trialing"&&Number.isFinite(trialEnd)&&trialEnd>now);
  const allowed=!!sub&&["active","trialing"].includes(sub.status)&&periodValid;
  if(!allowed)return reply(200,{allowed:false,reason:sub?.status||"setup_required",next:sub&&sub.status!=="incomplete"&&sub.status!=="incomplete_expired"?"billing.html":"onboarding.html",status:sub?.status??null});
  return reply(200,{allowed:true,business_id:membership.business_id,role:membership.role,status:sub.status,plan:sub.plan,trial_end:sub.trial_end,current_period_end:sub.current_period_end,cancel_at_period_end:sub.cancel_at_period_end});
