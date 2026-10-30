@@ -9,3 +9,14 @@ verify_jwt = true
 # Public by design; the function itself validates Turnstile and tenant services.
 [functions.submit-lead]
 verify_jwt = false
+
+
+# The billing dispatcher accepts only a private 256-bit database-generated job
+# token. This is a Cron-to-Edge endpoint, not a public or user-callable API.
+[functions.gatebrook-billing-email-dispatch]
+verify_jwt = false
+
+# The QA preview checks the user's Supabase Auth session and a server-side
+# tester allowlist before sending an email only to the user's own address.
+[functions.gatebrook-billing-email-preview]
+verify_jwt = false
