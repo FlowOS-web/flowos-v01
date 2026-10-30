@@ -535,6 +535,11 @@
       .value-save-button { width: 100%; }
       .metric-number { font-size: 23px; }
     }
+    .read-only-notice{margin:0 0 22px;padding:18px 20px;background:#14241b;border:1px solid #39754f;border-radius:14px;color:#e9f4ea;display:flex;gap:14px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    .read-only-notice.hidden{display:none}
+    .read-only-notice strong{display:block;font-size:16px;margin-bottom:5px}
+    .read-only-notice p{margin:0;color:#c2d7c7;font-size:13px;line-height:1.6;max-width:680px}
+    .read-only-notice a{display:inline-block;padding:11px 17px;border-radius:8px;background:#d9eddd;color:#102315;text-decoration:none;font-size:13px;font-weight:700}
   </style>
 
 
@@ -693,6 +698,12 @@
       </div>
 
 
+      <div id="readOnlyNotice" class="read-only-notice hidden" role="status" aria-live="polite">
+        <div><strong>Read-only workspace — subscription inactive</strong>
+          <p>Your saved leads, request answers, and business details are still available to view. Updates and new customer requests are disabled until you reactivate your subscription.</p>
+        </div>
+        <a href="billing.html">Manage subscription</a>
+      </div>
       <div
         id="dashboardError"
         class="dashboard-error hidden"
@@ -911,6 +922,7 @@
     let allLeads = [];
     let pendingReviews = [];
     let currentBusinessRole = null;
+    let currentReadOnly = false;
     const pendingReviewIds = new Set();
     let currentFilter = "all";
     let moneyFieldsAvailable = false;
@@ -1013,6 +1025,8 @@
       allLeads = [];
       pendingReviews = [];
       currentBusinessRole = null;
+      currentReadOnly = false;
+      document.getElementById("readOnlyNotice").classList.add("hidden");
       pendingReviewIds.clear();
       updateReviewCount();
       document.getElementById("needsReviewTab").classList.add("hidden");
@@ -1332,6 +1346,7 @@
     }
 
     async function updateLeadStatus(leadId, newStatus, button) {
+      if (currentReadOnly) return;
       const businessId = currentBusinessId;
       const epoch = dashboardEpoch;
       if (!businessId || !validStatuses.has(newStatus) || pendingLeadIds.has(leadId) ||
@@ -1369,6 +1384,7 @@
     }
 
     async function saveLeadValues(form) {
+      if (currentReadOnly) return;
       const businessId = currentBusinessId;
       const epoch = dashboardEpoch;
       const leadId = form.dataset.id;
@@ -1549,12 +1565,13 @@
         }
         card.append(head, reason, fields);
         if (review.notes) card.appendChild(notes);
-        card.appendChild(actions);
+        if (!currentReadOnly) card.appendChild(actions);
         reviewList.appendChild(card);
       }
     }
 
     async function decideReview(reviewId, decision, button) {
+      if (currentReadOnly) return;
       const businessId = currentBusinessId;
       const epoch = dashboardEpoch;
       if (currentBusinessRole !== "owner" || !businessId || !["approve","dismiss"].includes(decision) ||
@@ -1607,10 +1624,12 @@
         const { data: access, error: accessError } = await supabaseClient.functions.invoke("gatebrook-access", { method: "GET" });
         if (epoch !== dashboardEpoch) return;
         if (accessError) throw new Error("Workspace access could not be verified. Please retry in a moment.");
-        if (!access?.allowed) {
+        if (!access?.allowed && !access?.read_only) {
           location.replace(access?.next || "onboarding.html");
           return;
         }
+        currentReadOnly = access?.read_only===true && access?.allowed!==true;
+        document.getElementById("readOnlyNotice").classList.toggle("hidden", !currentReadOnly);
         if (requestedBusinessId && requestedBusinessId !== access.business_id) {
           throw new Error("This account does not have access to the business in this link.");
         }
