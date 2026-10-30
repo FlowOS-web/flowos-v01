@@ -246,3 +246,14 @@ test("paid renewal shows Monthly instead of expired 7-day trial",async()=>{
   assert.equal(h.nodes.qaStatusPlan.textContent,"Monthly");
   assert.match(sources.dashboard,/data\.plan==="trial"&&data\.status==="trialing"\?"7-day trial":"Monthly"/);
 });
+
+test("QA dashboard displays scheduled cancellation without hiding active access",()=>{
+  assert.match(sources.dashboard,/id="qaCancellationNotice"/);
+  assert.match(sources.dashboard,/data\.cancel_at_period_end===true/);
+  assert.match(sources.dashboard,/Cancellation scheduled\. Your QA subscription remains active until/);
+  assert.match(sources.dashboard,/timeZone:"America\/Chicago"/);
+});
+test("QA status gate checks current paid period rather than cancel request alone",()=>{
+  assert.match(sources.status,/const allowed = \["trialing","active"\]\.includes\(status\) && expiration!==null && expiration>Date\.now\(\)/);
+  assert.match(sources.status,/cancel_at_period_end:sub\?\.cancel_at_period_end===true/);
+});
