@@ -7,7 +7,7 @@ const read=p=>fs.readFileSync(path.join(root,p),"utf8");
 const webhook=read("supabase/functions/gatebrook-stripe-webhook/index.ts");
 const access=read("supabase/functions/gatebrook-access/index.ts");
 const requestMigration=read("supabase/migrations/202610300002_gatebrook_request_subscription_enforcement.sql");
-const fixture=({status="active",stripeId="sub_live_current",checkoutId="cs_live_recent",userId="test-user",owner=true})=>{
+const fixture=({status="active",stripeId="sub_live_current",checkoutId="cs_live_recent",userId="test-user",owner=true}={})=>{
   const tables={
     business_users:owner?{role:"owner"}:null,
     gatebrook_subscriptions:{user_id:userId,status,stripe_subscription_id:stripeId,stripe_checkout_session_id:checkoutId}
