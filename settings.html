@@ -602,6 +602,48 @@
       body.gb-brand-settings-page .gb-settings-fold .gb-fold-body{padding:15px 14px}
       body.gb-brand-settings-page .gb-save-actions{flex:1 1 100%;min-width:0}
     }
+
+    /* Soft animated disclosure affordances, including the first Services section. */
+    body.gb-brand-settings-page .gb-settings-fold>summary,
+    body.gb-brand-settings-page .gb-simple-disclosure>summary,
+    body.gb-brand-settings-page .gb-simple-builder .gb-advanced-settings>summary,
+    body.gb-brand-settings-page .gb-simple-builder .gb-condition-editor>summary{
+      transition:background-color .23s ease, color .23s ease;
+    }
+    body.gb-brand-settings-page .gb-settings-fold>summary:hover,
+    body.gb-brand-settings-page .gb-simple-disclosure>summary:hover{
+      background:rgba(99,169,117,.055);
+    }
+    body.gb-brand-settings-page .gb-settings-fold>summary:focus-visible,
+    body.gb-brand-settings-page .gb-simple-disclosure>summary:focus-visible{
+      outline:2px solid #a1d1ad;
+      outline-offset:-3px;
+    }
+    body.gb-brand-settings-page .gb-settings-fold>summary::after,
+    body.gb-brand-settings-page .gb-simple-disclosure>summary::after{
+      display:inline-block;
+      transform-origin:center;
+      transition:transform .32s cubic-bezier(.22,1,.36,1),color .2s ease;
+    }
+    body.gb-brand-settings-page .gb-settings-fold[open]>summary::after,
+    body.gb-brand-settings-page .gb-simple-disclosure[open]>summary::after{
+      transform:rotate(180deg);
+    }
+    body.gb-brand-settings-page .gb-settings-services[open]>summary{
+      border-bottom:1px solid var(--border);
+    }
+    @media(prefers-reduced-motion:reduce){
+      body.gb-brand-settings-page .gb-settings-fold>summary,
+      body.gb-brand-settings-page .gb-simple-disclosure>summary,
+      body.gb-brand-settings-page .gb-simple-builder .gb-advanced-settings>summary,
+      body.gb-brand-settings-page .gb-simple-builder .gb-condition-editor>summary{
+        transition:none!important;
+      }
+      body.gb-brand-settings-page .gb-settings-fold>summary::after,
+      body.gb-brand-settings-page .gb-simple-disclosure>summary::after{
+        transition:none!important;
+      }
+    }
 </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
@@ -718,6 +760,25 @@
         while(section.firstChild)body.append(section.firstChild);
         details.append(body);section.replaceWith(details);
       }
+      // Services is part of the same disclosure system; start expanded so a
+      // new owner immediately sees where to add their first offering.
+      const serviceSection=stepSections[0];
+      if(serviceSection){
+        const details=document.createElement("details");
+        details.className="gb-builder-step gb-settings-fold gb-settings-services";
+        details.open=true;
+        const summary=document.createElement("summary");
+        summary.className="gb-builder-step-title";
+        const title=serviceSection.querySelector(".gb-builder-step-title");
+        while(title.firstChild)summary.append(title.firstChild);
+        const badge=summary.querySelector("span");
+        if(badge)badge.textContent="01";
+        const body=document.createElement("div");
+        body.className="gb-fold-body";
+        while(serviceSection.firstChild)body.append(serviceSection.firstChild);
+        details.append(summary,body);
+        serviceSection.replaceWith(details);
+      }
       const previewStep=builder.querySelector(".gb-builder-preview-step");
       if(previewStep){
         const title=previewStep.querySelector(".gb-builder-step-title");
@@ -750,6 +811,48 @@
       }
       advanced.append(advancedSummary,content);
       form.insertBefore(advanced,privateInfo);
+
+      // Smooth, reversible height animation for every settings disclosure.
+      // A delegated listener also covers service-specific question editors
+      // that request-builder.js inserts after the settings page initializes.
+      const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)");
+      root.addEventListener("click",event=>{
+        if(!(event.target instanceof Element))return;
+        const summary=event.target.closest("summary");
+        if(!summary||!root.contains(summary))return;
+        const details=summary.parentElement;
+        if(!(details instanceof HTMLDetailsElement))return;
+        if(!details.matches(".gb-settings-fold, .gb-simple-disclosure, .gb-advanced-settings, .gb-condition-editor"))return;
+        event.preventDefault();
+        const previousTarget=details.dataset.motionTarget;
+        const targetOpen=previousTarget ? previousTarget!=="open" : !details.open;
+        const startHeight=details.getBoundingClientRect().height;
+        for(const animation of details.getAnimations())animation.cancel();
+        delete details.dataset.motionTarget;
+        if(targetOpen)details.open=true;
+        const endHeight=targetOpen?details.scrollHeight:summary.getBoundingClientRect().height;
+        if(reducedMotion.matches||!details.animate||Math.abs(endHeight-startHeight)<2){
+          details.open=targetOpen;
+          details.style.height="";
+          details.style.overflow="";
+          return;
+        }
+        details.style.overflow="hidden";
+        const target=targetOpen?"open":"closed";
+        details.dataset.motionTarget=target;
+        const animation=details.animate(
+          [{height:startHeight+"px"},{height:endHeight+"px"}],
+          {duration:320,easing:"cubic-bezier(.22,1,.36,1)"}
+        );
+        animation.onfinish=()=>{
+          if(details.dataset.motionTarget!==target)return;
+          details.open=targetOpen;
+          details.style.height="";
+          details.style.overflow="";
+          delete details.dataset.motionTarget;
+        };
+      });
+
       setTab(current());
     })();
 
