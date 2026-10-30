@@ -367,5 +367,9 @@
     }
   }
 
-  window.GatebrookRequestBuilder = { init, refreshPreview: renderPreview };
+  window.GatebrookRequestBuilder = {
+    init,
+    refreshPreview: renderPreview,
+    refreshServiceChoices: () => { renderFieldEditor(); renderPreview(); }
+  };
 })();
