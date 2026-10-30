@@ -196,7 +196,7 @@ function qaPlanSwitchHarness({storedPlan="annual",requestedPlan="trial",status="
     prior:{plan:storedPlan},plan:requestedPlan,STRIPE_PUBLIC_TEST:"pk_test_mock",
     reply:(code,data)=>({code,data}),origin:null,stripe,encodeURIComponent
   };
-  const wrapped="(async function(){\n"+branch+"\nreturn {code:200,data:{next:'create'}};\n})()";
+  const wrapped="(async function(){\n{\n"+branch+"\nreturn {code:200,data:{next:'create'}};\n})()";
   return Promise.resolve(vm.runInNewContext(wrapped,context)).then(result=>({result,calls}));
 }
 test("switching plans expires only an open unpaid sandbox session",async()=>{
