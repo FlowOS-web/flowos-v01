@@ -189,6 +189,11 @@
       *,*::before,*::after { transition:none!important; scroll-behavior:auto!important; }
     }
 
+      .gb-read-only-banner{padding:17px 19px;margin:18px 0 22px;background:#14251c;border:1px solid #3f7755;border-radius:12px;color:#e2f5e8}
+    .gb-read-only-banner.hidden{display:none}
+    .gb-read-only-banner strong{display:block;margin-bottom:8px}
+    .gb-read-only-banner p{color:#c5d9cb;font-size:14px;line-height:1.6;margin:0 0 12px}
+    .gb-read-only-banner a{display:inline-block;padding:11px 17px;border-radius:9px;background:#d9eddf;color:#153423;text-decoration:none;font-weight:700}
   </style>
 
 <link rel="stylesheet" href="theme.css?v=1">
@@ -216,6 +221,11 @@
     <h1>Business Settings</h1>
     <div class="subtitle">Manage the customer-facing profile, notification email, and services for your Gatebrook workspace.</div>
 
+    <div id="readOnlySettingsNotice" class="gb-read-only-banner hidden" role="status">
+      <strong>Read-only settings — subscription inactive</strong>
+      <p>You can review your saved profile, services, and request page, but editing is disabled until your subscription is reactivated.</p>
+      <a href="billing.html">Manage subscription</a>
+    </div>
     <div id="loading">Loading settings...</div>
     <div id="errorBox" class="feedback error hidden"></div>
     <div id="ownerOnly" class="owner-only-note hidden">Only the business owner can change these settings.</div>
@@ -447,6 +457,7 @@
 
     let businessId = null;
     let role = null;
+    let isReadOnly = false;
     let slug = null;
     let services = [];
     const requestedBusinessId = new URLSearchParams(location.search).get("business_id");
@@ -504,7 +515,13 @@
         if(!membership) throw new Error(requestedBusinessId ? "This account does not have access to the business in this link." : "This account is not connected to a Gatebrook business.");
 
         businessId = membership.business_id;
-        role = membership.role;
+        const {data:access,error:accessError}=await supabaseClient.functions.invoke("gatebrook-access",{method:"GET"});
+        if(accessError || !access) throw new Error("Unable to verify subscription access.");
+        if(!access.allowed && !access.read_only){ location.href=access.next||"billing.html"; return; }
+        if(access.business_id!==businessId) throw new Error("Workspace access mismatch.");
+        isReadOnly=access.read_only===true && !access.allowed;
+        role=isReadOnly?"viewer":membership.role;
+        document.getElementById("readOnlySettingsNotice").classList.toggle("hidden",!isReadOnly);
         document.querySelectorAll("[data-dashboard-link]").forEach(link => link.href = dashboardUrl());
 
         const [{data:business,error:businessError},{data:profile,error:profileError},{data:serviceRows,error:serviceError}] = await Promise.all([
@@ -533,11 +550,15 @@
         document.getElementById("requestLink").value = new URL("request.html?b=" + encodeURIComponent(slug), location.href).href;
 
         if(role !== "owner"){
+          ownerOnly.textContent=isReadOnly
+            ?"Your subscription is inactive. These settings are view-only until you reactivate."
+            :"Only the business owner can change these settings.";
           ownerOnly.classList.remove("hidden");
           profileForm.querySelectorAll("input,textarea,button").forEach(el => el.disabled = true);
           document.getElementById("newServiceForm").querySelectorAll("input,button").forEach(el => el.disabled = true);
         }
 
+        if(isReadOnly) document.getElementById("copyLinkButton").disabled=true;
         renderServices();
         if (window.GatebrookRequestBuilder) window.GatebrookRequestBuilder.init({ supabaseClient, businessId, role });
         loading.classList.add("hidden");
