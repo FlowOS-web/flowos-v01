@@ -10,7 +10,7 @@ const BILLING = SITE + "/billing.html";
 const escapeHtml=(v:unknown)=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;")
   .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
 const date=(iso:string|null)=>iso ?
-  new Intl.DateTimeFormat("en-US",{dateStyle:"long",timeZone:"UTC"}).format(new Date(iso)) :
+  new Intl.DateTimeFormat("en-US",{dateStyle:"long",timeStyle:"short",timeZone:"UTC"}).format(new Date(iso))+" UTC" :
   "the date in your Billing page";
 export function renderBillingEmail(kind:BillingEmailKind, d:BillingEmailDetails) {
   const end=date(d.trialEnd);
