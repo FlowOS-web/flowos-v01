@@ -2,7 +2,7 @@
 .gb-checkout-page {
   padding:0!important;
   display:block!important;
-  font-family:"Instrument Sans",Inter,ui-sans-serif,system-ui,sans-serif!important;
+  font-family:"Manrope","Instrument Sans",ui-sans-serif,system-ui,sans-serif!important;
   letter-spacing:-.01em;
 }
 .gb-checkout-header {
@@ -23,7 +23,7 @@
 }
 .gb-checkout-logo .gb-brand-glyph{width:41px;height:34px}
 .gb-checkout-logo .gb-wordmark{
-  font-family:inherit;
+  font-family:"Instrument Sans","Segoe UI",Arial,sans-serif;
   color:inherit;
   font-size:15px;
   font-weight:740;
