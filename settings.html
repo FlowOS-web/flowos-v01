@@ -202,7 +202,7 @@
 <link rel="icon" type="image/svg+xml" href="brand-mark.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&amp;family=Manrope:wght@400..800&amp;display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="brand-system.css?v=1">
 <link rel="stylesheet" href="request-polish.css?v=1">
@@ -935,6 +935,131 @@
       background:var(--gb-settings-action-hover);
       border-color:var(--gb-settings-action-hover);
       color:#fff;
+    }
+
+    /* Typography refinement: a coherent, premium type system for Settings only.
+       Preserve the established Gatebrook wordmark and public request form. */
+    html body.gb-brand-settings-page {
+      font-family:"Manrope","Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      font-optical-sizing:auto;
+      font-weight:450;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    body.gb-brand-settings-page :is(input,textarea,select,button) {
+      font-family:"Manrope","Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      font-optical-sizing:auto;
+    }
+    body.gb-brand-settings-page .gb-wordmark {
+      font-family:"Instrument Sans","Segoe UI",Arial,sans-serif;
+      font-weight:760;
+      letter-spacing:.17em;
+    }
+    body.gb-brand-settings-page h1 {
+      font-weight:760;
+      letter-spacing:-.052em;
+      line-height:1.14;
+    }
+    body.gb-brand-settings-page .subtitle {
+      font-size:13.5px;
+      font-weight:450;
+      line-height:1.75;
+      letter-spacing:-.006em;
+    }
+    body.gb-brand-settings-page .gb-builder-intro h2 {
+      font-weight:750;
+      letter-spacing:-.056em;
+      line-height:1.19;
+    }
+    body.gb-brand-settings-page :is(#businessProfile,#sharePage) > h2 {
+      font-weight:750;
+      font-size:21px;
+      letter-spacing:-.038em;
+      line-height:1.24;
+    }
+    body.gb-brand-settings-page .gb-builder-intro > p:not(.gb-settings-kicker):not(.gb-builder-kicker) {
+      font-size:13.7px;
+      font-weight:450;
+      line-height:1.73;
+    }
+    body.gb-brand-settings-page .gb-settings-tab {
+      font-family:inherit;
+      font-size:12.7px;
+      font-weight:690;
+      letter-spacing:-.018em;
+      line-height:1.32;
+    }
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title h3 {
+      font-size:16.5px;
+      font-weight:720;
+      letter-spacing:-.035em;
+      line-height:1.35;
+    }
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title p {
+      font-size:12.45px;
+      font-weight:450;
+      letter-spacing:-.006em;
+      line-height:1.7;
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) label {
+      font-size:12.7px;
+      font-weight:620;
+      letter-spacing:-.013em;
+      line-height:1.5;
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select) {
+      font-size:13.25px;
+      font-weight:480;
+      line-height:1.55;
+      letter-spacing:-.005em;
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) .btn {
+      font-size:12.85px;
+      font-weight:700;
+      letter-spacing:-.012em;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading strong,
+    body.gb-brand-settings-page #requestBuilder .gb-builder-question-summary strong,
+    body.gb-brand-settings-page #requestBuilder .gb-core-heading strong {
+      font-size:13.5px;
+      font-weight:710;
+      letter-spacing:-.022em;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-simple-disclosure summary strong,
+    body.gb-brand-settings-page #businessProfile .gb-simple-disclosure summary strong {
+      font-size:13.25px;
+      font-weight:700;
+      letter-spacing:-.018em;
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(small,.gb-field-help,.gb-question-review-copy span) {
+      line-height:1.72;
+      letter-spacing:0;
+    }
+    body.gb-brand-settings-page .gb-save-message strong {
+      font-size:13.8px;
+      font-weight:720;
+      letter-spacing:-.018em;
+    }
+    body.gb-brand-settings-page .gb-save-message span {
+      font-size:12px;
+      line-height:1.65;
+    }
+    body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title > span {
+      font-size:11.5px;
+      font-weight:720;
+      letter-spacing:.045em;
+    }
+    body.gb-brand-settings-page .gb-settings-eyebrow,
+    body.gb-brand-settings-page .gb-settings-kicker,
+    body.gb-brand-settings-page .gb-builder-kicker {
+      font-size:10.4px;
+      font-weight:800;
+      letter-spacing:.145em;
+    }
+    @media(max-width:700px){
+      body.gb-brand-settings-page .gb-settings-tab{font-size:11px;letter-spacing:-.016em}
+      body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title h3{font-size:15.5px}
+      body.gb-brand-settings-page .gb-simple-builder .gb-builder-step-title p{font-size:12px}
     }
 </style>
 
