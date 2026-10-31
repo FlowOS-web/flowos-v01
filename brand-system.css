@@ -69,14 +69,8 @@ body.gb-brand-settings-page {
 .brand, .logo { letter-spacing: .025em; }
 .brand span, .logo span { color: var(--muted); }
 .gb-wordmark { color: var(--text); letter-spacing: .12em; }
-.gb-brand-glyph .gb-logo-frame,
-.gb-brand-glyph .gb-logo-b,
-.gb-brand-glyph .gb-logo-cap { fill: #B8BDC4; }
-.gb-brand-glyph .gb-logo-g { fill: #F5F5F2; }
-:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-frame,
-:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-b,
-:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-cap { fill: #626A70; }
-:root[data-gb-theme="light"] .gb-brand-glyph .gb-logo-g { fill: #1A1D21; }
+/* Approved Option D logo fill colors come exclusively from brand-logo.css.
+   Do not override the green G and cap with legacy grayscale styles. */
 .login-card, .card, .stat-card, .lead-card {
   background: var(--panel);
   border: 1px solid var(--border);

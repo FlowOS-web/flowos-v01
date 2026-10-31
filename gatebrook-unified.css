@@ -292,3 +292,32 @@ html[data-gb-theme="light"] body.gb-legal-page .wrap .note{
   border-color:#bed3c2 !important;
   color:#2a4f38 !important;
 }
+
+/* Universal Gatebrook application typeface.
+   Keep the signature Gatebrook wordmark in Instrument Sans. */
+html body,
+html body.gb-dashboard-page,
+html body.gb-brand-settings-page,
+html body.gb-admin-page,
+html body.gb-request-page,
+html body.gb-brand-activate-page,
+html body.gb-simple-page,
+html body.gb-legal-page,
+html body .gb-home {
+  font-family:"Manrope","Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-optical-sizing:auto;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+html body.gb-checkout-page {
+  font-family:"Manrope","Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+html body :is(button,input,textarea,select) {
+  font-family:"Manrope","Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-optical-sizing:auto;
+}
+html body .gb-wordmark,
+html body .gb-checkout-logo .gb-wordmark,
+html body .gb-powered-label strong {
+  font-family:"Instrument Sans","Segoe UI",Arial,sans-serif;
+}
