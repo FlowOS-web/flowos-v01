@@ -824,6 +824,118 @@
       border-color:#c5cbcb;
       color:#242a2a;
     }
+
+    /* Black surfaces remain untouched; quiet evergreen highlights indicate actions. */
+    body.gb-brand-settings-page{
+      --settings-accent:#91cda4;
+      --gb-settings-action:#28613f;
+      --gb-settings-action-hover:#35734d;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span{
+      color:#a9d6b6;
+      border-color:#4a6754;
+      box-shadow:inset 0 0 0 1px rgba(118,185,138,.08);
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-settings-fold[open]{
+      border-color:#405646;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-settings-fold>summary::after,
+    body.gb-brand-settings-page #requestBuilder .gb-simple-disclosure>summary::after{
+      color:#83b99a;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-settings-fold>summary:hover,
+    body.gb-brand-settings-page #requestBuilder .gb-simple-disclosure>summary:hover{
+      background:rgba(114,180,131,.045);
+    }
+    body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{
+      background:#1d1f20;
+      border-color:#46604e;
+      box-shadow:inset 0 -2px var(--settings-accent);
+    }
+    body.gb-brand-settings-page .gb-settings-tab[aria-selected=true] .gb-tab-icon{
+      color:var(--settings-accent);
+    }
+    body.gb-brand-settings-page .gb-settings-tab:hover:not([aria-selected=true]){
+      background:rgba(111,171,129,.065);
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading span,
+    body.gb-brand-settings-page #requestBuilder .gb-core-heading span{
+      color:#9fcdb0;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-save-dock{
+      background:linear-gradient(130deg,#181a1b,#111314);
+      border-color:#4a6954;
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary,
+    body.gb-brand-settings-page #requestBuilder .gb-save-dock .btn.primary{
+      background:var(--gb-settings-action);
+      border-color:#548c67;
+      color:#fff;
+      box-shadow:0 0 0 1px rgba(97,157,113,.045);
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled),
+    body.gb-brand-settings-page #requestBuilder .gb-save-dock .btn.primary:hover:not(:disabled){
+      background:var(--gb-settings-action-hover);
+      border-color:#7ead8b;
+      color:#fff;
+      box-shadow:0 0 18px rgba(55,115,74,.13);
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input[type=checkbox],input[type=radio]){
+      accent-color:#69b184;
+    }
+    body.gb-brand-settings-page :is(#requestBuilder,#businessProfile,#sharePage) :is(input,textarea,select):focus{
+      border-color:#8abc9a;
+      box-shadow:0 0 0 3px rgba(105,173,128,.13);
+    }
+    body.gb-brand-settings-page #requestBuilder .gb-question-review-item:hover,
+    body.gb-brand-settings-page #requestBuilder .gb-condition-choice:hover{
+      border-color:#4f735b;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page{
+      --settings-accent:#3e8054;
+      --gb-settings-action:#28613f;
+      --gb-settings-action-hover:#35734d;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step-title>span{
+      color:#315d3d;
+      border-color:#9ec1a9;
+      box-shadow:none;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-settings-fold[open]{
+      border-color:#adcbb5;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-settings-fold>summary::after,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-simple-disclosure>summary::after{
+      color:#376d49;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-tab[aria-selected=true]{
+      background:#eceeed;
+      border-color:#afc8b7;
+      box-shadow:inset 0 -2px var(--settings-accent);
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page .gb-settings-tab[aria-selected=true] .gb-tab-icon{
+      color:#376d49;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-service-manager-heading span,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-core-heading span{
+      color:#315d3d;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-save-dock{
+      background:#f4f5f4;
+      border-color:#abc8b5;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary,
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-save-dock .btn.primary{
+      background:var(--gb-settings-action);
+      border-color:var(--gb-settings-action);
+      color:#fff;
+    }
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-builder-step .btn.primary:hover:not(:disabled),
+    html[data-gb-theme="light"] body.gb-brand-settings-page #requestBuilder .gb-save-dock .btn.primary:hover:not(:disabled){
+      background:var(--gb-settings-action-hover);
+      border-color:var(--gb-settings-action-hover);
+      color:#fff;
+    }
 </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
